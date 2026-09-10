@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg-base: #F7F7F5; 
+    --color-bg-card: #FFFFFF;
+    --color-border: #E5E7EB;
+    --text-primary: #111827;
+    --text-secondary: #6B7280;
+  }
+
+  .dark {
+    --color-bg-base: #0A0A0C; 
+    --color-bg-card: #18181B; 
+    --color-border: #27272A;
+    --text-primary: #FFFFFF;
+    --text-secondary: #8A8F98;
+  }
+
+  body {
+    @apply bg-[color:var(--color-bg-base)] text-[color:var(--text-primary)] font-body antialiased transition-colors duration-300;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Utilities for hiding scrollbars but allowing scroll */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
