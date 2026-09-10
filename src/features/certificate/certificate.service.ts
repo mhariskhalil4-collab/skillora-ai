@@ -11,8 +11,7 @@ export interface Certificate {
   created_at: string;
 }
 
-const VERIFY_BASE_URL = 'https://skillora.ai/verify'; // update once you have a real domain / route
-
+const VERIFY_BASE_URL = `${window.location.origin}/verify`;
 export const CertificateService = {
   /**
    * Call this after a roadmap hits 100% progress.
