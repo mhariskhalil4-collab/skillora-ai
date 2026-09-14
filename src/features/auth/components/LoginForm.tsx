@@ -62,9 +62,13 @@ export const LoginForm: React.FC = () => {
             {...register('password')} 
           />
           <div className="flex justify-end mt-2">
-            <a href="#forgot" className="text-sm text-brand hover:underline font-medium transition-colors">
+            <button
+              type="button"
+              onClick={() => navigate('/auth/forgot-password')}
+              className="text-sm text-brand hover:underline font-medium transition-colors cursor-pointer"
+            >
               Forgot password?
-            </a>
+            </button>
           </div>
         </div>
 

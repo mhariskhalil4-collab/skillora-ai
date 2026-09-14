@@ -138,6 +138,7 @@ export const ProfileService = {
           headline: profileRow?.headline || 'AI & Tech Upskilling Practitioner',
           bio: profileRow?.bio || 'Passionate about accelerating career growth, mastering cutting-edge technology, and building real-world projects with Skillora AI.',
           skills: profileRow?.skills && profileRow.skills.length > 0 ? profileRow.skills : ['Artificial Intelligence', 'Continuous Learning'],
+          avatarUrl: profileRow?.avatar_url || undefined,
           resumeUrl: profileRow?.resume_url || undefined,
           projects: userProjects,
           certificates: userCertificates,
@@ -224,7 +225,7 @@ export const ProfileService = {
   },
 
   /**
-   * Persists updated profile fields (full_name, headline, bio, resume_url, skills) to Supabase.
+   * Persists updated profile fields (full_name, headline, bio, resume_url, avatar_url, skills) to Supabase.
    */
   updateUserProfile: async (
     userId?: string,
@@ -249,6 +250,7 @@ export const ProfileService = {
     if (updates.headline !== undefined) dbPayload.headline = updates.headline;
     if (updates.bio !== undefined) dbPayload.bio = updates.bio;
     if (updates.resumeUrl !== undefined) dbPayload.resume_url = updates.resumeUrl;
+    if (updates.avatarUrl !== undefined) dbPayload.avatar_url = updates.avatarUrl;
     if (updates.skills !== undefined) dbPayload.skills = updates.skills;
 
     if (effectiveUserId && effectiveUserId !== 'guest_user') {

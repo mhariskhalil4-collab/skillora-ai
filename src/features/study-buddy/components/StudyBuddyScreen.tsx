@@ -234,8 +234,27 @@ export const StudyBuddyScreen: React.FC = () => {
         </div>
       )}
 
+      {/* Interactive Smart Prompt Action Chips */}
+      <div className="bg-[color:var(--color-bg-card)] border-t border-border px-4 pt-3 pb-1 flex items-center gap-2 overflow-x-auto scrollbar-none">
+        {[
+          { label: '💡 Real-World Analogy', prompt: 'Can you explain this concept using a simple real-world analogy?' },
+          { label: '💻 Code Breakdown', prompt: 'Can you show me a concise code snippet with a line-by-line explanation?' },
+          { label: '🎯 Quiz Practice', prompt: 'Can you quiz me with 2 quick practice questions on this topic to test my understanding?' },
+          { label: '🏗️ System Architecture', prompt: 'How does this skill fit into production system architecture and scalable design?' },
+        ].map((chip) => (
+          <button
+            key={chip.label}
+            onClick={() => handleSendMessage(chip.prompt)}
+            disabled={isLoading || isInitializing}
+            className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-[color:var(--color-bg-base)] text-[color:var(--text-secondary)] hover:text-brand hover:border-brand/50 border border-border transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {chip.label}
+          </button>
+        ))}
+      </div>
+
       {/* Input Section */}
-      <div className="bg-[color:var(--color-bg-card)] border-t border-border p-4 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+      <div className="bg-[color:var(--color-bg-card)] p-4 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
         <ChatInput onSend={handleSendMessage} disabled={isLoading || isInitializing} />
       </div>
     </div>

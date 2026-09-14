@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
 import { UserProfile, Project } from '../types/profile.types';
 import { PublicPortfolioService } from '@/features/portfolio/services/publicPortfolio.service';
+import { StorageService } from '@/features/profile/services/storage.service';
 import { Card } from '@/components/data-display/Card';
 import { Badge } from '@/components/elements/Badge';
 import { Button } from '@/components/elements/Button';
@@ -19,8 +19,11 @@ import {
   ClipboardDocumentCheckIcon,
   ClipboardDocumentIcon,
   LinkIcon,
+  PhotoIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/utils/cn';
+import { sanitizeUrl } from '@/utils/url.utils';
 
 export const PortfolioTab: React.FC<{ profile: UserProfile }> = ({ profile }) => {
   const [projectsList, setProjectsList] = useState<Project[]>(profile.projects || []);
@@ -29,6 +32,9 @@ export const PortfolioTab: React.FC<{ profile: UserProfile }> = ({ profile }) =>
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Public Portfolio Settings state
   const [slug, setSlug] = useState('');
@@ -37,8 +43,6 @@ export const PortfolioTab: React.FC<{ profile: UserProfile }> = ({ profile }) =>
   const [portfolioError, setPortfolioError] = useState('');
   const [portfolioSuccess, setPortfolioSuccess] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
-
-  const navigate = useNavigate();
 
   // Load user's portfolio settings on mount / profile change
   useEffect(() => {
@@ -82,11 +86,80 @@ export const PortfolioTab: React.FC<{ profile: UserProfile }> = ({ profile }) =>
     return () => clearTimeout(timer);
   };
 
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedProject) return;
+
+    setImageError(null);
+    setIsUploadingImage(true);
+
+    try {
+      const uploadRes = await StorageService.uploadPortfolioImage(file, profile.id, selectedProject.id);
+      const newImageUrl = uploadRes.url;
+
+      const updatedProjects = projectsList.map((p) => {
+        if (p.id === selectedProject.id) {
+          return { ...p, imageUrl: newImageUrl };
+        }
+        return p;
+      });
+
+      setProjectsList(updatedProjects);
+      setSelectedProject({ ...selectedProject, imageUrl: newImageUrl });
+
+      try {
+        localStorage.setItem('skillora_user_projects', JSON.stringify(updatedProjects));
+        const cachedProfileRaw = localStorage.getItem('skillora_user_profile');
+        if (cachedProfileRaw) {
+          const cachedProfile = JSON.parse(cachedProfileRaw);
+          cachedProfile.projects = updatedProjects;
+          localStorage.setItem('skillora_user_profile', JSON.stringify(cachedProfile));
+        }
+      } catch (_) {}
+
+      triggerToast('Project image uploaded successfully!');
+    } catch (err: any) {
+      console.error('[PortfolioTab] Error uploading project image:', err);
+      setImageError(err.message || 'Failed to upload image.');
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveImage = () => {
+    if (!selectedProject) return;
+    const updatedProjects = projectsList.map((p) => {
+      if (p.id === selectedProject.id) {
+        return { ...p, imageUrl: undefined };
+      }
+      return p;
+    });
+
+    setProjectsList(updatedProjects);
+    setSelectedProject({ ...selectedProject, imageUrl: undefined });
+
+    try {
+      localStorage.setItem('skillora_user_projects', JSON.stringify(updatedProjects));
+      const cachedProfileRaw = localStorage.getItem('skillora_user_profile');
+      if (cachedProfileRaw) {
+        const cachedProfile = JSON.parse(cachedProfileRaw);
+        cachedProfile.projects = updatedProjects;
+        localStorage.setItem('skillora_user_profile', JSON.stringify(cachedProfile));
+      }
+    } catch (_) {}
+
+    triggerToast('Project image removed.');
+  };
+
   const handleDownloadResume = () => {
-    if (profile.resumeUrl && profile.resumeUrl.trim() !== '') {
-      window.open(profile.resumeUrl, '_blank', 'noopener,noreferrer');
+    const safeResumeUrl = sanitizeUrl(profile.resumeUrl, ['http:', 'https:']);
+    if (safeResumeUrl) {
+      window.open(safeResumeUrl, '_blank', 'noopener,noreferrer');
     } else {
-      triggerToast('No resume has been uploaded to your profile yet.');
+      triggerToast(profile.resumeUrl ? 'The resume link is invalid or uses an unsupported protocol.' : 'No resume has been uploaded to your profile yet.');
     }
   };
 
@@ -98,26 +171,39 @@ export const PortfolioTab: React.FC<{ profile: UserProfile }> = ({ profile }) =>
 
   const handleDirectLinkClick = (e: React.MouseEvent, url?: string) => {
     e.stopPropagation();
-    if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+    const safeUrl = sanitizeUrl(url, ['http:', 'https:']);
+    if (safeUrl) {
+      window.open(safeUrl, '_blank', 'noopener,noreferrer');
     } else {
-      triggerToast('Please provide a valid repository URL first.');
+      triggerToast('Please provide a valid repository URL (e.g., https://github.com/...).');
     }
   };
 
   const handleSaveProjectUrl = () => {
     if (!selectedProject) return;
-    const cleanUrl = editingUrl.trim();
+    const cleanRaw = editingUrl.trim();
+    
+    // If empty, allow clearing URL; otherwise validate and sanitize
+    let safeUrl: string | undefined = undefined;
+    if (cleanRaw) {
+      const sanitized = sanitizeUrl(cleanRaw, ['http:', 'https:']);
+      if (!sanitized) {
+        triggerToast('Invalid URL. Please enter a valid https:// URL.');
+        return;
+      }
+      safeUrl = sanitized;
+    }
 
     const updatedProjects = projectsList.map((p) => {
       if (p.id === selectedProject.id) {
-        return { ...p, url: cleanUrl || undefined };
+        return { ...p, url: safeUrl };
       }
       return p;
     });
 
     setProjectsList(updatedProjects);
-    setSelectedProject({ ...selectedProject, url: cleanUrl || undefined });
+    setSelectedProject({ ...selectedProject, url: safeUrl });
+    setEditingUrl(safeUrl || '');
 
     // Persist to localStorage
     try {
@@ -403,18 +489,26 @@ export const PortfolioTab: React.FC<{ profile: UserProfile }> = ({ profile }) =>
                 <Card 
                   key={project.id} 
                   onClick={() => handleOpenProjectModal(project)}
-                  className="flex flex-col hover:border-brand/50 transition-all group cursor-pointer hover:shadow-ai-glow relative"
+                  className="flex flex-col hover:border-brand/50 transition-all group cursor-pointer hover:shadow-ai-glow relative overflow-hidden"
                 >
-                  <div className="h-32 bg-black/5 dark:bg-white/5 rounded-lg mb-4 flex items-center justify-center border border-border overflow-hidden relative">
-                    <span className="text-[color:var(--text-secondary)] text-xs font-mono opacity-60 flex items-center gap-1.5">
-                      <CodeBracketIcon className="w-4 h-4" /> Deliverable Preview
-                    </span>
+                  <div className="h-36 bg-black/5 dark:bg-white/5 rounded-lg mb-4 flex items-center justify-center border border-border overflow-hidden relative">
+                    {project.imageUrl ? (
+                      <img 
+                        src={project.imageUrl} 
+                        alt={project.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                      />
+                    ) : (
+                      <span className="text-[color:var(--text-secondary)] text-xs font-mono opacity-60 flex items-center gap-1.5">
+                        <CodeBracketIcon className="w-4 h-4" /> Deliverable Preview
+                      </span>
+                    )}
                     {project.url && (
                       <button
                         type="button"
                         onClick={(e) => handleDirectLinkClick(e, project.url)}
                         title="Open repository in new tab"
-                        className="absolute top-2 right-2 p-1.5 rounded-md bg-[color:var(--color-bg-card)] border border-border opacity-80 group-hover:opacity-100 transition-opacity text-brand hover:bg-brand/10 cursor-pointer"
+                        className="absolute top-2 right-2 p-1.5 rounded-md bg-[color:var(--color-bg-card)]/90 backdrop-blur-sm border border-border opacity-80 group-hover:opacity-100 transition-opacity text-brand hover:bg-brand/10 cursor-pointer"
                       >
                         <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                       </button>
@@ -444,43 +538,36 @@ export const PortfolioTab: React.FC<{ profile: UserProfile }> = ({ profile }) =>
                   No Featured Projects Yet
                 </h3>
                 <p className="text-sm text-[color:var(--text-secondary)] mt-1">
-                  Complete capstone deliverables and roadmap project submissions to showcase your verified code and live applications here.
+                  Complete roadmap deliverables or add projects to showcase your verified engineering achievements.
                 </p>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/roadmap')}
-                className="mt-2"
-              >
-                <SparklesIcon className="w-4 h-4 mr-2 text-brand" /> View Active Roadmap
-              </Button>
             </Card>
           )}
         </div>
 
-        {/* Sidebar: Resume & Skills */}
-        <div className="w-full lg:w-80 flex flex-col gap-6">
+        {/* Sidebar: Profile Summary & Resume */}
+        <div className="w-full lg:w-80 space-y-6">
           <Card>
-            <h3 className="font-heading font-bold text-[color:var(--text-primary)] mb-4">About &amp; Bio</h3>
-            <p className="text-sm text-[color:var(--text-secondary)] mb-6 leading-relaxed">
-              {profile.bio || 'Add a summary in Settings to tell collaborators about your learning journey.'}
-            </p>
-            
-            {profile.resumeUrl && profile.resumeUrl.trim() !== '' ? (
-              <button 
-                type="button"
-                onClick={handleDownloadResume}
-                className="w-full flex items-center justify-center gap-2 py-2.5 border border-border rounded-lg text-sm font-medium text-[color:var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
-              >
-                <DocumentArrowDownIcon className="w-4 h-4 text-brand" /> Download Resume
-              </button>
+            <h3 className="font-heading font-bold text-[color:var(--text-primary)] mb-4">Resume &amp; CV</h3>
+            {profile.resumeUrl ? (
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={handleDownloadResume}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-brand text-white font-heading text-sm font-semibold hover:bg-brand/90 transition-all cursor-pointer shadow-md"
+                >
+                  <DocumentArrowDownIcon className="w-4 h-4" /> Download Resume
+                </button>
+                <p className="text-xs text-[color:var(--text-secondary)] text-center">
+                  Verified resume on file
+                </p>
+              </div>
             ) : (
-              <div className="space-y-2">
-                <button 
+              <div className="space-y-3">
+                <button
                   type="button"
                   disabled
-                  className="w-full flex items-center justify-center gap-2 py-2.5 border border-border/60 rounded-lg text-sm font-medium text-[color:var(--text-secondary)] opacity-50 cursor-not-allowed bg-black/5 dark:bg-white/5"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-black/5 dark:bg-white/5 border border-border text-[color:var(--text-secondary)] font-heading text-sm font-semibold cursor-not-allowed opacity-60"
                 >
                   <DocumentArrowDownIcon className="w-4 h-4" /> Download Resume
                 </button>
@@ -536,6 +623,73 @@ export const PortfolioTab: React.FC<{ profile: UserProfile }> = ({ profile }) =>
 
             {/* Modal Body */}
             <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+              {/* Project Image Preview / Upload Section */}
+              <div className="space-y-2">
+                <label className="text-xs font-heading font-bold uppercase text-[color:var(--text-secondary)] flex items-center justify-between">
+                  <span>Project Thumbnail / Screenshot</span>
+                  <span className="text-[10px] text-[color:var(--text-secondary)] font-mono">Max 5MB</span>
+                </label>
+                
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageFileChange}
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                />
+
+                {selectedProject.imageUrl ? (
+                  <div className="relative rounded-xl overflow-hidden border border-border group h-40">
+                    <img
+                      src={selectedProject.imageUrl}
+                      alt={selectedProject.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="primary"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploadingImage}
+                        className="flex items-center gap-1.5"
+                      >
+                        <PhotoIcon className="w-4 h-4" /> Change Image
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleRemoveImage}
+                        disabled={isUploadingImage}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-500/20 border border-red-500/30"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingImage}
+                    className="w-full h-32 border-2 border-dashed border-border hover:border-brand/50 rounded-xl flex flex-col items-center justify-center gap-2 text-[color:var(--text-secondary)] hover:text-brand bg-black/5 dark:bg-white/5 transition-all cursor-pointer"
+                  >
+                    <PhotoIcon className="w-6 h-6 opacity-60" />
+                    <span className="text-xs font-medium">
+                      {isUploadingImage ? 'Uploading image...' : 'Click to upload project screenshot / cover'}
+                    </span>
+                  </button>
+                )}
+
+                {imageError && (
+                  <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                    <ExclamationCircleIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                    {imageError}
+                  </p>
+                )}
+              </div>
+
               <div>
                 <h4 className="text-xs font-heading font-bold uppercase text-[color:var(--text-secondary)] mb-1">
                   Project Description &amp; Architecture
@@ -602,7 +756,14 @@ export const PortfolioTab: React.FC<{ profile: UserProfile }> = ({ profile }) =>
                 <Button
                   type="button"
                   variant="primary"
-                  onClick={() => window.open(selectedProject.url, '_blank', 'noopener,noreferrer')}
+                  onClick={() => {
+                    const safeUrl = sanitizeUrl(selectedProject.url, ['http:', 'https:']);
+                    if (safeUrl) {
+                      window.open(safeUrl, '_blank', 'noopener,noreferrer');
+                    } else {
+                      triggerToast('Invalid or unsafe repository URL.');
+                    }
+                  }}
                   className="flex items-center gap-2"
                 >
                   <GlobeAltIcon className="w-4 h-4" /> Open Repository <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5 ml-0.5" />

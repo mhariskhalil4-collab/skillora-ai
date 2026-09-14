@@ -25,5 +25,6 @@ export interface UserProfile {
   skills: string[];
   projects: Project[];
   certificates: Certificate[];
+  avatarUrl?: string;
   resumeUrl?: string;
 }

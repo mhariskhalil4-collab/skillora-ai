@@ -1,21 +1,27 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/utils/cn';
-import { SparklesIcon } from '@heroicons/react/24/solid';
 import {
   HomeIcon,
+  AcademicCapIcon,
   MapIcon,
   ChatBubbleLeftRightIcon,
   ChartBarSquareIcon,
   UserCircleIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import {
+  SparklesIcon,
   HomeIcon as HomeIconSolid,
+  AcademicCapIcon as AcademicCapIconSolid,
   MapIcon as MapIconSolid,
   ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
   ChartBarSquareIcon as ChartBarSquareIconSolid,
   UserCircleIcon as UserCircleIconSolid,
+  ShieldCheckIcon as ShieldCheckIconSolid,
 } from '@heroicons/react/24/solid';
+import { useAdmin } from '@/features/admin/hooks/useAdmin';
+import { EARLY_ACCESS_FREE } from '@/config/access.config';
 
 export interface NavItem {
   path: string;
@@ -26,6 +32,7 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   { path: '/dashboard', label: 'Dashboard', icon: HomeIcon, activeIcon: HomeIconSolid },
+  { path: '/courses', label: 'Courses', icon: AcademicCapIcon, activeIcon: AcademicCapIconSolid },
   { path: '/roadmap', label: 'Roadmap', icon: MapIcon, activeIcon: MapIconSolid },
   { path: '/study-buddy', label: 'Study Buddy', icon: ChatBubbleLeftRightIcon, activeIcon: ChatBubbleLeftRightIconSolid },
   { path: '/career-gps', label: 'Career GPS', icon: ChartBarSquareIcon, activeIcon: ChartBarSquareIconSolid },
@@ -33,18 +40,27 @@ export const NAV_ITEMS: NavItem[] = [
 ];
 
 export const Sidebar: React.FC = () => {
+  const { isAdmin } = useAdmin();
+
   return (
     <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:flex-shrink-0 h-screen sticky top-0 border-r border-border bg-[color:var(--color-bg-card)]">
       {/* Brand */}
-      <div className="flex items-center gap-2 px-6 h-20 border-b border-border">
-        <SparklesIcon className="w-6 h-6 text-brand" />
-        <span className="text-lg font-heading font-bold text-[color:var(--text-primary)]">
-          Skillora <span className="text-brand">AI</span>
-        </span>
+      <div className="flex items-center justify-between px-6 h-16 border-b border-border">
+        <div className="flex items-center gap-2">
+          <SparklesIcon className="w-6 h-6 text-brand" />
+          <span className="text-lg font-heading font-bold text-[color:var(--text-primary)]">
+            Skillora <span className="text-brand">AI</span>
+          </span>
+        </div>
+        {EARLY_ACCESS_FREE && (
+          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-brand/15 text-brand border border-brand/30">
+            Early Access
+          </span>
+        )}
       </div>
 
       {/* Nav Links */}
-      <nav className="flex-1 flex flex-col gap-1 px-4 py-6">
+      <nav className="flex-1 flex flex-col gap-1 px-4 py-6 overflow-y-auto">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.path}
@@ -69,6 +85,36 @@ export const Sidebar: React.FC = () => {
             }}
           </NavLink>
         ))}
+
+        {/* Admin Navigation Link (visible to administrators) */}
+        {isAdmin && (
+          <div className="pt-4 mt-4 border-t border-border">
+            <span className="px-4 text-[10px] font-mono font-bold uppercase tracking-wider text-[color:var(--text-secondary)]">
+              Administration
+            </span>
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                cn(
+                  'mt-2 flex items-center gap-3 px-4 py-3 rounded-xl font-heading font-medium text-sm transition-colors',
+                  isActive
+                    ? 'bg-purple-500/10 text-purple-400 border border-purple-500/30'
+                    : 'text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 border border-transparent'
+                )
+              }
+            >
+              {({ isActive }) => {
+                const Icon = isActive ? ShieldCheckIconSolid : ShieldCheckIcon;
+                return (
+                  <>
+                    <Icon className="w-5 h-5 flex-shrink-0 text-purple-400" />
+                    <span>Admin Center</span>
+                  </>
+                );
+              }}
+            </NavLink>
+          </div>
+        )}
       </nav>
     </aside>
   );

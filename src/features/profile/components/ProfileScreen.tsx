@@ -5,6 +5,7 @@ import { ProfileHeader } from './ProfileHeader';
 import { PortfolioTab } from './PortfolioTab';
 import { CertificatesTab } from './CertificatesTab';
 import { SettingsTab } from './SettingsTab';
+import { AchievementsSection } from '@/features/achievements';
 import { Button } from '@/components/elements/Button';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
@@ -14,7 +15,7 @@ export const ProfileScreen: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'portfolio' | 'certificates' | 'settings'>('portfolio');
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'certificates' | 'achievements' | 'settings'>('portfolio');
   const authUser = useAuthStore((state) => state.user);
 
   const loadProfile = useCallback(async () => {
@@ -100,7 +101,8 @@ export const ProfileScreen: React.FC = () => {
         <div className="flex gap-6 border-b border-border mt-8 mb-8 overflow-x-auto scrollbar-hide">
           {[
             { id: 'portfolio', label: 'Portfolio & Resume' },
-            { id: 'certificates', label: 'Certificates & Badges' },
+            { id: 'certificates', label: 'Certificates' },
+            { id: 'achievements', label: 'Badges & Achievements' },
             { id: 'settings', label: 'Settings' }
           ].map((tab) => (
             <button
@@ -122,6 +124,7 @@ export const ProfileScreen: React.FC = () => {
         <div>
           {activeTab === 'portfolio' && <PortfolioTab profile={profile} />}
           {activeTab === 'certificates' && <CertificatesTab profile={profile} />}
+          {activeTab === 'achievements' && <AchievementsSection />}
           {activeTab === 'settings' && <SettingsTab profile={profile} onSave={handleUpdateProfile} />}
         </div>
       </div>

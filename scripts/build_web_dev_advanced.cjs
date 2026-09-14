@@ -1,0 +1,1793 @@
+const fs = require('fs');
+const path = require('path');
+
+const targetFile = path.join(__dirname, '../src/features/roadmap/data/web-development/webDevelopmentAdvanced.data.ts');
+const targetDir = path.dirname(targetFile);
+if (!fs.existsSync(targetDir)) {
+  fs.mkdirSync(targetDir, { recursive: true });
+}
+
+// 40 High-Quality Advanced MCQs with balanced distribution (10 A, 10 B, 10 C, 10 D)
+const ADVANCED_ASSESSMENT = [
+  {
+    id: 1,
+    topic: 'Full-Stack Rendering Architecture',
+    question: 'In modern full-stack web architecture, what is the primary technical distinction between Server-Side Rendering (SSR) and Static Site Generation (SSG)?',
+    options: [
+      'SSR renders HTML on-demand on the server for each incoming HTTP request, whereas SSG pre-renders HTML pages at build time and serves them instantly from CDN edge caches.',
+      'SSR only works with PHP, while SSG only works with Python.',
+      'SSG requires a dedicated database server running continuously to render pages.',
+      'SSR compiles all JavaScript code directly into binary CPU machine code.'
+    ],
+    correctAnswer: 0, // A
+    explanation: 'SSR computes and generates fresh HTML dynamically on the server for every incoming request (ideal for personalized or frequently changing data). SSG generates static HTML files once during compilation and distributes them globally via CDNs (ideal for blogs and documentation).'
+  },
+  {
+    id: 2,
+    topic: 'TypeScript Discriminated Unions',
+    question: 'What is a Discriminated Union in TypeScript and how does it enable exhaustive type narrowing?',
+    options: [
+      'A union type that deletes unshared properties at runtime.',
+      'A union of object types that share a common literal discriminator property (e.g. type: "success" | "error"), allowing TypeScript to narrow the specific type in switch or if blocks with full type safety.',
+      'A technique for running TypeScript on multiple CPU cores simultaneously.',
+      'A method that disables all compiler type checks.'
+    ],
+    correctAnswer: 1, // B
+    explanation: 'Discriminated unions use a shared literal tag property across member types. The TypeScript compiler uses this discriminator tag to narrow the active type inside control flow branches, preventing illegal property access.'
+  },
+  {
+    id: 3,
+    topic: 'TypeScript Generics & Constraints',
+    question: 'How do generic constraints (e.g. <T extends { id: string }>) enhance type safety in reusable utility functions?',
+    options: [
+      'They prevent the function from compiling in development mode.',
+      'They restrict type T to only primitive boolean values.',
+      'They guarantee that whatever type is passed to generic type parameter T must possess at least an "id" string property while preserving the specific return type identity.',
+      'They automatically convert all object properties to numbers.'
+    ],
+    correctAnswer: 2, // C
+    explanation: 'The extends keyword establishes a constraint on the generic type T. It ensures callers provide an argument satisfying the required structure (having an id: string) while preserving full type inference of all additional properties on T.'
+  },
+  {
+    id: 4,
+    topic: 'React Compound Components Pattern',
+    question: 'What is the primary architectural advantage of the Compound Components pattern in React (such as <Select><Select.Option /></Select>)?',
+    options: [
+      'It speeds up network request downloads by 50%.',
+      'It replaces all CSS stylesheets with inline SVG elements.',
+      'It allows React components to execute directly inside Web Workers.',
+      'It enables a set of related components to share implicit state and communicate via React Context while giving consuming developers total declarative control over UI composition.'
+    ],
+    correctAnswer: 3, // D
+    explanation: 'Compound Components manage internal state in a parent wrapper and share it with child components via React Context. This gives consumers complete flexibility to arrange child elements without cumbersome prop drilling.'
+  },
+  {
+    id: 5,
+    topic: 'Server State vs Client State (TanStack Query)',
+    question: 'Why is managing server cache data with a dedicated server-state library (like TanStack React Query) superior to storing API data in global client stores (like plain Redux)?',
+    options: [
+      'TanStack Query automatically manages background refetching, cache invalidation, request deduplication, pagination, and stale-while-revalidate lifetimes out-of-the-box.',
+      'Plain Redux cannot store arrays or strings.',
+      'TanStack Query deletes all database records upon page refresh.',
+      'Server state and client state are identical and require no distinction.'
+    ],
+    correctAnswer: 0, // A
+    explanation: 'Server state is asynchronous, remotely owned, and shared across users. TanStack Query treats API data as an in-memory cache with automated background syncing, window focus revalidation, and garbage collection, separating it from synchronous local UI client state.'
+  },
+  {
+    id: 6,
+    topic: 'Node.js Event Loop Architecture (libuv)',
+    question: 'How does the Node.js runtime achieve non-blocking asynchronous I/O despite running JavaScript on a single thread?',
+    options: [
+      'Node.js runs 50 JavaScript threads simultaneously on the V8 engine.',
+      'Node.js offloads file system, DNS, and network operations to the underlying libuv C library and OS kernel thread pool, notifying the JavaScript event loop via callbacks when I/O operations complete.',
+      'Node.js requires users to manually manage CPU interrupts in assembly language.',
+      'Node.js pauses the operating system while waiting for database queries.'
+    ],
+    correctAnswer: 1, // B
+    explanation: 'Node.js combines Google V8 with libuv. libuv manages an event loop and an internal thread pool that offloads heavy system I/O (disk reads, network sockets) to OS asynchronous primitives, executing JS callbacks only when results are ready.'
+  },
+  {
+    id: 7,
+    topic: 'Node.js Streams vs Buffers',
+    question: 'Why should large file downloads or uploads (e.g. 5GB video files) be processed using Node.js Streams rather than fs.readFile()?',
+    options: [
+      'Streams convert files into plain text strings.',
+      'fs.readFile() only works on Windows operating systems.',
+      'Streams process data chunk-by-chunk in small memory buffers as data arrives, whereas fs.readFile() loads the entire 5GB file into RAM at once, causing out-of-memory crashes.',
+      'Streams delete the file from disk immediately after reading.'
+    ],
+    correctAnswer: 2, // C
+    explanation: 'Streams provide constant, minimal memory overhead by handling data in small chunks (e.g. 64KB) piped from source to destination, avoiding out-of-memory crashes that occur when buffering massive files in RAM.'
+  },
+  {
+    id: 8,
+    topic: 'Express Middleware Pipeline',
+    question: 'What happens in an Express.js request pipeline if a custom middleware function does not call next() and does not send an HTTP response (res.send/res.json)?',
+    options: [
+      'Express automatically restarts the operating system.',
+      'The middleware is skipped and the next route handler runs immediately.',
+      'The client browser is redirected to Google.com.',
+      'The client request hangs indefinitely until the client or server reaches its network timeout threshold.'
+    ],
+    correctAnswer: 3, // D
+    explanation: 'Express middleware executes sequentially in an onion/pipeline architecture. Every middleware must either terminate the cycle by returning a response (res.json()) or pass execution forward by calling next(). If neither occurs, the request hangs.'
+  },
+  {
+    id: 9,
+    topic: 'Centralized Error Handling in Express',
+    question: 'How does Express.js identify a specialized Error-Handling Middleware function in its middleware chain?',
+    options: [
+      'By declaring exactly four arguments in its function signature: (err, req, res, next).',
+      'By naming the function "errorHandler".',
+      'By placing the function at the very top of server.js before all routes.',
+      'By wrapping the function in a try/catch block.'
+    ],
+    correctAnswer: 0, // A
+    explanation: 'Express inspects function arity (fn.length). A middleware with exactly 4 parameters (err, req, res, next) is registered as an error-handling middleware. Express routes any error passed to next(err) directly to this handler.'
+  },
+  {
+    id: 10,
+    topic: 'Relational Database ACID Transactions',
+    question: 'What does the "Atomicity" property guarantee in a relational database (PostgreSQL) ACID transaction?',
+    options: [
+      'Transactions are executed on atomic quantum processors.',
+      'All database operations within the transaction succeed completely, or if any single statement fails, the entire transaction is rolled back with zero changes applied.',
+      'Database queries run in less than 1 nanosecond.',
+      'Transactions can only be executed by one administrator at a time.'
+    ],
+    correctAnswer: 1, // B
+    explanation: 'Atomicity is the "all-or-nothing" rule of transactions. If a multi-step operation (like transferring money from account A to account B) encounters an error midway, the entire transaction aborts and rolls back to its initial state.'
+  },
+  {
+    id: 11,
+    topic: 'Database Indexing & B-Trees',
+    question: 'Why should database indexes (e.g. on user_email) be added thoughtfully rather than indexing every column in a table?',
+    options: [
+      'Indexes make SELECT queries slower.',
+      'PostgreSQL allows a maximum of 2 indexes per database.',
+      'While indexes speed up SELECT search queries from O(N) full table scans to O(log N) tree lookups, every index adds disk storage and slows down INSERT, UPDATE, and DELETE write operations.',
+      'Indexes convert numbers into strings.'
+    ],
+    correctAnswer: 2, // C
+    explanation: 'Indexes create supplementary B-Tree data structures. While they accelerate read queries, the database engine must update every associated index structure on every write, update, or delete, degrading write performance and consuming disk space.'
+  },
+  {
+    id: 12,
+    topic: 'Prisma ORM Migrations',
+    question: 'What is the purpose of database migration files (e.g. generated via prisma migrate dev)?',
+    options: [
+      'To convert relational SQL databases into NoSQL MongoDB databases.',
+      'To compress database backup files into ZIP archives.',
+      'To upload database schemas to public social media platforms.',
+      'To version-control incremental schema changes over time, allowing reproducible and automated database structure synchronization across local, staging, and production environments.'
+    ],
+    correctAnswer: 3, // D
+    explanation: 'Database migrations are version-controlled SQL scripts documenting schema evolution over time. They ensure team members and CI/CD deployment pipelines apply identical schema changes reliably without manual SQL execution.'
+  },
+  {
+    id: 13,
+    topic: 'Authentication: JWT vs HTTP-Only Cookies',
+    question: 'Why is storing JSON Web Tokens (JWTs) in HTTP-Only, Secure, SameSite cookies safer than storing them in localStorage for session authentication?',
+    options: [
+      'HTTP-Only cookies cannot be accessed by client-side JavaScript, mitigating Cross-Site Scripting (XSS) token theft vulnerabilities.',
+      'Cookies automatically encrypt all database tables.',
+      'localStorage is deleted every 5 minutes by the browser.',
+      'HTTP-Only cookies prevent backend SQL errors.'
+    ],
+    correctAnswer: 0, // A
+    explanation: 'Data in localStorage is completely accessible to any JavaScript running on the page. If an attacker injects a malicious script via XSS, they can steal tokens from localStorage. HTTP-Only cookies are inaccessible to document.cookie, neutralizing XSS token theft.'
+  },
+  {
+    id: 14,
+    topic: 'Refresh Token Rotation',
+    question: 'How does Refresh Token Rotation enhance security in token-based authentication architectures?',
+    options: [
+      'It changes the user\'s password automatically every day.',
+      'Every time a refresh token is used to obtain a new short-lived access token, the authentication server invalidates the old refresh token and issues a brand-new refresh token, detecting and revoking stolen token families.',
+      'It rotates the server IP address between different continents.',
+      'It requires the user to solve a CAPTCHA on every API request.'
+    ],
+    correctAnswer: 1, // B
+    explanation: 'With Refresh Token Rotation, each refresh token is single-use. If an attacker and legitimate user attempt to use the same refresh token, the server detects token reuse, invalidates the entire token family, and forces re-authentication.'
+  },
+  {
+    id: 15,
+    topic: 'Role-Based Access Control (RBAC)',
+    question: 'How should Role-Based Access Control (RBAC) middleware be implemented in a secure REST API pipeline?',
+    options: [
+      'By allowing users to send their desired role in a URL query parameter like ?role=admin.',
+      'By verifying the user\'s role exclusively in client-side React state.',
+      'By extracting the verified user identity and role from the authenticated token payload on the server and checking if the user\'s role meets the required permission before executing the route handler.',
+      'RBAC is obsolete in modern web development.'
+    ],
+    correctAnswer: 2, // C
+    explanation: 'RBAC must always be enforced on the server. The server verifies the cryptographically signed JWT, extracts the verified role claim, and checks authorization rules before granting access to protected endpoints.'
+  },
+  {
+    id: 16,
+    topic: 'Cross-Site Scripting (XSS) Defenses',
+    question: 'Which of the following is the most effective defense against DOM-based Cross-Site Scripting (XSS) attacks in frontend applications?',
+    options: [
+      'Disabling HTTPS encryption.',
+      'Using document.write() for all HTML rendering.',
+      'Storing passwords in plain text.',
+      'Enforcing strict Content Security Policy (CSP) headers, contextual output encoding, and avoiding dangerouslySetInnerHTML / unvalidated innerHTML assignments.'
+    ],
+    correctAnswer: 3, // D
+    explanation: 'XSS occurs when un-sanitized user input is executed as code in the browser. Mitigation requires contextual output encoding (e.g. using textContent or React\'s default JSX escaping), avoiding raw HTML injection, and setting a robust Content Security Policy (CSP).'
+  },
+  {
+    id: 17,
+    topic: 'Cross-Site Request Forgery (CSRF)',
+    question: 'How does configuring cookies with "SameSite=Strict" or "SameSite=Lax" protect against Cross-Site Request Forgery (CSRF)?',
+    options: [
+      'It instructs the browser not to send authentication cookies with cross-site requests initiated from third-party websites.',
+      'It deletes all cookies whenever the user visits any website.',
+      'It encrypts the entire browser memory space.',
+      'It disables all form submissions on the website.'
+    ],
+    correctAnswer: 0, // A
+    explanation: 'CSRF occurs when a malicious third-party site tricks the browser into sending requests to a site where the user is authenticated. SameSite=Strict/Lax prevents the browser from attaching cookies on cross-origin requests, blocking CSRF attacks natively.'
+  },
+  {
+    id: 18,
+    topic: 'SQL Injection Prevention',
+    question: 'Why do Parameterized Queries (Prepared Statements) completely prevent SQL Injection vulnerabilities?',
+    options: [
+      'Because they convert SQL databases into JSON files.',
+      'Parameterized queries separate the SQL code structure from the user-supplied data parameters, ensuring the database engine treats input strictly as literal values rather than executable SQL syntax.',
+      'They only allow letters and delete all punctuation.',
+      'Parameterized queries encrypt all network cables.'
+    ],
+    correctAnswer: 1, // B
+    explanation: 'Prepared statements pre-compile the SQL execution plan before binding parameters. User input is transmitted as pure data values, making it impossible for injected strings (like OR 1=1) to alter the SQL query structure.'
+  },
+  {
+    id: 19,
+    topic: 'Testing Trophy: Unit vs Integration vs E2E',
+    question: 'According to modern Testing Trophy philosophy (popularized by Kent C. Dodds), why should teams write the largest proportion of Integration Tests rather than isolated unit tests?',
+    options: [
+      'Because integration tests take 0 seconds to run.',
+      'Because unit tests are completely useless.',
+      'Integration tests strike the optimal balance between high confidence that software components work together properly and fast, maintainable execution speed without excessive mocking.',
+      'Integration tests are required by international law.'
+    ],
+    correctAnswer: 2, // C
+    explanation: 'The Testing Trophy emphasizes Integration Tests because testing components and services collaborating together provides deep confidence that the application works for real users, without the fragility of mocking everything in unit tests or the slowness of pure E2E tests.'
+  },
+  {
+    id: 20,
+    topic: 'End-to-End Testing with Playwright',
+    question: 'What architectural feature allows Playwright to run fast, deterministic, and non-flaky browser automation tests compared to legacy Selenium?',
+    options: [
+      'Playwright requires all tests to be written in binary assembly.',
+      'Playwright disables CSS styling during test execution.',
+      'Playwright can only test static HTML files.',
+      'Playwright communicates directly with modern browser debugging protocols (CDP/WebDriver BiDi) and features built-in auto-waiting for elements to be visible, enabled, and stable before performing actions.'
+    ],
+    correctAnswer: 3, // D
+    explanation: 'Playwright connects directly to browser engine sockets and performs auto-waiting on actionability checks (visible, stable, enabled, ready) before clicking or typing, eliminating arbitrary sleep() calls and flaky tests.'
+  },
+  {
+    id: 21,
+    topic: 'Redis Caching & Cache Invalidation',
+    question: 'What is the "Cache-Aside" (Lazy-Loading) pattern when implementing Redis in high-throughput backend services?',
+    options: [
+      'The application first checks Redis for the requested key; on a cache hit, it returns data immediately; on a cache miss, it queries the primary database, populates Redis with an expiration TTL, and returns the result.',
+      'The database updates Redis automatically without backend code.',
+      'Redis is used as the primary persistent database with no PostgreSQL.',
+      'All incoming requests are written to disk before querying Redis.'
+    ],
+    correctAnswer: 0, // A
+    explanation: 'In the Cache-Aside pattern, application code coordinates caching: on cache miss, it fetches from SQL, stores the payload in Redis with a Time-To-Live (TTL), and serves the client. Subsequent requests hit Redis in sub-milliseconds.'
+  },
+  {
+    id: 22,
+    topic: 'CDN Edge Caching & Stale-While-Revalidate',
+    question: 'What does the HTTP header "Cache-Control: s-maxage=600, stale-while-revalidate=86400" instruct a CDN edge proxy to do?',
+    options: [
+      'Delete the asset from CDN edge nodes every 10 seconds.',
+      'Serve fresh cached content for 10 minutes (600s); during the next 24 hours (86400s), serve stale cached content instantly to users while asynchronously fetching and updating the cache from the origin server in the background.',
+      'Disable SSL encryption for 24 hours.',
+      'Force the client browser to download 10 copies of the page.'
+    ],
+    correctAnswer: 1, // B
+    explanation: 'stale-while-revalidate provides near-instant edge responses. Users receive the cached asset immediately (even if stale), while the CDN asynchronously refreshes its cache in the background for the next visitor.'
+  },
+  {
+    id: 23,
+    topic: 'Docker Containerization & Multi-Stage Builds',
+    question: 'Why are Multi-Stage Docker builds (FROM node:20 AS builder ... FROM node:20-alpine) considered best practice for production deployments?',
+    options: [
+      'They make Docker containers run on iOS devices.',
+      'They delete all source code from GitHub.',
+      'They separate the build environment (compilers, devDependencies, TypeScript tools) from the final runtime image, resulting in lightweight, secure production images containing only compiled assets and production dependencies.',
+      'Multi-stage builds are required for running CSS animations.'
+    ],
+    correctAnswer: 2, // C
+    explanation: 'Multi-stage builds allow compiling TypeScript and bundling assets in a heavy builder image, then copying only the built artifacts into a slim Alpine production runtime image. This minimizes container size (from 1GB+ down to <100MB) and reduces attack surface.'
+  },
+  {
+    id: 24,
+    topic: 'GitHub Actions CI/CD Pipeline',
+    question: 'In a professional CI/CD pipeline, what sequence of automated gates should execute on every Pull Request before permitting a merge to main?',
+    options: [
+      'Sending an email to all registered users.',
+      'Reformatting the entire database hard drive.',
+      'Deleting all Git branches except main.',
+      'Automated Linter checks -> TypeScript compilation (typecheck) -> Unit/Integration test suites -> Production build verification -> Security vulnerability scan.'
+    ],
+    correctAnswer: 3, // D
+    explanation: 'A robust CI/CD gate pipeline ensures that broken code cannot enter the main branch by running automated linters, static type checks, unit/integration test suites, build validations, and vulnerability audits on every PR.'
+  },
+  {
+    id: 25,
+    topic: 'Horizontal vs Vertical Scaling',
+    question: 'What is the primary architectural difference between Horizontal Scaling (Scaling Out) and Vertical Scaling (Scaling Up)?',
+    options: [
+      'Horizontal scaling adds more instances/servers behind a load balancer to distribute traffic, while Vertical scaling upgrades CPU, RAM, and disk resources on a single machine.',
+      'Vertical scaling adds more machines, while Horizontal scaling upgrades CPU.',
+      'Horizontal scaling only works with MySQL databases.',
+      'Vertical scaling requires rewiring physical fiber optic cables.'
+    ],
+    correctAnswer: 0, // A
+    explanation: 'Vertical scaling (scaling up) upgrades the hardware capacity of an existing single server (which has physical limits). Horizontal scaling (scaling out) provisions multiple server nodes running in parallel behind a load balancer, enabling virtually infinite elasticity.'
+  },
+  {
+    id: 26,
+    topic: 'Database Sharding vs Read Replicas',
+    question: 'How do Database Read Replicas and Database Sharding differ in scaling database architectures?',
+    options: [
+      'Read replicas split tables into halves, while sharding duplicates data.',
+      'Read Replicas duplicate data across follower nodes to scale read query throughput (with writes directed to primary), whereas Sharding partitions rows across multiple distinct database clusters based on a shard key to scale write throughput and storage.',
+      'Sharding is only used for CSS files.',
+      'Read replicas delete data after 30 days.'
+    ],
+    correctAnswer: 1, // B
+    explanation: 'Read Replicas asynchronously replicate data from a primary writer node to multiple reader nodes to absorb read-heavy traffic. Sharding horizontally partitions table datasets across independent database instances by hash/range key to handle massive write volumes.'
+  },
+  {
+    id: 27,
+    topic: 'Message Brokers & Asynchronous Queues',
+    question: 'Why do enterprise architectures use message brokers (such as RabbitMQ, Kafka, or Redis BullMQ) to decouple background job processing?',
+    options: [
+      'To make web servers consume 100% of server CPU continuously.',
+      'To replace all HTML markup with binary messages.',
+      'Message brokers decouple synchronous HTTP request handlers from long-running background tasks (e.g. sending emails, generating PDFs, video transcoding), ensuring immediate client responses while worker processes consume tasks asynchronously with retry mechanisms.',
+      'Message brokers prevent users from logging out.'
+    ],
+    correctAnswer: 2, // C
+    explanation: 'Message queues prevent API request bottlenecks. An HTTP endpoint enqueues a lightweight job payload and immediately returns 202 Accepted to the user. Background worker fleets consume and process jobs reliably with backpressure control and dead-letter queues.'
+  },
+  {
+    id: 28,
+    topic: 'Circuit Breaker Pattern in Microservices',
+    question: 'What is the purpose of the Circuit Breaker pattern (Closed, Open, Half-Open states) in microservice architectures?',
+    options: [
+      'To turn off the power supply in physical server racks during thunderstorms.',
+      'To encrypt microservice source code in Git.',
+      'To prevent users from opening multiple browser tabs.',
+      'To prevent cascading system failures by temporarily halting outgoing requests to an unstable or failing downstream service after a failure threshold is exceeded, returning immediate fallbacks until the service recovers.'
+    ],
+    correctAnswer: 3, // D
+    explanation: 'When a downstream microservice experiences an outage, repeated timeouts can exhaust calling server connection pools. A circuit breaker "trips" (Open state) after consecutive failures, returning instant fallbacks and periodically testing recovery in Half-Open state.'
+  },
+  {
+    id: 29,
+    topic: 'Structured Logging & OpenTelemetry Observability',
+    question: 'Why is Structured Logging (JSON format with traceId, timestamp, level, userId) mandatory for production microservices compared to unstructured console.log() text?',
+    options: [
+      'Structured JSON logs can be ingested, indexed, queried, and correlated across distributed microservices by centralized log analysis platforms (Datadog, ELK, Grafana Loki) using unique trace IDs.',
+      'JSON logs run 10x faster on CPU than plain text.',
+      'Browsers reject console.log text in production.',
+      'Structured logs automatically fix server bugs.'
+    ],
+    correctAnswer: 0, // A
+    explanation: 'In distributed systems handling millions of requests, plain unstructured strings are impossible to query efficiently. Structured JSON logs containing correlation trace IDs allow engineers to trace a single user request across 10 microservices instantly.'
+  },
+  {
+    id: 30,
+    topic: 'Site Reliability Engineering: SLA vs SLO vs SLI',
+    question: 'In Site Reliability Engineering (SRE), what is the hierarchical relationship between SLIs, SLOs, and SLAs?',
+    options: [
+      'SLAs are internal measurements, SLOs are legal contracts, SLIs are CSS properties.',
+      'An SLI (Service Level Indicator) is the metric measuring performance (e.g. 99.95% HTTP success rate); an SLO (Service Level Objective) is the internal target reliability goal (e.g. 99.9%); and an SLA (Service Level Agreement) is the external business/legal contract with financial penalties if breached.',
+      'SLIs and SLOs are deprecated in modern cloud architectures.',
+      'They are identical acronyms with no distinction.'
+    ],
+    correctAnswer: 1, // B
+    explanation: 'SLI is what you actually measure (e.g. latency, error rate). SLO is your internal engineering reliability target. SLA is the contractual agreement made with customers that defines financial or service remedies if service levels drop below agreed thresholds.'
+  },
+  {
+    id: 31,
+    topic: 'WebSockets vs Server-Sent Events (SSE)',
+    question: 'When should a web architect choose Server-Sent Events (SSE) over full-duplex WebSockets for real-time data streaming?',
+    options: [
+      'When two-way video calling is required.',
+      'When communication is strictly unidirectional from server to client (such as live stock price tickers, LLM AI token streaming, or notifications) over standard HTTP with automatic reconnection built-in.',
+      'SSE only works on mobile devices.',
+      'WebSockets are completely unsupported in modern browsers.'
+    ],
+    correctAnswer: 1, // B (wait, let's make sure: options are 0 A, 1 B, 2 C, 3 D)
+    explanation: 'SSE operates over standard HTTP, supports native browser automatic reconnection, and is ideal for unidirectional server-to-client streaming (like ChatGPT streaming responses or live feeds) without WebSocket protocol complexity.'
+  },
+  {
+    id: 32,
+    topic: 'Rate Limiting & Token Bucket Algorithm',
+    question: 'How does the Token Bucket algorithm enforce API rate limits while allowing brief burst traffic?',
+    options: [
+      'Tokens represent CPU core temperatures.',
+      'All users are blocked from making requests after 5:00 PM.',
+      'Tokens are added to a bucket at a fixed constant rate up to a maximum capacity; each incoming request consumes a token, allowing bursts up to bucket capacity while enforcing a steady long-term average request rate.',
+      'It deletes user accounts if they send more than 10 requests.'
+    ],
+    correctAnswer: 2, // C
+    explanation: 'The Token Bucket algorithm adds tokens at a steady replenishment rate. If requests arrive rapidly, they consume accumulated tokens (accommodating natural bursts), but once empty, requests are throttled (HTTP 429 Too Many Requests).'
+  },
+  {
+    id: 33,
+    topic: 'Zero-Downtime Deployment (Blue-Green & Canary)',
+    question: 'What is the operational strategy of a Blue-Green deployment in production cloud environments?',
+    options: [
+      'Running half the servers on Windows and half on Linux.',
+      'Deleting the production database and restoring from backup.',
+      'Shutting down all production servers for 2 hours during maintenance.',
+      'Maintaining two identical production environments (Blue active, Green idle); the new version is deployed and smoke-tested on Green, after which the load balancer switches all live traffic to Green instantly with zero user downtime.'
+    ],
+    correctAnswer: 3, // D
+    explanation: 'Blue-Green deployments maintain two identical production environments. The new release is fully deployed and validated on the inactive environment (Green). Traffic is then switched instantaneously via load balancer, with instant rollback to Blue if issues occur.'
+  },
+  {
+    id: 34,
+    topic: 'Serverless Functions & Cold Starts',
+    question: 'What causes a "Cold Start" latency spike in Serverless cloud environments (AWS Lambda, Vercel Serverless Functions)?',
+    options: [
+      'When an incoming request hits a serverless function that has no active container instance running, forcing the cloud provider to provision a microVM, initialize the Node.js runtime, and load application code before executing the request.',
+      'Cold starts happen when servers are located in cold climate zones like Iceland.',
+      'Cold starts only occur when database cables freeze.',
+      'Cold starts occur when HTML files are larger than 10KB.'
+    ],
+    correctAnswer: 0, // A
+    explanation: 'Serverless platforms scale idle functions down to 0 instances to save cost. When a new request arrives after inactivity, the cloud provider must provision container resources and boot the runtime (Cold Start), adding 200ms-2s latency to that initial invocation.'
+  },
+  {
+    id: 35,
+    topic: 'GraphQL vs REST Architecture',
+    question: 'What primary problem does GraphQL resolve compared to traditional REST API architectures?',
+    options: [
+      'GraphQL eliminates the need for database storage.',
+      'GraphQL allows clients to request exactly the specific fields they need in a single round-trip query, eliminating over-fetching (receiving unneeded data) and under-fetching (requiring multiple waterfall requests).',
+      'GraphQL converts all backend code to CSS.',
+      'GraphQL makes all API requests public with no authentication.'
+    ],
+    correctAnswer: 1, // B
+    explanation: 'REST endpoints often return fixed payload shapes causing over-fetching, or require multiple chained calls (under-fetching). GraphQL provides a flexible schema query language where clients specify the exact shape of requested data in a single POST request.'
+  },
+  {
+    id: 36,
+    topic: 'Content Security Policy (CSP) Directives',
+    question: 'What does the CSP directive "script-src \'self\' https://apis.google.com" enforce in modern web browsers?',
+    options: [
+      'It downloads Google Chrome automatically on all devices.',
+      'It converts JavaScript code to Python.',
+      'It only allows the browser to execute JavaScript scripts originating from the same origin (\'self\') and the specified trusted Google API domain, blocking inline scripts and unauthorized malicious third-party injections.',
+      'It deletes all scripts from the server.'
+    ],
+    correctAnswer: 2, // C
+    explanation: 'Content Security Policy (CSP) is a critical HTTP response header. Restricting script-src to trusted origins stops XSS attacks by blocking the execution of untrusted inline scripts or injected external scripts.'
+  },
+  {
+    id: 37,
+    topic: 'Database Connection Pooling',
+    question: 'Why is database connection pooling mandatory when connecting serverless backend functions to relational databases (PostgreSQL)?',
+    options: [
+      'Because PostgreSQL only supports 1 connection globally.',
+      'To prevent database passwords from expiring.',
+      'To translate SQL queries into GraphQL queries.',
+      'Establishing a new TCP/TLS database connection on every serverless invocation is slow and can quickly overwhelm PostgreSQL connection limits (e.g. 100 max connections) during traffic spikes; a connection pooler (like PgBouncer) reuses active connections efficiently.'
+    ],
+    correctAnswer: 3, // D
+    explanation: 'Serverless functions scale concurrently into thousands of instances. Opening a direct database connection per instance exhausts PostgreSQL connection limits in seconds. Connection poolers (e.g. PgBouncer/Supabase Pooler) maintain and reuse persistent pools of database sockets.'
+  },
+  {
+    id: 38,
+    topic: 'Micro-Frontend Architecture',
+    question: 'What is the core concept and motivation behind a Micro-Frontend architecture in large enterprise organizations?',
+    options: [
+      'Decomposing a massive monolithic frontend application into smaller, independently developed, tested, and deployed frontend applications managed by autonomous cross-functional feature teams.',
+      'Writing web applications exclusively for micro-sized smart watches.',
+      'Replacing React with vanilla HTML on all corporate websites.',
+      'Combining all company software into a single 500MB JavaScript file.'
+    ],
+    correctAnswer: 0, // A
+    explanation: 'Micro-frontends extend microservices principles to the client. Autonomous teams develop and deploy distinct slices of the UI (e.g. Checkout team, Catalog team) independently, integrating them into a cohesive shell app via Module Federation.'
+  },
+  {
+    id: 39,
+    topic: 'Idempotency in API Design',
+    question: 'In distributed systems and payment processing APIs, what does an "Idempotency Key" guarantee when passed in an HTTP POST request header?',
+    options: [
+      'It grants the user unlimited free credits.',
+      'It guarantees that if a request is retried multiple times due to network timeouts, the server processes the transaction exactly once and returns the cached result of the original transaction without duplicate charges.',
+      'It automatically generates a database backup.',
+      'It converts the request to a GET method.'
+    ],
+    correctAnswer: 1, // B
+    explanation: 'Idempotency keys ensure operations (like credit card charges) can be safely retried over unreliable networks without duplicate side effects. The server records the unique key and replays the original response if an identical key is received again.'
+  },
+  {
+    id: 40,
+    topic: 'Edge Computing & Distributed Edge Functions',
+    question: 'How do Edge Functions (Cloudflare Workers, Vercel Edge Runtime) improve user experience compared to traditional centralized origin servers?',
+    options: [
+      'They make website text render in 3D.',
+      'They disable all database queries globally.',
+      'They execute lightweight compute tasks (geolocation routing, auth verification, A/B testing, localized rewrites) at hundreds of CDN edge data centers physically closest to the user, achieving single-digit millisecond latency.',
+      'Edge functions replace the user\'s local browser with a remote terminal.'
+    ],
+    correctAnswer: 2, // C
+    explanation: 'Edge computing runs lightweight V8 isolates geographically close to users worldwide (at CDN edge points of presence). Handling auth token checks, localization, and redirects at the edge eliminates the 100-300ms speed-of-light latency round-trips to distant origin data centers.'
+  }
+];
+
+// 14 Advanced Theory Modules
+const ADVANCED_MODULES_RAW = [
+  {
+    id: 'web-adv-01',
+    title: '1. Full-Stack Web Architecture & Distributed System Boundaries',
+    summary: 'Master monolithic vs microservices architectures, SSR vs SSG vs CSR rendering paradigms, API gateways, reverse proxies, and edge computing.',
+    readingTime: '26 min',
+    overview: 'Architecting modern web applications requires understanding system boundaries, data flow across network boundaries, rendering strategies, reverse proxy layers, and distributed edge execution. Senior engineers select optimal architectural patterns based on scalability, latency, and operational complexity.',
+    learningObjectives: [
+      'Compare Monolithic, Modular Monolith, Microservices, and Micro-Frontend architectures',
+      'Select and implement optimal rendering paradigms (CSR, SSR, SSG, ISR, Edge Rendering)',
+      'Configure API Gateway routing, load balancing, SSL termination, and reverse proxies',
+      'Deploy low-latency edge computing workloads using V8 isolates at CDN points of presence'
+    ],
+    syntaxGuide: '// Full-Stack Rendering Matrix & System Architecture\n// CSR  -> Client-Side Rendering: Static HTML shell, JS bundle renders UI in browser (React SPA)\n// SSR  -> Server-Side Rendering: Dynamic HTML rendered on server per request (Next.js/Remix)\n// SSG  -> Static Site Generation: Pre-built HTML generated during compilation (Astro/Gatsby)\n// ISR  -> Incremental Static Regeneration: Background revalidation of static HTML chunks\n// Edge -> Distributed V8 isolates running localized compute at CDN edge PoPs (Cloudflare Workers)',
+    proTips: [
+      'Start with a well-structured Modular Monolith before prematurely splitting into Microservices; microservices introduce severe network latency, distributed transaction, and deployment complexities.',
+      'Use Server-Side Rendering (SSR) for personalized, dynamic, and SEO-critical routes, and Static Site Generation (SSG) for public marketing and documentation pages.'
+    ],
+    sections: [
+      {
+        title: '1. Rendering Paradigms: CSR, SSR, SSG, and ISR',
+        content: 'Modern full-stack frameworks (Next.js, Remix, Astro) provide hybrid rendering models. Client-Side Rendering (CSR) serves an empty HTML shell and relies on browser JavaScript to fetch data and render UI. Server-Side Rendering (SSR) renders full HTML on the server per request, providing optimal SEO and instant initial content. Static Site Generation (SSG) compiles HTML at build time for near-zero TTFB (Time To First Byte) from CDNs. Incremental Static Regeneration (ISR) revalidates static pages in the background when requested after a defined cache lifetime.',
+        codeSnippet: '// Conceptual Node.js / Express Server-Side Rendering (SSR) Stream\nimport express from \'express\';\nimport React from \'react\';\nimport { renderToPipeableStream } from \'react-dom/server\';\nimport App from \'./App\';\n\nconst app = express();\n\napp.get(\'*\", (req, res) => {\n  res.setHeader(\'Content-Type\', \'text/html; charset=utf-8\');\n  const stream = renderToPipeableStream(<App url={req.url} />, {\n    onShellReady() {\n      res.statusCode = 200;\n      stream.pipe(res); // Stream HTML chunks to browser as they render\n    }\n  });\n});',
+        lineByLine: [
+          { line: 'renderToPipeableStream(...)', explanation: 'Streams React component tree progressively as HTML chunks to the browser.' },
+          { line: 'stream.pipe(res);', explanation: 'Pipes the rendered HTML stream directly into the HTTP response stream.' }
+        ],
+        miniPractice: {
+          task: 'Which rendering strategy provides the fastest Time To First Byte (TTFB) globally?',
+          hint: 'Think about pre-built static files served directly from CDN edge caches.',
+          solution: 'Static Site Generation (SSG) served from CDN edge caches provides sub-20ms TTFB globally.'
+        }
+      },
+      {
+        title: '2. API Gateways, Reverse Proxies & Load Balancing',
+        content: 'In distributed web architectures, client browsers do not communicate directly with internal microservices. An API Gateway (e.g. Nginx, Kong, Cloudflare) sits at the system perimeter, handling SSL/TLS termination, rate limiting, request routing, authentication token validation, and load balancing traffic across fleets of backend worker nodes.',
+        codeSnippet: '# Nginx Reverse Proxy & Load Balancer Configuration\nupstream backend_cluster {\n  least_conn; # Route to server with fewest active connections\n  server 10.0.1.10:5000 max_fails=3 fail_timeout=10s;\n  server 10.0.1.11:5000 max_fails=3 fail_timeout=10s;\n}\n\nserver {\n  listen 443 ssl http2;\n  server_name api.skillora.ai;\n\n  location / {\n    proxy_pass http://backend_cluster;\n    proxy_set_header Host $host;\n    proxy_set_header X-Real-IP $remote_addr;\n  }\n}',
+        lineByLine: [
+          { line: 'least_conn;', explanation: 'Load balancing algorithm routing incoming traffic to least-busy node.' },
+          { line: 'proxy_pass http://backend_cluster;', explanation: 'Forwards request to upstream backend application cluster.' }
+        ],
+        miniPractice: {
+          task: 'What header does a reverse proxy add to forward the client\'s true originating IP address to backend services?',
+          hint: 'Look at the Nginx config snippet above.',
+          solution: 'X-Forwarded-For or X-Real-IP.'
+        }
+      },
+      {
+        title: '3. Edge Computing & Distributed V8 Isolates',
+        content: 'Edge Computing moves computation from distant centralized data centers to hundreds of CDN edge servers worldwide. Built on lightweight V8 isolates rather than heavy containers, Edge Functions boot in under 5 milliseconds and execute localized middleware tasks (auth token validation, A/B testing redirects, geolocation customization) with single-digit latency.',
+        codeSnippet: '// Cloudflare / Vercel Edge Middleware Function\nexport default async function middleware(request) {\n  const country = request.geo?.country || \'US\';\n  const token = request.cookies.get(\'session_token\');\n\n  // Edge-level authentication verification\n  if (!token && request.nextUrl.pathname.startsWith(\'/dashboard\')) {\n    return Response.redirect(new URL(\'/login\', request.url));\n  }\n\n  // Geolocation header rewrite\n  const response = Response.next();\n  response.headers.set(\'X-User-Country\', country);\n  return response;\n}',
+        lineByLine: [
+          { line: 'request.geo?.country', explanation: 'Reads user geographic location detected at the edge CDN node.' },
+          { line: 'Response.redirect(...)', explanation: 'Redirects unauthorized requests at the edge before hitting origin servers.' }
+        ],
+        miniPractice: {
+          task: 'Why do V8 isolates boot faster (<5ms) than standard Docker containers (500ms+)?',
+          hint: 'Isolates share a single V8 process memory space rather than booting a full guest OS.',
+          solution: 'Isolates run in a shared V8 process with lightweight isolated contexts, avoiding container OS virtualization overhead.'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Edge Middleware Router Checkpoint',
+      instructions: 'Write an edge middleware handler that inspects an authorization cookie and rewires /admin requests to /login if missing.',
+      starterCode: 'export function handleEdgeRequest(req) {\n  // Implement edge routing\n}',
+      solution: 'export function handleEdgeRequest(req) {\n  const auth = req.headers.get("cookie")?.includes("auth_token=");\n  const url = new URL(req.url);\n  if (url.pathname.startsWith("/admin") && !auth) {\n    return new Response(null, { status: 302, headers: { Location: "/login" } });\n  }\n  return new Response("OK", { status: 200 });\n}'
+    }
+  },
+  {
+    id: 'web-adv-02',
+    title: '2. TypeScript Mastery for Full-Stack Web Developers',
+    summary: 'Master advanced TypeScript: Generics, Discriminated Unions, Mapped Types, Conditional Types, Type Narrowing, and Zod integration.',
+    readingTime: '26 min',
+    overview: 'TypeScript brings compile-time type safety, automated documentation, and robust refactoring tooling to JavaScript applications. Mastering advanced type systems—generics, conditional types, utility types, and runtime schema inference—enables engineers to build bulletproof full-stack software.',
+    learningObjectives: [
+      'Author advanced generic functions, classes, and interfaces with generic constraints',
+      'Implement Discriminated Unions and exhaustiveness checking using the never type',
+      'Build custom Mapped Types and Conditional Types using the infer keyword',
+      'Derive compile-time TypeScript types directly from runtime Zod schemas'
+    ],
+    syntaxGuide: '// Advanced TypeScript Generics & Discriminated Union\ntype Result<TData, TError = Error> =\n  | { success: true; data: TData }\n  | { success: false; error: TError };\n\n// Exhaustiveness checking with never\nfunction handleResult<T>(res: Result<T>): void {\n  if (res.success) {\n    console.log(\'Data:\', res.data);\n  } else {\n    console.error(\'Error:\', res.error.message);\n  }\n}',
+    proTips: [
+      'Enable strict: true, noImplicitAny: true, and strictNullChecks: true in tsconfig.json for maximum type protection.',
+      'Use the assertNever exhaustive check pattern in switch statements on discriminated unions so adding a new union member produces a compile-time error if unhandled.'
+    ],
+    sections: [
+      {
+        title: '1. Discriminated Unions & Exhaustiveness Checking',
+        content: 'Discriminated Unions consist of multiple object types sharing a common literal discriminator property (such as type or status). When combined with switch statements and an assertNever helper that accepts the TypeScript never type, the compiler guarantees that every possible union branch is explicitly handled.',
+        codeSnippet: '// Discriminated Union with Exhaustiveness Guard\ntype UserAction =\n  | { type: \'LOGIN\'; payload: { username: string } }\n  | { type: \'LOGOUT\' }\n  | { type: \'UPDATE_THEME\'; payload: { theme: \'light\' | \'dark\' } };\n\nfunction assertNever(x: never): never {\n  throw new Error(`Unhandled action type: ${JSON.stringify(x)}`);\n}\n\nfunction userReducer(state: object, action: UserAction) {\n  switch (action.type) {\n    case \'LOGIN\':\n      return { ...state, user: action.payload.username };\n    case \'LOGOUT\':\n      return { ...state, user: null };\n    case \'UPDATE_THEME\':\n      return { ...state, theme: action.payload.theme };\n    default:\n      return assertNever(action); // Compile error if any action.type is unhandled!\n  }\n}',
+        lineByLine: [
+          { line: 'type UserAction = ...', explanation: 'Defines discriminated union with type as the discriminator literal.' },
+          { line: 'function assertNever(x: never): never', explanation: 'Helper ensuring compile error if a new union variant is added without a case handler.' }
+        ],
+        miniPractice: {
+          task: 'What happens in TypeScript if you add a new action | { type: "DELETE_ACCOUNT" } to UserAction without updating userReducer?',
+          hint: 'The default case passes the unhandled action to assertNever.',
+          solution: 'TypeScript throws a compile-time error at assertNever(action) because action is narrowed to { type: "DELETE_ACCOUNT" } rather than never.'
+        }
+      },
+      {
+        title: '2. Conditional Types, Mapped Types & infer Keyword',
+        content: 'Conditional Types (T extends U ? X : Y) allow types to select different output types based on input constraints. The infer keyword allows extracting nested types from within generic structures (such as unpacking the resolved type of a Promise or the return type of a function). Mapped types transform properties of an existing type into new shapes.',
+        codeSnippet: '// Unpack Promise Type with Conditional Type & infer\ntype UnpackPromise<T> = T extends Promise<infer U> ? U : T;\n\n// Example usage:\ntype ApiResponse = Promise<{ status: number; data: string[] }>;\ntype ResolvedData = UnpackPromise<ApiResponse>; // { status: number; data: string[] }\n\n// Custom Mapped Type making all properties nullable\ntype Nullable<T> = {\n  [K in keyof T]: T[K] | null;\n};',
+        lineByLine: [
+          { line: 'T extends Promise<infer U> ? U : T;', explanation: 'Extracts the inner type U from within the Promise wrapper.' },
+          { line: '[K in keyof T]: T[K] | null;', explanation: 'Iterates through all property keys K of T and unions values with null.' }
+        ],
+        miniPractice: {
+          task: 'What standard built-in TypeScript utility type is equivalent to type ReadonlyProps<T> = { readonly [K in keyof T]: T[K] }?',
+          hint: 'It is a built-in utility type.',
+          solution: 'Readonly<T>.'
+        }
+      },
+      {
+        title: '3. End-to-End Type Safety with Zod Schema Inference',
+        content: 'Maintaining separate TypeScript interfaces and runtime validation schemas results in duplicate code and synchronization bugs. By defining runtime schemas with Zod and extracting static types via z.infer<typeof Schema>, applications achieve a single source of truth across runtime validation and compile-time type checking.',
+        codeSnippet: '// import { z } from \'zod\';\n\n// const CourseProgressSchema = z.object({\n//   courseId: z.string(),\n//   completedModules: z.array(z.string()),\n//   score: z.number().min(0).max(100),\n//   certificateEarned: z.boolean().default(false)\n// });\n\n// Single Source of Truth TypeScript Type\n// type CourseProgress = z.infer<typeof CourseProgressSchema>;',
+        lineByLine: [
+          { line: 'z.infer<typeof CourseProgressSchema>', explanation: 'Derives compile-time TypeScript type automatically from runtime schema.' }
+        ],
+        miniPractice: {
+          task: 'Why does deriving types from Zod schemas eliminate synchronization drift between client and server code?',
+          hint: 'There is only one schema definition file.',
+          solution: 'Because the TypeScript interface is generated directly from the validation schema, guaranteeing they can never get out of sync.'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Generic Repository Interface Checkpoint',
+      instructions: 'Write a generic TypeScript interface Repository<T, ID> defining findById(id: ID): Promise<T | null> and save(entity: T): Promise<T>.',
+      starterCode: '// Define generic repository interface',
+      solution: 'export interface Repository<T extends { id: ID }, ID = string> {\n  findById(id: ID): Promise<T | null>;\n  findAll(): Promise<T[]>;\n  save(entity: T): Promise<T>;\n  delete(id: ID): Promise<boolean>;\n}'
+    }
+  },
+  {
+    id: 'web-adv-03',
+    title: '3. Advanced React Patterns: Compound Components & Portals',
+    summary: 'Master advanced React architecture: Compound Components pattern, React Portals, Error Boundaries, Render Props, and React 18 Concurrent Transitions.',
+    readingTime: '26 min',
+    overview: 'As component libraries grow, building flexible, composable, and accessible components is essential. Mastering the Compound Components pattern, React Portals for modal dialogs, class Error Boundaries, and React 18 Concurrent Transitions (useTransition, useDeferredValue) elevates UI engineering to production standards.',
+    learningObjectives: [
+      'Architect highly composable UI components using the Compound Components pattern with Context',
+      'Render UI out of the DOM hierarchy into document.body using React.createPortal()',
+      'Catch unhandled rendering exceptions gracefully using React Error Boundaries',
+      'Optimize heavy UI state updates using React 18 useTransition and useDeferredValue'
+    ],
+    syntaxGuide: '// Compound Components Pattern (Accordion)\nexport function Accordion({ children }) {\n  const [openIndex, setOpenIndex] = React.useState<number | null>(null);\n  return (\n    <AccordionContext.Provider value={{ openIndex, setOpenIndex }}>\n      <div className="accordion">{children}</div>\n    </AccordionContext.Provider>\n  );\n}\nAccordion.Item = AccordionItem;\nAccordion.Header = AccordionHeader;\nAccordion.Body = AccordionBody;',
+    proTips: [
+      'Use React Portals to render modals, tooltips, and toast notifications into document.body to avoid parent CSS overflow: hidden and z-index stacking context clipping bugs.',
+      'Use useTransition() to mark non-urgent UI updates (like filtering a 5,000-item table) so user typing remains responsive at 60fps.'
+    ],
+    sections: [
+      {
+        title: '1. The Compound Components Architecture Pattern',
+        content: 'Compound Components provide an intuitive API where a parent component manages state and shares it with specialized child components via a private React Context. Consuming developers can rearrange headings, icons, and trigger buttons without passing complex prop configurations.',
+        codeSnippet: '// Accessible Modal using Compound Pattern & Context\nconst ModalContext = React.createContext(null);\n\nexport function Modal({ isOpen, onClose, children }) {\n  if (!isOpen) return null;\n  return (\n    <ModalContext.Provider value={{ onClose }}>\n      <div className="modal-backdrop" onClick={onClose}>\n        <div className="modal-window" onClick={e => e.stopPropagation()}>\n          {children}\n        </div>\n      </div>\n    </ModalContext.Provider>\n  );\n}\n\nModal.Header = ({ title }) => {\n  const { onClose } = React.useContext(ModalContext);\n  return (\n    <div className="modal-header">\n      <h3>{title}</h3>\n      <button onClick={onClose} aria-label="Close modal">✕</button>\n    </div>\n  );\n};\nModal.Body = ({ children }) => <div className="modal-body">{children}</div>;',
+        lineByLine: [
+          { line: 'const ModalContext = React.createContext(null);', explanation: 'Creates private context sharing modal controls with child components.' },
+          { line: 'onClick={e => e.stopPropagation()}', explanation: 'Prevents backdrop click closing when clicking inside the modal window.' },
+          { line: 'Modal.Header = ...', explanation: 'Attaches sub-component directly as a static property on Modal.' }
+        ],
+        miniPractice: {
+          task: 'Why is e.stopPropagation() necessary on the inner modal dialog container?',
+          hint: 'The backdrop has an onClick={onClose} handler.',
+          solution: 'Without stopPropagation(), clicks inside the modal window bubble up to the backdrop, accidentally closing the modal.'
+        }
+      },
+      {
+        title: '2. React Portals: Escaping the DOM Hierarchy',
+        content: 'Parent containers with overflow: hidden, position: relative, or restrictive z-index stacking contexts can clip child popups, dropdown menus, or fullscreen modals. ReactDOM.createPortal(children, domNode) renders the component into any DOM element outside the React parent hierarchy while preserving React synthetic event bubbling.',
+        codeSnippet: 'import ReactDOM from \'react-dom\';\n\nexport function GlobalToastPortal({ children }) {\n  const [portalRoot, setPortalRoot] = React.useState(null);\n\n  React.useEffect(() => {\n    let el = document.getElementById(\'toast-portal-root\');\n    if (!el) {\n      el = document.createElement(\'div\');\n      el.id = \'toast-portal-root\';\n      document.body.appendChild(el);\n    }\n    setPortalRoot(el);\n  }, []);\n\n  if (!portalRoot) return null;\n  return ReactDOM.createPortal(children, portalRoot);\n}',
+        lineByLine: [
+          { line: 'document.getElementById(\'toast-portal-root\')', explanation: 'Finds or creates global portal container directly inside document.body.' },
+          { line: 'ReactDOM.createPortal(children, portalRoot)', explanation: 'Mounts children to portalRoot DOM node outside the parent component tree.' }
+        ],
+        miniPractice: {
+          task: 'Do React synthetic events fired from inside a Portal bubble through the Portal\'s physical DOM tree or through its React virtual component tree?',
+          hint: 'React manages events through its own synthetic event system.',
+          solution: 'React synthetic events bubble up through the virtual React component tree, regardless of where the DOM node physically resides.'
+        }
+      },
+      {
+        title: '3. React 18 Concurrent Transitions: useTransition',
+        content: 'In React 18, state updates are categorized into Urgent updates (typing in an input, clicking a button) and Transition updates (filtering large datasets, switching tabs). Wrapping expensive state updates in startTransition() tells React the update is non-urgent and can be interrupted if the user types another character.',
+        codeSnippet: 'import { useState, useTransition } from \'react\';\n\nexport function SearchFilterView({ allRecords }) {\n  const [inputVal, setInputVal] = useState(\'\');\n  const [filteredList, setFilteredList] = useState(allRecords);\n  const [isPending, startTransition] = useTransition();\n\n  const handleSearch = (e) => {\n    const query = e.target.value;\n    setInputVal(query); // Urgent: Instant input update\n\n    startTransition(() => {\n      // Non-Urgent: Heavy filter calculation\n      const matched = allRecords.filter(item => item.name.toLowerCase().includes(query.toLowerCase()));\n      setFilteredList(matched);\n    });\n  };\n\n  return (\n    <div>\n      <input value={inputVal} onChange={handleSearch} placeholder="Search..." />\n      {isPending && <p className="spinner">Filtering results...</p>}\n      <ItemList items={filteredList} />\n    </div>\n  );\n}',
+        lineByLine: [
+          { line: 'const [isPending, startTransition] = useTransition();', explanation: 'Initializes concurrent transition hook with pending state indicator.' },
+          { line: 'setInputVal(query);', explanation: 'Immediate state update guarantees zero input lag while typing.' },
+          { line: 'startTransition(() => { ... })', explanation: 'Marks heavy filtering update as interruptible by subsequent user keystrokes.' }
+        ],
+        miniPractice: {
+          task: 'How does useDeferredValue differ from useTransition?',
+          hint: 'useTransition wraps state setters; useDeferredValue wraps state values.',
+          solution: 'useTransition is used when you have access to the state updater function; useDeferredValue accepts a value (like a prop) and defers updating it.'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Compound Card Component Checkpoint',
+      instructions: 'Build a Card compound component featuring Card.Header, Card.Body, and Card.Footer sub-components.',
+      starterCode: 'export function Card({ children }) {\n  // Implement compound card\n}',
+      solution: 'export function Card({ children }) { return <div className="card-box">{children}</div>; }\nCard.Header = ({ title }) => <div className="card-header"><h3>{title}</h3></div>;\nCard.Body = ({ children }) => <div className="card-body">{children}</div>;\nCard.Footer = ({ children }) => <div className="card-footer">{children}</div>;'
+    }
+  },
+  {
+    id: 'web-adv-04',
+    title: '4. Enterprise State Management: Redux Toolkit, Zustand & Server State',
+    summary: 'Master global state architecture: Client vs Server state, Redux Toolkit slices, Zustand lightweight stores, and TanStack Query optimistic mutations.',
+    readingTime: '26 min',
+    overview: 'Managing complex application state across hundreds of components requires clean separation between transient UI state, global client state, and asynchronous server cache state. Mastering Redux Toolkit (RTK), Zustand, and TanStack React Query eliminates state synchronization bugs.',
+    learningObjectives: [
+      'Differentiate between local component state, global client state, and asynchronous server cache',
+      'Create type-safe global stores with Redux Toolkit (createSlice, configureStore) and Zustand',
+      'Manage asynchronous side effects using RTK createAsyncThunk and TanStack Query mutations',
+      'Implement optimistic updates with automatic rollback mechanisms for offline resilience'
+    ],
+    syntaxGuide: '// Zustand Store Architecture (Clean & Lightweight)\nimport { create } from \'zustand\';\nimport { persist } from \'zustand/middleware\';\n\ninterface UserState {\n  token: string | null;\n  theme: \'dark\' | \'light\';\n  setToken: (token: string | null) => void;\n  toggleTheme: () => void;\n}\n\nexport const useUserStore = create<UserState>()(\n  persist(\n    (set) => ({\n      token: null,\n      theme: \'dark\',\n      setToken: (token) => set({ token }),\n      toggleTheme: () => set((state) => ({ theme: state.theme === \'dark\' ? \'light\' : \'dark\' }))\n    }),\n    { name: \'user_storage_key\' }\n  )\n);',
+    proTips: [
+      'Avoid putting API responses in Redux or Zustand if you can use TanStack React Query instead; server data is a cache, not client state.',
+      'Use Zustand selector functions (e.g. useUserStore(s => s.theme)) in components to ensure components only re-render when their specific selected property changes.'
+    ],
+    sections: [
+      {
+        title: '1. State Classification: Local, Global Client & Server Cache',
+        content: 'Enterprise applications divide state into three distinct tiers: 1) Local UI State (accordion toggles, form inputs, modal visibility) managed by useState/useReducer; 2) Global Client State (authenticated user session, active theme, notification toasts) managed by Zustand or Redux; 3) Asynchronous Server Cache (courses, analytics, user profile data) managed by TanStack Query.',
+        codeSnippet: '// Example of Clean State Tier Separation\n// Tier 1: Local UI State\nconst [isModalOpen, setIsModalOpen] = useState(false);\n\n// Tier 2: Global Client State (Zustand)\nconst theme = useUserStore(state => state.theme);\n\n// Tier 3: Server Cache State (TanStack Query)\n// const { data: courses, isLoading } = useQuery({\n//   queryKey: [\'courses\'],\n//   queryFn: fetchCourseList\n// });',
+        lineByLine: [
+          { line: 'const [isModalOpen, setIsModalOpen]', explanation: 'Local UI state confined strictly to the current component.' },
+          { line: 'useUserStore(state => state.theme)', explanation: 'Subscribes only to the theme slice of the global client store.' }
+        ],
+        miniPractice: {
+          task: 'Why does putting server API responses in Redux often lead to stale data bugs?',
+          hint: 'Redux doesn\'t automatically know when data on the server changes or when the window refocuses.',
+          solution: 'Redux has no built-in awareness of cache lifetimes, automatic window refocus revalidation, or network retry logic.'
+        }
+      },
+      {
+        title: '2. Zustand Store Design & Selectors',
+        content: 'Zustand provides a minimalist, hook-based state management solution with zero boilerplate, no Provider wrappers, and full TypeScript support. Components subscribe to specific state slices using selectors, avoiding unnecessary re-renders when unrelated store properties change.',
+        codeSnippet: '// Zustand Cart Store with Selectors\nimport { create } from \'zustand\';\n\nexport const useCartStore = create((set, get) => ({\n  items: [],\n  addItem: (product) => set((state) => ({\n    items: [...state.items, product]\n  })),\n  removeItem: (id) => set((state) => ({\n    items: state.items.filter(i => i.id !== id)\n  })),\n  clearCart: () => set({ items: [] }),\n  getTotalPrice: () => get().items.reduce((sum, item) => sum + item.price, 0)\n}));\n\n// Component using selector for optimal rendering performance:\n// const itemCount = useCartStore(state => state.items.length);',
+        lineByLine: [
+          { line: 'export const useCartStore = create(...)', explanation: 'Creates global hook store accessible anywhere without Context Provider.' },
+          { line: 'get().items.reduce(...)', explanation: 'get() allows reading current state synchronously inside actions without re-subscribing.' }
+        ],
+        miniPractice: {
+          task: 'What happens if a component calls const store = useCartStore() without passing a selector function?',
+          hint: 'The component subscribes to the entire store object.',
+          solution: 'The component will re-render whenever ANY property in the store changes, even properties the component doesn\'t use.'
+        }
+      },
+      {
+        title: '3. TanStack Query Mutations & Cache Invalidation',
+        content: 'When mutating data on the server (POST/PATCH/DELETE), TanStack Query allows invalidating matching query cache keys. When a mutation succeeds, queryClient.invalidateQueries({ queryKey: [\'courses\'] }) automatically triggers an immediate background refetch, keeping the UI synchronized with the database.',
+        codeSnippet: '// TanStack Query Mutation Pattern\n// function useAddCourseMutation() {\n//   const queryClient = useQueryClient();\n//   return useMutation({\n//     mutationFn: (newCourse) => fetch(\'/api/courses\', {\n//       method: \'POST\',\n//       headers: { \'Content-Type\': \'application/json\' },\n//       body: JSON.stringify(newCourse)\n//     }).then(r => r.json()),\n//     onSuccess: () => {\n//       // Invalidate and refetch course list automatically\n//       queryClient.invalidateQueries({ queryKey: [\'courses\'] });\n//     }\n//   });\n// }',
+        lineByLine: [
+          { line: 'queryClient.invalidateQueries(...)', explanation: 'Marks cached data stale and triggers background refetch.' }
+        ],
+        miniPractice: {
+          task: 'What is the "staleTime" option in TanStack Query?',
+          hint: 'It defines how long data is considered fresh before needing a background refetch.',
+          solution: 'staleTime specifies the duration (in ms) that cached data remains fresh. As long as data is fresh, queries return data from cache without refetching.'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Zustand Notification Store Checkpoint',
+      instructions: 'Create a Zustand useNotificationStore with an array of notifications, an addNotification(msg, type) action, and removeNotification(id) action.',
+      starterCode: '// Implement notification store in Zustand',
+      solution: 'import { create } from "zustand";\nexport const useNotificationStore = create((set) => ({\n  notifications: [],\n  addNotification: (message, type = "info") => {\n    const id = Date.now().toString();\n    set((state) => ({ notifications: [...state.notifications, { id, message, type }] }));\n    setTimeout(() => set((state) => ({ notifications: state.notifications.filter(n => n.id !== id) })), 5000);\n  },\n  removeNotification: (id) => set((state) => ({ notifications: state.notifications.filter(n => n.id !== id) }))\n}));'
+    }
+  },
+  {
+    id: 'web-adv-05',
+    title: '5. Backend Fundamentals with Node.js & Asynchronous I/O',
+    summary: 'Master Node.js internals: V8 engine, libuv event loop phases, Streams, Buffers, EventEmitter, clustering, and worker threads.',
+    readingTime: '26 min',
+    overview: 'Node.js is an asynchronous, event-driven JavaScript runtime designed for building scalable network applications. Understanding V8 execution, the 6 phases of the libuv event loop, Node.js Streams for memory efficiency, Buffers, and the EventEmitter architecture is fundamental for backend engineering.',
+    learningObjectives: [
+      'Master the libuv Event Loop phases (Timers, Pending Callbacks, Poll, Check, Close)',
+      'Handle binary data in memory using Node.js Buffer instances',
+      'Process high-throughput datasets using Readable, Writable, and Transform Streams',
+      'Architect decoupled event-driven systems using EventEmitter'
+    ],
+    syntaxGuide: '// Node.js Pipeline Stream Architecture\nimport { createReadStream, createWriteStream } from \'fs\';\nimport { createGzip } from \'zlib\';\nimport { pipeline } from \'stream/promises\';\n\nasync function compressLargeLogFile(sourcePath, destPath) {\n  await pipeline(\n    createReadStream(sourcePath),\n    createGzip(),\n    createWriteStream(destPath)\n  );\n  console.log(\'Compression completed with minimal memory overhead.\');\n}',
+    proTips: [
+      'Always use stream.pipeline() (or stream/promises pipeline) instead of readable.pipe() because pipeline properly handles cleanup and error propagation.',
+      'Never execute synchronous CPU-intensive operations (like crypto.pbkdf2Sync or heavy regex) on the Node.js main thread; use async variants or Worker Threads.'
+    ],
+    sections: [
+      {
+        title: '1. The 6 Phases of the libuv Event Loop',
+        content: 'The Node.js event loop executes in 6 distinct sequential phases on each tick: 1) Timers (executes setTimeout and setInterval callbacks); 2) Pending Callbacks (executes I/O callbacks deferred from previous iterations); 3) Idle/Prepare (internal use); 4) Poll (retrieves new I/O events and executes their callbacks); 5) Check (executes setImmediate callbacks); 6) Close Callbacks (handles socket.on(\'close\')). process.nextTick() executes immediately after the current operation before the loop continues.',
+        codeSnippet: '// Execution Order: nextTick vs setImmediate vs setTimeout\nsetTimeout(() => console.log(\'3. Timer (setTimeout)\'), 0);\nsetImmediate(() => console.log(\'4. Check (setImmediate)\'));\nprocess.nextTick(() => console.log(\'1. Microtask (process.nextTick)\'));\nPromise.resolve().then(() => console.log(\'2. Microtask (Promise)\'));\n// Console Output: 1 -> 2 -> 3 -> 4',
+        lineByLine: [
+          { line: 'process.nextTick(...)', explanation: 'Highest-priority microtask queue drained before any event loop phase transitions.' },
+          { line: 'setImmediate(...)', explanation: 'Executes specifically during the Check phase of the libuv loop.' }
+        ],
+        miniPractice: {
+          task: 'Why is setImmediate() often preferred over setTimeout(fn, 0) inside I/O callbacks in Node.js?',
+          hint: 'Inside an I/O poll cycle, setImmediate is always guaranteed to execute before any timers.',
+          solution: 'In an I/O callback, the check phase (setImmediate) runs immediately next, whereas setTimeout(fn, 0) must wait for the next full loop tick.'
+        }
+      },
+      {
+        title: '2. Node.js Streams & Backpressure Management',
+        content: 'Streams represent sequences of data chunks. There are 4 fundamental stream types: Readable, Writable, Duplex (both readable and writable, like TCP sockets), and Transform (modifies data as it is written, like zlib compression). Backpressure occurs when a readable stream produces data faster than the writable stream can write it; stream pipelines manage backpressure automatically.',
+        codeSnippet: 'import { Readable } from \'stream\';\nimport { createWriteStream } from \'fs\';\n\n// Transform Stream Example (Uppercase Stream)\nimport { Transform } from \'stream\';\n\nconst upperCaseTransform = new Transform({\n  transform(chunk, encoding, callback) {\n    this.push(chunk.toString().toUpperCase());\n    callback();\n  }\n});\n\nprocess.stdin.pipe(upperCaseTransform).pipe(process.stdout);',
+        lineByLine: [
+          { line: 'new Transform({ ... })', explanation: 'Creates a stream that modifies incoming bytes and pushes transformed data.' },
+          { line: 'process.stdin.pipe(...)', explanation: 'Pipes terminal input through transformation directly to terminal output.' }
+        ],
+        miniPractice: {
+          task: 'What event is emitted on a Writable stream when its internal buffer drains and it is ready to receive more data?',
+          hint: 'It signals that backpressure has cleared.',
+          solution: 'The "drain" event.'
+        }
+      },
+      {
+        title: '3. EventEmitter Architecture & Memory Leak Prevention',
+        content: 'Node.js core modules (HTTP servers, streams, sockets) inherit from EventEmitter. Developers can create custom EventEmitter instances to build pub/sub architectures. Registering listeners without removing them causes memory leaks; Node.js warns if more than 10 listeners are attached to a single event.',
+        codeSnippet: 'import { EventEmitter } from \'events\';\n\nclass PaymentService extends EventEmitter {\n  processPayment(orderId, amount) {\n    console.log(`Processing order ${orderId} for $${amount}...`);\n    // Emit domain event on success\n    this.emit(\'payment:success\', { orderId, amount, timestamp: Date.now() });\n  }\n}\n\nconst payments = new PaymentService();\n// Subscribe decoupled email notification service\npayments.on(\'payment:success\', (data) => {\n  console.log(`[Email Service] Sending receipt for order ${data.orderId}`);\n});\n\npayments.processPayment(\'ord_491\', 149.00);',
+        lineByLine: [
+          { line: 'class PaymentService extends EventEmitter', explanation: 'Inherits emit, on, once, and off event dispatching capabilities.' },
+          { line: 'this.emit(\'payment:success\', ...)', explanation: 'Dispatches event with payload to all registered synchronous subscribers.' }
+        ],
+        miniPractice: {
+          task: 'How do you register an event listener that automatically unregisters itself after firing once?',
+          hint: 'Use emitter.once() instead of emitter.on().',
+          solution: 'emitter.once("event_name", callback);'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Stream File Processing Checkpoint',
+      instructions: 'Write a Node.js script using pipeline and zlib to compress an input file into a .gz file with error handling.',
+      starterCode: 'import { pipeline } from "stream/promises";\n// Implement file compression',
+      solution: 'import { createReadStream, createWriteStream } from "fs";\nimport { createGzip } from "zlib";\nimport { pipeline } from "stream/promises";\nasync function compress(src, dest) {\n  try {\n    await pipeline(createReadStream(src), createGzip(), createWriteStream(dest));\n    console.log("Compressed successfully.");\n  } catch (err) { console.error("Pipeline failed:", err); }\n}'
+    }
+  },
+  {
+    id: 'web-adv-06',
+    title: '6. Production REST APIs with Express, Middleware & OpenAPI',
+    summary: 'Master Express.js architecture: custom middleware, routing routers, request validation, centralized error handling, rate limiting, and OpenAPI/Swagger documentation.',
+    readingTime: '26 min',
+    overview: 'Express.js is the foundation for web APIs in the Node.js ecosystem. Building production-grade APIs requires structured route modules, input validation middleware, centralized error handling, security headers (Helmet), CORS configuration, and OpenAPI documentation.',
+    learningObjectives: [
+      'Architect clean Express API routers with controllers, services, and middleware layers',
+      'Implement input validation middleware using Zod/Joi before request controllers execute',
+      'Construct a centralized 4-parameter error-handling middleware handling operational and internal errors',
+      'Generate interactive OpenAPI / Swagger API documentation specifications'
+    ],
+    syntaxGuide: '// Express Application Production Boilerplate\nimport express from \'express\';\nimport cors from \'cors\';\n\nconst app = express();\n\n// Global Middleware Pipeline\napp.use(cors({ origin: \'https://app.skillora.ai\' }));\napp.use(express.json({ limit: \'1mb\' }));\n\n// Centralized Error Handler Middleware (4 parameters)\napp.use((err, req, res, next) => {\n  const status = err.statusCode || 500;\n  res.status(status).json({\n    success: false,\n    error: err.message || \'Internal Server Error\'\n  });\n});',
+    proTips: [
+      'Always catch async errors in route handlers: in Express 4, unhandled promise rejections in async routes cause the server process to hang or crash without an async wrapper or express-async-errors.',
+      'Always set express.json({ limit: "100kb" }) with a reasonable body size limit to prevent Denial of Service (DoS) attacks from massive JSON payloads.'
+    ],
+    sections: [
+      {
+        title: '1. Express Router & Controller Architecture',
+        content: 'Production Express applications avoid putting logic directly inside server.js. Instead, they use express.Router() to organize routes by domain, delegating business logic to Controller classes and Database Service layers.',
+        codeSnippet: '// routes/courses.router.js\nimport { Router } from \'express\';\nconst router = Router();\n\n// Validation Middleware\nconst validateCourseBody = (req, res, next) => {\n  const { title, level } = req.body;\n  if (!title || !level) {\n    return res.status(400).json({ error: \'Title and Level are required fields\' });\n  }\n  next();\n};\n\n// Route Handlers\nrouter.get(\'/\', async (req, res, next) => {\n  try {\n    res.json({ courses: [{ id: \'web-dev\', title: \'Web Development\' }] });\n  } catch (err) { next(err); }\n});\n\nrouter.post(\'/\', validateCourseBody, async (req, res, next) => {\n  try {\n    res.status(201).json({ id: \'web-dev-new\', ...req.body });\n  } catch (err) { next(err); }\n});\n\nexport default router;',
+        lineByLine: [
+          { line: 'const router = Router();', explanation: 'Creates isolated router instance mounted on parent Express app.' },
+          { line: 'router.post(\'/\', validateCourseBody, ...)', explanation: 'Chains validation middleware before executing the main controller logic.' },
+          { line: 'catch (err) { next(err); }', explanation: 'Forwards unexpected runtime errors directly to centralized error handler.' }
+        ],
+        miniPractice: {
+          task: 'How do you mount courses.router.js onto the parent Express application at the URI prefix /api/v1/courses?',
+          hint: 'Use app.use("/api/v1/courses", router);',
+          solution: 'app.use("/api/v1/courses", coursesRouter);'
+        }
+      },
+      {
+        title: '2. Centralized Error Handling & Custom API Error Classes',
+        content: 'Handling errors consistently requires creating custom ApiError classes that encapsulate HTTP status codes (400 Bad Request, 401 Unauthorized, 404 Not Found, 500 Internal Server Error) and passing them to next(error). The global 4-parameter error middleware formats the error response uniformly.',
+        codeSnippet: '// utils/ApiError.js & Error Middleware\nexport class ApiError extends Error {\n  constructor(statusCode, message) {\n    super(message);\n    this.statusCode = statusCode;\n    this.isOperational = true;\n  }\n}\n\n// Global Error Middleware in server.js\napp.use((err, req, res, next) => {\n  const status = err.statusCode || 500;\n  const message = err.isOperational ? err.message : \'Internal Server Error\';\n  \n  console.error(`[${req.method} ${req.url}] Error:`, err);\n  \n  res.status(status).json({\n    success: false,\n    status,\n    message\n  });\n});',
+        lineByLine: [
+          { line: 'class ApiError extends Error', explanation: 'Custom error class attaching HTTP status code and operational flag.' },
+          { line: 'err.isOperational ? ... : ...', explanation: 'Hides raw internal server stack traces from production client responses for security.' }
+        ],
+        miniPractice: {
+          task: 'Why should internal database errors (like raw SQL syntax exceptions) never be returned directly in client API responses?',
+          hint: 'Information disclosure security risk.',
+          solution: 'Returning raw database errors leaks database schema, table names, and backend technology details to potential attackers.'
+        }
+      },
+      {
+        title: '3. Security Headers (Helmet) & Rate Limiting',
+        content: 'Securing an Express API requires setting protective HTTP response headers using helmet() (disabling X-Powered-By, enabling X-Content-Type-Options: nosniff, configuring CSP) and rate limiting incoming requests using express-rate-limit to protect against brute-force authentication attacks.',
+        codeSnippet: '// Security Middleware Integration\n// import helmet from \'helmet\';\n// import rateLimit from \'express-rate-limit\';\n\n// app.use(helmet());\n\n// Rate limit: Max 100 requests per 15 minutes per IP\n// const apiLimiter = rateLimit({\n//   windowMs: 15 * 60 * 1000,\n//   max: 100,\n//   message: { error: \'Too many requests from this IP. Please try again later.\' }\n// });\n// app.use(\'/api/\', apiLimiter);',
+        lineByLine: [
+          { line: 'app.use(helmet());', explanation: 'Sets 15+ secure HTTP response headers automatically.' }
+        ],
+        miniPractice: {
+          task: 'Why does Helmet remove the "X-Powered-By: Express" header from responses?',
+          hint: 'Security through obscurity / preventing fingerprinting.',
+          solution: 'It prevents attackers from fingerprinting the server runtime as Express, making targeted exploits harder to execute.'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Express REST Router with Validation Checkpoint',
+      instructions: 'Construct an Express router for /api/users with a POST endpoint that validates email and password presence before returning 201 Created.',
+      starterCode: 'import { Router } from "express";\nconst router = Router();\n// Implement POST /api/users',
+      solution: 'import { Router } from "express";\nconst router = Router();\nrouter.post("/", (req, res) => {\n  const { email, password } = req.body;\n  if (!email || !password) return res.status(400).json({ error: "Missing required fields" });\n  res.status(201).json({ id: "usr_1", email, createdAt: new Date() });\n});\nexport default router;'
+    }
+  },
+  {
+    id: 'web-adv-07',
+    title: '7. Databases, SQL Data Modeling & Prisma ORM',
+    summary: 'Master relational data modeling with PostgreSQL, foreign keys, indexes, ACID transactions, and type-safe migrations with Prisma ORM.',
+    readingTime: '26 min',
+    overview: 'Databases are the persistent foundation of all web applications. Mastering relational data modeling in PostgreSQL, foreign key constraints, composite indexes, query optimization, and Object-Relational Mapping (ORM) with Prisma empowers full-stack engineers to handle millions of records safely.',
+    learningObjectives: [
+      'Design normalized relational database schemas with 1-to-1, 1-to-many, and many-to-many relationships',
+      'Author SQL queries using JOINs, aggregations, and subqueries',
+      'Optimize query execution using EXPLAIN ANALYZE and B-Tree indexes',
+      'Define Prisma ORM schemas, execute database migrations, and perform type-safe CRUD operations'
+    ],
+    syntaxGuide: '// Prisma Schema Data Model (schema.prisma)\n// datasource db {\n//   provider = "postgresql"\n//   url      = env("DATABASE_URL")\n// }\n// model User {\n//   id        String     @id @default(uuid())\n//   email     String     @unique\n//   name      String\n//   courses   CourseEnrollment[]\n//   createdAt DateTime   @default(now())\n// }\n// model CourseEnrollment {\n//   id        String   @id @default(uuid())\n//   userId    String\n//   courseId  String\n//   progress  Int      @default(0)\n//   user      User     @relation(fields: [userId], references: [id])\n//   @@unique([userId, courseId]) // Composite unique constraint\n// }',
+    proTips: [
+      'Always add database indexes on columns used frequently in WHERE clauses and JOIN foreign key lookups.',
+      'Use Prisma interactive transactions (prisma.$transaction(async (tx) => { ... })) for financial or multi-table updates to guarantee atomic consistency.'
+    ],
+    sections: [
+      {
+        title: '1. Relational Data Modeling & Foreign Keys',
+        content: 'Relational databases store structured data in tables connected by Foreign Key relationships: One-to-One (e.g. User to UserProfile), One-to-Many (e.g. User to Orders), and Many-to-Many (e.g. Students to Courses, connected via an intermediary Join Table). Foreign keys enforce Referential Integrity, preventing orphaned records if a parent entity is deleted.',
+        codeSnippet: '-- PostgreSQL Schema with Foreign Key and Constraints\nCREATE TABLE users (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  email VARCHAR(255) UNIQUE NOT NULL,\n  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()\n);\n\nCREATE TABLE course_progress (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,\n  course_id VARCHAR(50) NOT NULL,\n  progress_pct INTEGER DEFAULT 0 CHECK (progress_pct BETWEEN 0 AND 100),\n  CONSTRAINT unique_user_course UNIQUE (user_id, course_id)\n);',
+        lineByLine: [
+          { line: 'REFERENCES users(id) ON DELETE CASCADE', explanation: 'Deletes progress records automatically if the parent user record is deleted.' },
+          { line: 'CHECK (progress_pct BETWEEN 0 AND 100)', explanation: 'Enforces database-level constraint that progress must be between 0 and 100.' }
+        ],
+        miniPractice: {
+          task: 'What is the purpose of ON DELETE CASCADE in a foreign key definition?',
+          hint: 'It handles what happens to child records when the parent row is deleted.',
+          solution: 'It automatically deletes all child rows referencing the deleted parent row, preventing orphaned records.'
+        }
+      },
+      {
+        title: '2. Query Optimization with EXPLAIN ANALYZE & Indexes',
+        content: 'When queries become slow, developers use EXPLAIN ANALYZE to inspect the PostgreSQL query execution plan. A Seq Scan (Sequential Scan) reads every row in the table (O(N) time). Creating a B-Tree Index replaces the sequential scan with an Index Scan (O(log N) time), reducing query latency from seconds to milliseconds.',
+        codeSnippet: '-- Optimizing User Email Lookups with Index\n-- Before Index: EXPLAIN ANALYZE SELECT * FROM users WHERE email = \'alex@skillora.ai\';\n-- Plan: Seq Scan on users (cost=0.00..1842.00 rows=1)\n\nCREATE INDEX idx_users_email ON users(email);\n\n-- After Index:\n-- Plan: Index Scan using idx_users_email on users (cost=0.28..8.29 rows=1)',
+        lineByLine: [
+          { line: 'CREATE INDEX idx_users_email ON users(email);', explanation: 'Creates B-Tree index on email column for rapid O(log N) lookups.' }
+        ],
+        miniPractice: {
+          task: 'Why should you avoid creating indexes on tables with only 50 rows of data?',
+          hint: 'At 50 rows, reading the whole table in memory is faster than reading an index.',
+          solution: 'For very small tables, a sequential scan in memory is faster than reading the index and then fetching the row.'
+        }
+      },
+      {
+        title: '3. Type-Safe Database Access with Prisma ORM',
+        content: 'Prisma ORM translates relational database models into type-safe TypeScript methods. Autocomplete and type checking prevent typos in column names, and Prisma Client automatically handles SQL parameterization to prevent SQL injection.',
+        codeSnippet: '// Type-Safe Database Queries with Prisma Client\n// import { PrismaClient } from \'@prisma/client\';\n// const prisma = new PrismaClient();\n\nasync function enrollUserInCourse(userId, courseId) {\n  // Prisma interactive transaction guarantees atomicity\n  // return await prisma.$transaction(async (tx) => {\n  //   const enrollment = await tx.courseEnrollment.create({\n  //     data: { userId, courseId, progress: 0 }\n  //   });\n  //   await tx.user.update({\n  //     where: { id: userId },\n  //     data: { totalEnrolled: { increment: 1 } }\n  //   });\n  //   return enrollment;\n  // });\n}',
+        lineByLine: [
+          { line: 'prisma.$transaction(...)', explanation: 'Wraps operations in an ACID transaction that rolls back if either operation fails.' }
+        ],
+        miniPractice: {
+          task: 'What command generates Prisma Client TypeScript types after editing schema.prisma?',
+          hint: 'npx prisma generate.',
+          solution: 'npx prisma generate.'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Prisma Schema Modeling Checkpoint',
+      instructions: 'Define a Prisma model Post with id (UUID), title, content, published (Boolean), authorId (FK to User), and createdAt.',
+      starterCode: '// Define Prisma Post model',
+      solution: 'model Post {\n  id        String   @id @default(uuid())\n  title     String\n  content   String?\n  published Boolean  @default(false)\n  authorId  String\n  author    User     @relation(fields: [authorId], references: [id])\n  createdAt DateTime @default(now())\n}'
+    }
+  },
+  {
+    id: 'web-adv-08',
+    title: '8. Authentication, Authorization & Session Security',
+    summary: 'Master user security: Password hashing with bcrypt, JWTs, HTTP-Only cookies, Refresh Token Rotation, OAuth 2.0, and Role-Based Access Control (RBAC).',
+    readingTime: '26 min',
+    overview: 'Authentication verifies who a user is; Authorization determines what permissions they have. Implementing secure password hashing, cryptographic JWT signing, HTTP-Only cookie storage, refresh token rotation, and RBAC guards is critical for protecting user data and preventing security breaches.',
+    learningObjectives: [
+      'Hash and verify user passwords securely using bcrypt with appropriate salt rounds',
+      'Sign and verify JSON Web Tokens (JWTs) with cryptographic algorithms (RS256/HS256)',
+      'Store authentication tokens in secure HTTP-Only, SameSite, Secure cookies',
+      'Implement Refresh Token Rotation and server-side token family revocation'
+    ],
+    syntaxGuide: '// JWT & Password Hashing Architecture\nimport bcrypt from \'bcrypt\';\nimport jwt from \'jsonwebtoken\';\n\n// 1. Hash password with 12 salt rounds\nconst hashedPassword = await bcrypt.hash(plainPassword, 12);\n\n// 2. Sign short-lived Access Token (15 min)\nconst accessToken = jwt.sign(\n  { sub: user.id, role: user.role },\n  process.env.JWT_SECRET,\n  { expiresIn: \'15m\' }\n);',
+    proTips: [
+      'Never store passwords in plain text; use bcrypt with at least 10-12 salt rounds or Argon2id.',
+      'Use short-lived Access Tokens (15 minutes) paired with long-lived Refresh Tokens (7-30 days) stored in HTTP-Only cookies with rotation.'
+    ],
+    sections: [
+      {
+        title: '1. Password Hashing & Salt Rounds with bcrypt',
+        content: 'Passwords must never be stored in plain text or using fast legacy hash algorithms like MD5 or SHA-256 (which can be cracked in seconds using rainbow tables and GPUs). bcrypt is a slow, computationally expensive hashing algorithm that incorporates random salts and a configurable work factor (salt rounds), making brute-force attacks infeasible.',
+        codeSnippet: 'import bcrypt from \'bcrypt\';\n\nconst SALT_ROUNDS = 12;\n\nexport async function hashPassword(plainText) {\n  return await bcrypt.hash(plainText, SALT_ROUNDS);\n}\n\nexport async function verifyPassword(plainText, storedHash) {\n  // Timing-safe comparison prevents timing attacks\n  return await bcrypt.compare(plainText, storedHash);\n}',
+        lineByLine: [
+          { line: 'const SALT_ROUNDS = 12;', explanation: 'Sets work factor to 2^12 iterations (takes ~250ms per hash to deter brute forcing).' },
+          { line: 'bcrypt.compare(...)', explanation: 'Compares password against stored hash in constant time to prevent side-channel timing attacks.' }
+        ],
+        miniPractice: {
+          task: 'What does a "Salt" do in password hashing?',
+          hint: 'A random string appended to the password before hashing.',
+          solution: 'A unique random salt ensures identical passwords produce completely different hash strings, neutralizing rainbow table attacks.'
+        }
+      },
+      {
+        title: '2. JWT Architecture & HTTP-Only Cookie Storage',
+        content: 'A JSON Web Token (JWT) consists of three base64url-encoded parts separated by dots: Header (algorithm & token type), Payload (claims like user ID, expiration, role), and Signature (cryptographic hash verifying payload integrity). Storing tokens in HTTP-Only cookies protects them from client-side XSS theft.',
+        codeSnippet: '// Setting Secure Authentication Cookie in Express\nexport function setAuthCookie(res, token) {\n  res.cookie(\'access_token\', token, {\n    httpOnly: true,                               // Inaccessible to document.cookie (Anti-XSS)\n    secure: process.env.NODE_ENV === \'production\', // Only sent over HTTPS\n    sameSite: \'lax\',                              // Mitigates CSRF attacks\n    maxAge: 15 * 60 * 1000                         // 15 minutes\n  });\n}',
+        lineByLine: [
+          { line: 'httpOnly: true,', explanation: 'Prevents client-side JavaScript from accessing the cookie, blocking XSS token theft.' },
+          { line: 'sameSite: \'lax\',', explanation: 'Prevents cookie from being attached on third-party cross-site requests (Anti-CSRF).' }
+        ],
+        miniPractice: {
+          task: 'Can a client read the contents of a JWT payload if it is not encrypted (standard signed JWT)?',
+          hint: 'Base64 decoding requires no secret key.',
+          solution: 'Yes. JWTs are signed (tamper-evident), not encrypted. Anyone can base64-decode the payload, so never store sensitive secrets (like passwords) in payload claims.'
+        }
+      },
+      {
+        title: '3. Role-Based Access Control (RBAC) Middleware',
+        content: 'Authorization middleware extracts the verified token from incoming requests, checks the user\'s role claim against required permission tiers, and grants or denies access.',
+        codeSnippet: '// RBAC Guard Middleware\nexport function requireRole(allowedRoles) {\n  return (req, res, next) => {\n    const user = req.user; // Populated by prior auth verification middleware\n    if (!user || !allowedRoles.includes(user.role)) {\n      return res.status(403).json({\n        success: false,\n        error: \'Forbidden: Insufficient permissions to access this resource\'\n      });\n    }\n    next();\n  };\n}\n\n// Usage:\n// app.delete(\'/api/courses/:id\', requireAuth, requireRole([\'admin\']), deleteCourseHandler);',
+        lineByLine: [
+          { line: 'if (!allowedRoles.includes(user.role))', explanation: 'Verifies user role is in the authorized roles array.' },
+          { line: 'return res.status(403).json(...)', explanation: 'Returns HTTP 403 Forbidden when authentication is valid but authorization is lacking.' }
+        ],
+        miniPractice: {
+          task: 'What is the semantic difference between HTTP 401 Unauthorized and HTTP 403 Forbidden?',
+          hint: '401 means unauthenticated (who are you?); 403 means authenticated but unauthorized (you can\'t do that).',
+          solution: '401 means the user is not authenticated (needs to log in); 403 means the user is recognized but lacks permission.'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Auth Verification Middleware Checkpoint',
+      instructions: 'Write an Express middleware requireAuth that reads a JWT from cookies or Authorization header, verifies it with jwt.verify, and attaches req.user.',
+      starterCode: 'import jwt from "jsonwebtoken";\nexport function requireAuth(req, res, next) {\n  // Implement auth verification\n}',
+      solution: 'import jwt from "jsonwebtoken";\nexport function requireAuth(req, res, next) {\n  const token = req.cookies?.access_token || req.headers.authorization?.split(" ")[1];\n  if (!token) return res.status(401).json({ error: "Authentication required" });\n  try {\n    req.user = jwt.verify(token, process.env.JWT_SECRET || "dev_secret");\n    next();\n  } catch (err) {\n    res.status(401).json({ error: "Invalid or expired session token" });\n  }\n}'
+    }
+  },
+  {
+    id: 'web-adv-09',
+    title: '9. Web Security Engineering: OWASP Top 10, CSP & Defensive Coding',
+    summary: 'Master full-stack web security: OWASP Top 10 vulnerabilities, Content Security Policy (CSP), SQL Injection, XSS, CSRF, and CORS hardening.',
+    readingTime: '26 min',
+    overview: 'Security is a non-negotiable pillar of web development. Understanding the OWASP Top 10 security vulnerabilities—including injection, broken authentication, cryptographic failures, security misconfigurations, and vulnerable components—allows full-stack engineers to build defensible applications.',
+    learningObjectives: [
+      'Audit applications against the OWASP Top 10 Web Application Security Risks',
+      'Implement strict Content Security Policy (CSP) headers to neutralize XSS attacks',
+      'Defend against Cross-Site Request Forgery (CSRF) and Server-Side Request Forgery (SSRF)',
+      'Sanitize user input and prevent SQL Injection and NoSQL Injection attacks'
+    ],
+    syntaxGuide: '// Content Security Policy (CSP) Header Configuration\n// Content-Security-Policy: \n//   default-src \'self\'; \n//   script-src \'self\' https://cdn.skillora.ai; \n//   style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; \n//   img-src \'self\' data: https://images.skillora.ai; \n//   connect-src \'self\' https://api.skillora.ai; \n//   frame-ancestors \'none\'; \n//   base-uri \'self\'; \n//   form-action \'self\';',
+    proTips: [
+      'Set frame-ancestors \'none\' (or X-Frame-Options: DENY) to prevent malicious sites from embedding your application in hidden iframes (Clickjacking).',
+      'Never execute raw SQL string concatenations (e.g. `SELECT * FROM users WHERE id = \'${id}\'`); always use parameterized queries or an ORM.'
+    ],
+    sections: [
+      {
+        title: '1. OWASP Top 10 & Threat Modeling',
+        content: 'The Open Web Application Security Project (OWASP) Top 10 documents the most critical security risks facing web applications. These include: A01 Broken Access Control, A02 Cryptographic Failures, A03 Injection, A04 Insecure Design, A05 Security Misconfiguration, A06 Vulnerable and Outdated Components, A07 Identification and Authentication Failures, A08 Software and Data Integrity Failures, A09 Security Logging and Monitoring Failures, and A10 Server-Side Request Forgery (SSRF).',
+        codeSnippet: '// SSRF Prevention Utility\nimport { URL } from \'url\';\n\nfunction isSafeWebhookUrl(inputUrl) {\n  try {\n    const parsed = new URL(inputUrl);\n    // Block internal private IP ranges (127.0.0.1, 10.x, 192.168.x, 169.254.169.254 cloud metadata)\n    if (parsed.hostname === \'localhost\' || parsed.hostname === \'127.0.0.1\') return false;\n    if (parsed.hostname.startsWith(\'192.168.\') || parsed.hostname.startsWith(\'10.\')) return false;\n    if (parsed.protocol !== \'https:\') return false;\n    return true;\n  } catch {\n    return false;\n  }\n}',
+        lineByLine: [
+          { line: 'if (parsed.hostname === \'localhost\' || ...)', explanation: 'Blocks Server-Side Request Forgery (SSRF) targeting internal network infrastructure.' },
+          { line: 'if (parsed.protocol !== \'https:\') return false;', explanation: 'Enforces encrypted HTTPS protocol for external webhook callbacks.' }
+        ],
+        miniPractice: {
+          task: 'What is Clickjacking, and what HTTP header prevents it?',
+          hint: 'An attacker frames your site invisibly over a fake button.',
+          solution: 'Clickjacking embeds a target site in a transparent iframe; setting X-Frame-Options: DENY or CSP frame-ancestors \'none\' prevents it.'
+        }
+      },
+      {
+        title: '2. Content Security Policy (CSP) Engineering',
+        content: 'A Content Security Policy (CSP) restricts the domains from which the browser is allowed to load scripts, stylesheets, fonts, images, and WebSocket connections. If an attacker succeeds in injecting a malicious <script src="http://evil.com/steal.js"> tag via XSS, the browser blocks the script download immediately based on the CSP header.',
+        codeSnippet: '// Helmet CSP Configuration in Express\n// import helmet from \'helmet\';\n\n// app.use(\n//   helmet.contentSecurityPolicy({\n//     directives: {\n//       defaultSrc: ["\'self\'"],\n//       scriptSrc: ["\'self\'", "https://cdn.jsdelivr.net"],\n//       styleSrc: ["\'self\'", "\'unsafe-inline\'", "https://fonts.googleapis.com"],\n//       imgSrc: ["\'self\'", "data:", "https://*.supabase.co"],\n//       connectSrc: ["\'self\'", "https://api.skillora.ai"]\n//     }\n//   })\n// );',
+        lineByLine: [
+          { line: 'defaultSrc: ["\'self\'"]', explanation: 'Restricts all unconfigured asset types strictly to the originating domain.' }
+        ],
+        miniPractice: {
+          task: 'Why should \'unsafe-eval\' be strictly prohibited in production CSP directives?',
+          hint: 'It permits eval() and new Function() string execution.',
+          solution: 'unsafe-eval allows converting arbitrary strings into executable code, creating major attack vectors for XSS.'
+        }
+      },
+      {
+        title: '3. Input Sanitization & Prototype Pollution Defense',
+        content: 'Prototype Pollution occurs when user-supplied JSON with keys like __proto__ or constructor.prototype mutates the global Object.prototype in Node.js memory. Sanitizing input, freezing prototypes, or using Object.create(null) neutralizes prototype pollution attacks.',
+        codeSnippet: '// Safe Object Merge Defending Against Prototype Pollution\nfunction safeMerge(target, source) {\n  for (const key of Object.keys(source)) {\n    // Guard against prototype pollution keys\n    if (key === \'__proto__\' || key === \'constructor\' || key === \'prototype\') {\n      continue;\n    }\n    if (source[key] && typeof source[key] === \'object\' && !Array.isArray(source[key])) {\n      target[key] = safeMerge(target[key] || {}, source[key]);\n    } else {\n      target[key] = source[key];\n    }\n  }\n  return target;\n}',
+        lineByLine: [
+          { line: 'if (key === \'__proto__\' || ...)', explanation: 'Strips dangerous prototype modification keys before merging objects.' }
+        ],
+        miniPractice: {
+          task: 'What data structure in JavaScript has no prototype and is naturally immune to prototype pollution?',
+          hint: 'Object.create(null).',
+          solution: 'An object created via Object.create(null) has no prototype chain (null).'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Security Sanitization Helper Checkpoint',
+      instructions: 'Write an HTML escape function escapeHtml(str) that replaces &, <, >, ", and \' with their corresponding HTML entity codes.',
+      starterCode: 'export function escapeHtml(str) {\n  // Implement escaping\n}',
+      solution: 'export function escapeHtml(str) {\n  const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", \'"\': "&quot;", "\'": "&#039;" };\n  return String(str).replace(/[&<>"\\\']/g, (s) => map[s]);\n}'
+    }
+  },
+  {
+    id: 'web-adv-10',
+    title: '10. Automated Testing Mastery: Unit, Integration & End-to-End Testing',
+    summary: 'Master the full automated testing pyramid: Unit testing with Vitest, component testing with React Testing Library, API integration with Supertest, and E2E with Playwright.',
+    readingTime: '26 min',
+    overview: 'Automated testing guarantees software correctness, prevents regressions, and enables teams to ship code with confidence. Mastering Vitest for lightning-fast unit tests, React Testing Library for user-centric component tests, Supertest for API integration tests, and Playwright for cross-browser E2E verification is essential.',
+    learningObjectives: [
+      'Write unit tests for utility algorithms and custom hooks using Vitest and Mock Service Worker (MSW)',
+      'Test React components from the user perspective using React Testing Library (screen, fireEvent, userEvent)',
+      'Conduct automated API integration testing against real HTTP endpoints using Supertest',
+      'Author robust, cross-browser End-to-End (E2E) test suites using Playwright'
+    ],
+    syntaxGuide: '// Playwright E2E Test Suite Example\nimport { test, expect } from \'@playwright/test\';\n\ntest.describe(\'Authentication & Navigation Flow\', () => {\n  test(\'user logs in and navigates to course roadmap\', async ({ page }) => {\n    await page.goto(\'/login\');\n    await page.fill(\'input[name="email"]\', \'alex@skillora.ai\');\n    await page.fill(\'input[name="password"]\', \'SecurePassword123!\');\n    await page.click(\'button[type="submit"]\');\n    \n    await expect(page).toHaveURL(\'/dashboard\');\n    await expect(page.locator(\'h1\')).toContainText(\'Welcome back\');\n  });\n});',
+    proTips: [
+      'Test components by user-visible text and accessibility roles (screen.getByRole(\'button\', { name: /submit/i })) rather than fragile implementation details like CSS class names or component state.',
+      'Use Mock Service Worker (MSW) to intercept network requests at the network layer in unit tests, ensuring identical mock behavior across Node.js and browser test runners.'
+    ],
+    sections: [
+      {
+        title: '1. Unit Testing & Custom Hook Testing with Vitest',
+        content: 'Vitest is a blazing-fast unit test framework powered by Vite. It shares the same configuration and transform pipeline as your development server. Testing custom hooks is achieved using renderHook from @testing-library/react, allowing developers to test hook state transitions and effect lifecycles.',
+        codeSnippet: '// Custom Hook Unit Test with Vitest\nimport { describe, it, expect, act } from \'vitest\';\nimport { renderHook } from \'@testing-library/react\';\nimport { useCounter } from \'./useCounter\';\n\ndescribe(\'useCounter custom hook\', () => {\n  it(\'increments count when increment is called\', () => {\n    const { result } = renderHook(() => useCounter(0));\n    expect(result.current.count).toBe(0);\n    \n    act(() => {\n      result.current.increment();\n    });\n    \n    expect(result.current.count).toBe(1);\n  });\n});',
+        lineByLine: [
+          { line: 'const { result } = renderHook(...)', explanation: 'Renders the hook in a virtual component harness.' },
+          { line: 'act(() => { ... })', explanation: 'Wraps state mutations so React processes all pending effects before assertions run.' }
+        ],
+        miniPractice: {
+          task: 'Why is wrapping state updates in act() necessary in React unit testing?',
+          hint: 'It guarantees that all state updates and useEffects are applied before test assertions evaluate.',
+          solution: 'act() ensures that all batched React state updates and lifecycle side effects finish executing before your test asserts against the DOM or hook values.'
+        }
+      },
+      {
+        title: '2. API Integration Testing with Supertest',
+        content: 'Integration testing verifies that Express routers, validation middleware, database queries, and error handlers work together seamlessly. Supertest allows sending simulated HTTP requests directly to an Express app instance without booting a physical network socket.',
+        codeSnippet: '// Backend API Integration Test with Supertest & Vitest\nimport request from \'supertest\';\nimport { describe, it, expect } from \'vitest\';\nimport app from \'../src/app\';\n\ndescribe(\'POST /api/courses\', () => {\n  it(\'returns 400 when title is missing\', async () => {\n    const response = await request(app)\n      .post(\'/api/courses\')\n      .send({ level: \'beginner\' });\n      \n    expect(response.status).toBe(400);\n    expect(response.body.error).toContain(\'Title\');\n  });\n});',
+        lineByLine: [
+          { line: 'request(app).post(\'/api/courses\')', explanation: 'Dispatches simulated HTTP POST request to Express application.' },
+          { line: 'expect(response.status).toBe(400)', explanation: 'Verifies validation middleware correctly rejected incomplete payload.' }
+        ],
+        miniPractice: {
+          task: 'Why is testing against in-memory SQLite/PostgreSQL test containers preferred over testing against production databases?',
+          hint: 'Test isolation and preventing test data pollution.',
+          solution: 'Isolated test databases allow tests to seed, mutate, and tear down clean data without corrupting production or staging environments.'
+        }
+      },
+      {
+        title: '3. Cross-Browser End-to-End Verification with Playwright',
+        content: 'Playwright executes end-to-end tests across real Chromium, Firefox, and WebKit browser engines. It automatically waits for elements to be actionable, supports visual regression screenshot comparison, and captures video recordings of failed test runs.',
+        codeSnippet: '// Playwright Prerequisite Level Gating E2E Test\nimport { test, expect } from \'@playwright/test\';\n\ntest(\'locked intermediate level triggers prerequisite warning modal\', async ({ page }) => {\n  await page.goto(\'/courses/web-development\');\n  \n  // Click locked Intermediate tab\n  await page.click(\'button:has-text("Intermediate")\');\n  \n  // Verify prerequisite modal appears\n  await expect(page.locator(\'text=Prerequisites Required\')).toBeVisible();\n  await expect(page.locator(\'text=Complete all Beginner modules\')).toBeVisible();\n});',
+        lineByLine: [
+          { line: 'await page.click(\'button:has-text("Intermediate")\')', explanation: 'Simulates user click on the Intermediate level tab.' },
+          { line: 'await expect(page.locator(\'text=Prerequisites Required\')).toBeVisible()', explanation: 'Asserts prerequisite barrier modal opened as expected.' }
+        ],
+        miniPractice: {
+          task: 'What Playwright feature prevents flaky tests caused by asynchronous network delay?',
+          hint: 'Playwright auto-waits before executing actions.',
+          solution: 'Playwright\'s built-in Auto-Waiting automatically polls for elements to be attached, visible, stable, and enabled before clicking or asserting.'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Playwright Navigation Test Checkpoint',
+      instructions: 'Write a Playwright test verifying that navigating to /courses displays the Web Development Masterclass card with valid badges.',
+      starterCode: 'import { test, expect } from "@playwright/test";\n// Write catalog card test',
+      solution: 'import { test, expect } from "@playwright/test";\ntest("course catalog contains Web Development Masterclass", async ({ page }) => {\n  await page.goto("/courses");\n  await expect(page.locator("h3:has-text(\'Web Development Masterclass\')")).toBeVisible();\n  await expect(page.locator("text=40 Modules")).toBeVisible();\n});'
+    }
+  },
+  {
+    id: 'web-adv-11',
+    title: '11. Full-Stack Performance Engineering, Caching & Edge Optimization',
+    summary: 'Master backend and network performance: HTTP Cache-Control, ETag validation, Redis in-memory caching, CDN edge distribution, and database connection pooling.',
+    readingTime: '26 min',
+    overview: 'High-performance web platforms sustain high traffic volumes while maintaining sub-100ms response times. Mastering multi-tier caching architectures—HTTP headers, conditional ETags, Redis in-memory caching, database connection pooling with PgBouncer, and CDN edge optimization—is essential for enterprise web engineers.',
+    learningObjectives: [
+      'Design multi-tier caching strategies across browser, CDN edge, and application cache layers',
+      'Implement conditional HTTP request caching using ETag and Last-Modified headers',
+      'Implement the Cache-Aside pattern with Redis for sub-millisecond database query acceleration',
+      'Tune database connection pools and eliminate N+1 query bottlenecks'
+    ],
+    syntaxGuide: '// Multi-Tier Caching Architecture\n// Tier 1: Browser Cache (Cache-Control: private, max-age=300)\n// Tier 2: CDN Edge Cache (Cache-Control: s-maxage=3600, stale-while-revalidate=86400)\n// Tier 3: Application In-Memory Cache (Redis Cache-Aside with TTL)\n// Tier 4: Database Buffer Pool & Connection Pooler (PgBouncer)',
+    proTips: [
+      'Always set explicit Time-To-Live (TTL) expiration on all Redis cache keys to prevent memory exhaustion from orphaned cache records.',
+      'Eliminate N+1 database queries by batching related relational queries using SQL JOINs or Prisma include/select queries.'
+    ],
+    sections: [
+      {
+        title: '1. HTTP Caching Headers: Cache-Control & Conditional ETags',
+        content: 'HTTP caching prevents redundant network round-trips. max-age defines browser cache duration; s-maxage defines shared CDN cache duration. When assets may change dynamically, servers generate an ETag (cryptographic hash of the content). Browsers send this hash back in subsequent requests via If-None-Match. If unchanged, the server returns HTTP 304 Not Modified with 0 bytes body payload.',
+        codeSnippet: '// Express ETag & Conditional 304 Not Modified Response\nimport crypto from \'crypto\';\n\napp.get(\'/api/v1/courses\', async (req, res) => {\n  const courses = await fetchCoursesFromDatabase();\n  const payload = JSON.stringify(courses);\n  \n  // Compute content hash ETag\n  const etag = crypto.createHash(\'md5\').update(payload).digest(\'hex\');\n  \n  if (req.headers[\'if-none-match\'] === etag) {\n    return res.status(304).end(); // 304 Not Modified: 0 bytes transferred\n  }\n  \n  res.setHeader(\'ETag\', etag);\n  res.setHeader(\'Cache-Control\', \'public, max-age=60, s-maxage=300\');\n  res.json(courses);\n});',
+        lineByLine: [
+          { line: 'if (req.headers[\'if-none-match\'] === etag)', explanation: 'Checks if client cached version matches active server content hash.' },
+          { line: 'return res.status(304).end();', explanation: 'Returns empty 304 status code, saving server bandwidth and client parse time.' }
+        ],
+        miniPractice: {
+          task: 'What is the difference between Cache-Control: no-cache and Cache-Control: no-store?',
+          hint: 'no-cache allows caching with revalidation; no-store forbids saving anything.',
+          solution: 'no-cache allows saving in cache but requires validating with the server (ETag) before use; no-store completely forbids writing to disk or cache memory.'
+        }
+      },
+      {
+        title: '2. Redis In-Memory Caching (Cache-Aside Pattern)',
+        content: 'Redis is an in-memory key-value data structure store delivering sub-millisecond read/write speeds. In the Cache-Aside pattern, backend services query Redis first; on a cache miss, data is read from PostgreSQL and written to Redis with an expiration TTL.',
+        codeSnippet: '// Redis Cache-Aside Implementation\n// import { createClient } from \'redis\';\n// const redis = createClient({ url: process.env.REDIS_URL });\n\nasync function getCachedCourseData(courseId) {\n  const cacheKey = `course:${courseId}`;\n  \n  // 1. Check Redis in-memory cache\n  // const cached = await redis.get(cacheKey);\n  // if (cached) return JSON.parse(cached);\n  \n  // 2. Cache Miss: Query PostgreSQL\n  // const course = await prisma.course.findUnique({ where: { id: courseId } });\n  \n  // 3. Populate Redis with 1-hour TTL (3600 seconds)\n  // if (course) await redis.setEx(cacheKey, 3600, JSON.stringify(course));\n  // return course;\n}',
+        lineByLine: [
+          { line: 'redis.setEx(cacheKey, 3600, ...)', explanation: 'Saves JSON string with automatic 3600-second expiration TTL.' }
+        ],
+        miniPractice: {
+          task: 'What happens during a "Cache Stampede" (Thundering Herd) when a heavily requested cache key expires?',
+          hint: 'Thousands of requests miss simultaneously and hit the database.',
+          solution: 'Thousands of concurrent requests experience a cache miss simultaneously and flood the database, potentially crashing it.'
+        }
+      },
+      {
+        title: '3. Resolving N+1 Database Query Bottlenecks',
+        content: 'The N+1 query problem occurs when code fetches N parent records in 1 query, then executes N separate individual queries to fetch children. For 1,000 users, this executes 1,001 database queries. Using SQL JOINs or ORM eager loading (Prisma include) resolves this in a single query.',
+        codeSnippet: '// Bad: N+1 Queries (1 query for users + 100 queries for profiles)\n// const users = await prisma.user.findMany();\n// for (const u of users) { u.profile = await prisma.profile.findUnique({ where: { userId: u.id } }); }\n\n// Optimized: Single SQL JOIN Query\n// const usersWithProfiles = await prisma.user.findMany({\n//   include: { profile: true }\n// });',
+        lineByLine: [
+          { line: 'include: { profile: true }', explanation: 'Executes a single optimized SQL JOIN query fetching users and profiles together.' }
+        ],
+        miniPractice: {
+          task: 'If an endpoint returns 50 products and executes a separate query to fetch reviews for each product, how many total queries are executed?',
+          hint: '1 initial query + 50 child queries.',
+          solution: '51 total queries (1 + 50), which is a classic N+1 bottleneck.'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Cache Wrapper Function Checkpoint',
+      instructions: 'Write a generic withCache(key, ttlSec, fetchFn) helper that queries memory cache before executing fetchFn on miss.',
+      starterCode: 'export async function withCache(key, ttl, fn) {\n  // Implement cache wrapper\n}',
+      solution: 'const memCache = new Map();\nexport async function withCache(key, ttlSec, fetchFn) {\n  const cached = memCache.get(key);\n  if (cached && Date.now() < cached.expiresAt) return cached.data;\n  const data = await fetchFn();\n  memCache.set(key, { data, expiresAt: Date.now() + (ttlSec * 1000) });\n  return data;\n}'
+    }
+  },
+  {
+    id: 'web-adv-12',
+    title: '12. Cloud Deployment, Docker Containerization & CI/CD Pipelines',
+    summary: 'Master containerization: Multi-stage Dockerfiles, Docker Compose, GitHub Actions CI/CD workflows, automated testing gates, and zero-downtime deployments.',
+    readingTime: '26 min',
+    overview: 'Containerization packages code and dependencies into portable, immutable Docker images that run identically across local development, staging clusters, and production cloud infrastructure. Mastering multi-stage Docker builds, GitHub Actions CI/CD automation, and zero-downtime deployments enables seamless shipping.',
+    learningObjectives: [
+      'Write optimized Multi-Stage Dockerfiles for Node.js and React applications',
+      'Orchestrate multi-container local environments (App, PostgreSQL, Redis) with Docker Compose',
+      'Author automated GitHub Actions CI/CD pipelines executing linting, typechecks, and tests',
+      'Implement zero-downtime deployment strategies (Blue-Green, Rolling Updates)'
+    ],
+    syntaxGuide: '# Production Multi-Stage Dockerfile for Full-Stack Node/React\n# Stage 1: Build Stage\nFROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\n# Stage 2: Minimal Production Runtime\nFROM node:20-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production\nCOPY --from=builder /app/package*.json ./\nCOPY --from=builder /app/node_modules ./node_modules\nCOPY --from=builder /app/dist ./dist\nEXPOSE 3000\nCMD ["node", "dist/server.js"]',
+    proTips: [
+      'Always use npm ci instead of npm install in Dockerfiles and CI pipelines to ensure deterministic builds strictly adhering to package-lock.json.',
+      'Never run Docker containers as root in production; create and switch to a non-privileged user (USER node).'
+    ],
+    sections: [
+      {
+        title: '1. Multi-Stage Docker Architecture',
+        content: 'A Multi-Stage Docker build divides container creation into intermediate build stages and a final slim production stage. The build stage contains heavy build tools (TypeScript, bundlers, devDependencies). The runner stage copies only compiled distribution files and production dependencies, reducing image size from 1.2GB to under 90MB and removing build tool vulnerability attack surfaces.',
+        codeSnippet: '# Production React + Vite Nginx Dockerfile\nFROM node:20-alpine AS build\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\n# Stage 2: Serve with lightweight Nginx web server\nFROM nginx:alpine\nCOPY --from=build /app/dist /usr/share/nginx/html\nCOPY nginx.conf /etc/nginx/conf.d/default.conf\nEXPOSE 80\nCMD ["nginx", "-g", "daemon off;"]',
+        lineByLine: [
+          { line: 'COPY --from=build /app/dist ...', explanation: 'Copies static HTML/CSS/JS artifacts from build stage to Nginx server root.' },
+          { line: 'FROM nginx:alpine', explanation: 'Uses ultra-minimal 20MB Alpine Linux Nginx web server image.' }
+        ],
+        miniPractice: {
+          task: 'Why should .dockerignore include node_modules and .git folders?',
+          hint: 'Prevents massive local folders from copying into the Docker build context.',
+          solution: 'Excluding node_modules and .git dramatically speeds up docker build context uploads and ensures clean npm ci inside the container.'
+        }
+      },
+      {
+        title: '2. Docker Compose for Local Multi-Service Development',
+        content: 'Docker Compose orchestrates multi-container applications (Frontend, Backend API, PostgreSQL database, Redis cache) using a single docker-compose.yml configuration file. Running docker compose up boots the entire distributed architecture with unified networking and volume persistence.',
+        codeSnippet: '# docker-compose.yml for Full-Stack Environment\nversion: \'3.8\'\nservices:\n  api:\n    build: .\n    ports:\n      - "5000:5000"\n    environment:\n      - DATABASE_URL=postgresql://user:pass@db:5432/skillora\n      - REDIS_URL=redis://cache:6379\n    depends_on:\n      - db\n      - cache\n  db:\n    image: postgres:16-alpine\n    environment:\n      POSTGRES_DB: skillora\n      POSTGRES_PASSWORD: pass\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n  cache:\n    image: redis:7-alpine\nvolumes:\n  pgdata:',
+        lineByLine: [
+          { line: 'depends_on: [db, cache]', explanation: 'Ensures database and cache containers start before the API container boots.' },
+          { line: 'volumes: [pgdata:...]', explanation: 'Persists PostgreSQL database data to host machine across container restarts.' }
+        ],
+        miniPractice: {
+          task: 'What command stops and removes all containers, networks, and volumes created by Docker Compose?',
+          hint: 'docker compose down -v.',
+          solution: 'docker compose down -v (-v removes named volumes).'
+        }
+      },
+      {
+        title: '3. GitHub Actions CI/CD Pipeline Automation',
+        content: 'GitHub Actions automates code integration and deployment workflows. When a pull request is opened, the workflow runs linting, typechecking, and automated test suites. Upon merging to main, the workflow builds the Docker image and triggers zero-downtime deployment.',
+        codeSnippet: '# .github/workflows/ci.yml\nname: Continuous Integration\non:\n  pull_request:\n    branches: [main]\njobs:\n  verify:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with: { node-version: 20, cache: \'npm\' }\n      - run: npm ci\n      - run: npm run typecheck\n      - run: npm run test:unit\n      - run: npm run build',
+        lineByLine: [
+          { line: 'uses: actions/checkout@v4', explanation: 'Clones repository code into CI runner virtual machine.' },
+          { line: 'run: npm run typecheck', explanation: 'Blocks PR merge if any TypeScript compiler errors exist.' }
+        ],
+        miniPractice: {
+          task: 'Why should CI/CD pipelines run npm run typecheck before running unit tests?',
+          hint: 'Catching syntax and type errors early saves test runner time.',
+          solution: 'Type checking is fast (<10s) and catches compile errors immediately before executing slower test suites.'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'GitHub Actions Workflow Checkpoint',
+      instructions: 'Write a GitHub Actions workflow that triggers on push to main and executes npm ci, npm run typecheck, and npx playwright test.',
+      starterCode: 'name: CI\n# Define workflow',
+      solution: 'name: CI\non: [push]\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with: { node-version: 20 }\n      - run: npm ci\n      - run: npm run typecheck\n      - run: npx playwright install --with-deps\n      - run: npx playwright test'
+    }
+  },
+  {
+    id: 'web-adv-13',
+    title: '13. System Design, Microservices & High-Availability Architecture',
+    summary: 'Master enterprise system design: Horizontal scaling, load balancing algorithms, database sharding, message queues (Kafka/RabbitMQ), and CAP theorem.',
+    readingTime: '26 min',
+    overview: 'System design is the discipline of architecting software systems capable of serving millions of concurrent users with high availability, fault tolerance, and data consistency. Mastering horizontal scaling, message brokers, caching tiers, database sharding, and the CAP theorem is essential for staff and principal engineers.',
+    learningObjectives: [
+      'Apply CAP Theorem (Consistency, Availability, Partition Tolerance) tradeoffs to system architectures',
+      'Design event-driven microservices using asynchronous message brokers (RabbitMQ / Kafka)',
+      'Implement database sharding and read-write split topologies for massive scale',
+      'Apply fault-tolerance patterns (Rate Limiting, Circuit Breaker, Bulkhead, Fallbacks)'
+    ],
+    syntaxGuide: '// CAP Theorem Architectural Tradeoffs\n// C -> Strong Consistency: Every read receives the most recent write (PostgreSQL ACID)\n// A -> High Availability: Every request receives a non-error response without guarantee of latest write\n// P -> Partition Tolerance: System continues to operate despite network packet loss between nodes\n// In distributed networks, Network Partitions (P) are inevitable; systems must choose CP or AP.',
+    proTips: [
+      'In distributed systems, design for failure from day one: assume any network call, database query, or third-party service will fail or time out.',
+      'Use asynchronous event-driven messaging (Kafka/RabbitMQ) for decoupled operations (notifications, audit logging, analytics) to keep user-facing APIs fast and resilient.'
+    ],
+    sections: [
+      {
+        title: '1. The CAP Theorem & Distributed Data Tradeoffs',
+        content: 'The CAP Theorem states that a distributed data store can simultaneously provide at most two out of three guarantees: Consistency (all nodes see the same data at the same time), Availability (every request receives a response), and Partition Tolerance (the system operates despite arbitrary message loss between network partitions). Because network partitions (P) are unavoidable in real-world distributed networks, architectures must choose between CP (Consistency over Availability) or AP (Availability over Consistency / Eventual Consistency).',
+        codeSnippet: '// Eventual Consistency vs Strong Consistency Pattern\n// CP System (Banking/Ledger): Requires quorum before confirming write\n// AP System (Social Feed/Likes): Writes locally and propagates asynchronously\n\nasync function recordUserLikeAP(postId, userId) {\n  // 1. Write to local Redis node immediately (High Availability)\n  await redis.sadd(`post:${postId}:likes`, userId);\n  \n  // 2. Publish event to message broker for background database reconciliation\n  await messageQueue.publish(\'post.liked\', { postId, userId, timestamp: Date.now() });\n  \n  return { status: \'recorded\' };\n}',
+        lineByLine: [
+          { line: 'await redis.sadd(...)', explanation: 'Writes to fast in-memory store providing instant availability.' },
+          { line: 'await messageQueue.publish(...)', explanation: 'Asynchronously reconciles persistent relational database eventually.' }
+        ],
+        miniPractice: {
+          task: 'Is a traditional single-node PostgreSQL database a CP, AP, or CA system when running without network partitions?',
+          hint: 'Single nodes have no network partitions.',
+          solution: 'A single-node database provides CA (Consistency & Availability), but once distributed across a network, it must handle partitions (P).'
+        }
+      },
+      {
+        title: '2. Asynchronous Event-Driven Architecture with Message Brokers',
+        content: 'Synchronous REST calls between microservices create fragile dependency chains where a failure in one service cascades through the system. Message brokers (RabbitMQ, Apache Kafka) decouple services by introducing persistent message queues: publishers emit domain events, and consumers process messages asynchronously at their own pace with guaranteed delivery.',
+        codeSnippet: '// Asynchronous Order Processing Worker\n// import amqp from \'amqplib\';\n\nasync function startOrderWorker() {\n  // const conn = await amqp.connect(process.env.RABBITMQ_URL);\n  // const channel = await conn.createChannel();\n  // await channel.assertQueue(\'orders_queue\', { durable: true });\n  \n  // channel.consume(\'orders_queue\', async (msg) => {\n  //   if (msg !== null) {\n  //     const order = JSON.parse(msg.content.toString());\n  //     await processOrderFulfillment(order);\n  //     channel.ack(msg); // Acknowledge message after successful processing\n  //   }\n  // });\n}',
+        lineByLine: [
+          { line: 'channel.assertQueue(\'orders_queue\', { durable: true })', explanation: 'Guarantees queue survives message broker server restarts.' },
+          { line: 'channel.ack(msg)', explanation: 'Explicit acknowledgment tells broker to delete message only after work finishes.' }
+        ],
+        miniPractice: {
+          task: 'What happens if a worker crashes before calling channel.ack(msg)?',
+          hint: 'The message broker detects worker disconnection.',
+          solution: 'The broker re-queues the message and delivers it to another healthy worker instance, ensuring zero lost orders.'
+        }
+      },
+      {
+        title: '3. Database Sharding & Read/Write Splitting',
+        content: 'When database write volume exceeds what a single high-spec server can handle, horizontal Sharding partitions rows across multiple distinct database clusters based on a Shard Key (e.g. hash(userId) % totalShards). Read/write splitting directs all SELECT queries to Read Replicas while directing INSERT/UPDATE/DELETE queries to the Primary Writer.',
+        codeSnippet: '// Read/Write Splitting Database Router Pattern\nclass DatabaseRouter {\n  constructor(primaryDb, replicaPool) {\n    this.primary = primaryDb;\n    this.replicas = replicaPool;\n  }\n  \n  query(sql, params, isWrite = false) {\n    if (isWrite) {\n      return this.primary.query(sql, params);\n    }\n    // Round-robin load balance across read replicas\n    const replica = this.replicas[Math.floor(Math.random() * this.replicas.length)];\n    return replica.query(sql, params);\n  }\n}',
+        lineByLine: [
+          { line: 'if (isWrite) return this.primary.query(...)', explanation: 'Directs all state-mutating writes to the primary database master.' },
+          { line: 'const replica = this.replicas[...]', explanation: 'Distributes read queries across read replica pool.' }
+        ],
+        miniPractice: {
+          task: 'What is "Replication Lag" in database read replicas?',
+          hint: 'Replicating data from primary to replicas takes a few milliseconds over network.',
+          solution: 'The slight delay (e.g. 5-50ms) between a write committing on the primary and synchronizing to the read replicas.'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Distributed System Rate Limiter Checkpoint',
+      instructions: 'Write a Redis-based sliding window rate limiter function isRateLimited(userId, maxRequests, windowSec).',
+      starterCode: 'export async function isRateLimited(userId, limit, window) {\n  // Implement rate limiter\n}',
+      solution: 'export async function isRateLimited(userId, maxRequests, windowSec) {\n  const now = Date.now();\n  const windowStart = now - (windowSec * 1000);\n  // In real Redis: ZREMRANGEBYSCORE key 0 windowStart -> ZADD key now now -> ZCARD key\n  return false; // Returns true if ZCARD > maxRequests\n}'
+    }
+  },
+  {
+    id: 'web-adv-14',
+    title: '14. Production Monitoring, Observability & Incident Management',
+    summary: 'Master production observability: Structured logging, OpenTelemetry tracing, Prometheus metrics, Grafana dashboards, health checks, and SRE incident response.',
+    readingTime: '26 min',
+    overview: 'Deploying software to production is only half the journey. Maintaining high availability requires end-to-end observability: structured JSON logging, distributed OpenTelemetry traces across microservices, Prometheus metric counters, alerting rules, health check probes, and blameless post-mortem incident management.',
+    learningObjectives: [
+      'Implement structured logging with correlation trace IDs across distributed services',
+      'Instrument distributed request tracing using OpenTelemetry standards',
+      'Expose Prometheus metrics (counter, gauge, histogram) and visualize them in Grafana',
+      'Configure Kubernetes / Cloud liveness and readiness health check probes'
+    ],
+    syntaxGuide: '// OpenTelemetry & Prometheus Metrics Instrumentation\nimport express from \'express\';\n// import { collectDefaultMetrics, Counter, Histogram } from \'prom-client\';\n\n// const app = express();\n// collectDefaultMetrics(); // Collects CPU, memory, event loop lag\n\n// const httpRequestsTotal = new Counter({\n//   name: \'http_requests_total\',\n//   help: \'Total number of HTTP requests\',\n//   labelNames: [\'method\', \'route\', \'status_code\']\n// });',
+    proTips: [
+      'Always separate liveness probes (/healthz/live -> process is running) from readiness probes (/healthz/ready -> database and Redis connections are established).',
+      'Always include a unique requestId / traceId in every log entry and return it in the X-Request-Id HTTP response header for debugging customer support tickets.'
+    ],
+    sections: [
+      {
+        title: '1. Structured JSON Logging & Request Correlation IDs',
+        content: 'In distributed systems handling thousands of requests per second, unstructured text logs are impossible to search. Structured JSON logging outputs machine-readable objects containing timestamp, log level, message, userId, and a unique traceId generated at the API gateway and propagated through all downstream microservice headers.',
+        codeSnippet: '// Structured Logger Middleware with Correlation ID\nimport crypto from \'crypto\';\n\nexport function requestLogger(req, res, next) {\n  const requestId = req.headers[\'x-request-id\'] || crypto.randomUUID();\n  req.requestId = requestId;\n  res.setHeader(\'X-Request-Id\', requestId);\n\n  const start = Date.now();\n  res.on(\'finish\', () => {\n    const duration = Date.now() - start;\n    const logPayload = {\n      timestamp: new Date().toISOString(),\n      level: res.statusCode >= 500 ? \'ERROR\' : \'INFO\',\n      requestId,\n      method: req.method,\n      path: req.originalUrl,\n      status: res.statusCode,\n      durationMs: duration\n    };\n    console.log(JSON.stringify(logPayload));\n  });\n  next();\n}',
+        lineByLine: [
+          { line: 'res.setHeader(\'X-Request-Id\', requestId);', explanation: 'Returns trace ID to client for bug reporting and support tickets.' },
+          { line: 'console.log(JSON.stringify(logPayload));', explanation: 'Outputs clean JSON for ingestion by Datadog, ELK, or Grafana Loki.' }
+        ],
+        miniPractice: {
+          task: 'Why is logging in JSON format preferred over template literals for cloud log aggregation systems?',
+          hint: 'Cloud log analyzers parse JSON properties automatically into searchable index fields.',
+          solution: 'Cloud log analyzers automatically parse JSON keys into indexed, filterable columns without writing complex regex extraction rules.'
+        }
+      },
+      {
+        title: '2. Prometheus Metrics: Counters, Gauges & Histograms',
+        content: 'Prometheus collects numerical metrics via HTTP scraping. There are 3 core metric types: Counters (monotonically increasing numbers, like total HTTP requests), Gauges (values that go up and down, like active WebSocket connections or memory usage), and Histograms (statistical distribution of samples, like HTTP request duration percentiles p50, p95, p99).',
+        codeSnippet: '// Prometheus Histogram for API Latency Tracking\n// const httpRequestDurationSeconds = new Histogram({\n//   name: \'http_request_duration_seconds\',\n//   help: \'Duration of HTTP requests in seconds\',\n//   labelNames: [\'method\', \'route\', \'status_code\'],\n//   buckets: [0.01, 0.05, 0.1, 0.3, 0.5, 1, 2, 5] // Latency buckets\n// });\n\n// app.get(\'/metrics\', async (req, res) => {\n//   res.set(\'Content-Type\', register.contentType);\n//   res.end(await register.metrics());\n// });',
+        lineByLine: [
+          { line: 'buckets: [0.01, 0.05, ...]', explanation: 'Defines latency boundaries to measure p95 and p99 response times.' }
+        ],
+        miniPractice: {
+          task: 'What metric type is appropriate for tracking the number of active users currently connected to a WebSocket server?',
+          hint: 'The count fluctuates up and down.',
+          solution: 'A Gauge (e.g. active_websocket_connections).'
+        }
+      },
+      {
+        title: '3. Health Check Probes: Liveness vs Readiness',
+        content: 'Orchestration platforms (Kubernetes, Docker Swarm, AWS ECS) use health probes to automate failure recovery. A Liveness Probe (/healthz/live) checks if the Node.js process is responsive (if failing, the container is restarted). A Readiness Probe (/healthz/ready) checks if downstream dependencies (database, Redis) are reachable (if failing, traffic is temporarily routed away without restarting).',
+        codeSnippet: '// Production Health Check Endpoints\napp.get(\'/healthz/live\', (req, res) => {\n  res.status(200).json({ status: \'alive\' }); // Process is running\n});\n\napp.get(\'/healthz/ready\', async (req, res) => {\n  try {\n    // Check PostgreSQL connection\n    // await prisma.$queryRaw`SELECT 1`;\n    // Check Redis connection\n    // await redis.ping();\n    res.status(200).json({ status: \'ready\', db: \'connected\', cache: \'connected\' });\n  } catch (err) {\n    res.status(503).json({ status: \'unhealthy\', error: err.message });\n  }\n});',
+        lineByLine: [
+          { line: 'app.get(\'/healthz/live\', ...)', explanation: 'Liveness endpoint confirming event loop is responsive.' },
+          { line: 'app.get(\'/healthz/ready\', ...)', explanation: 'Readiness endpoint verifying database and cache socket health.' }
+        ],
+        miniPractice: {
+          task: 'What happens if a database goes down temporarily and your application only has a liveness probe that checks the database?',
+          hint: 'The orchestrator will restart the healthy application container continuously.',
+          solution: 'Kubernetes will enter a crash loop restarting the app container repeatedly, even though the issue is the database, worsening the outage.'
+        }
+      }
+    ],
+    practiceExercise: {
+      title: 'Health Check Route Handler Checkpoint',
+      instructions: 'Write an Express health check router providing /live and /ready endpoints with database connectivity simulation.',
+      starterCode: 'import { Router } from "express";\nconst router = Router();\n// Implement health check router',
+      solution: 'import { Router } from "express";\nconst router = Router();\nrouter.get("/live", (req, res) => res.json({ status: "alive" }));\nrouter.get("/ready", (req, res) => {\n  const dbOk = true;\n  if (dbOk) return res.json({ status: "ready" });\n  res.status(503).json({ status: "degraded" });\n});\nexport default router;'
+    }
+  }
+];
+
+// Capstone Projects: Advanced Level (2 Projects)
+const ADVANCED_PROJECT_01 = {
+  id: 'web-adv-project-ecommerce',
+  title: '15. Advanced Capstone Project 1: Enterprise Full-Stack E-Commerce & Inventory Management Platform',
+  description: 'Architect, engineer, and deploy an enterprise-grade full-stack e-commerce platform using React, TypeScript, Node.js, Express, PostgreSQL, Prisma ORM, JWT authentication with refresh token rotation, Stripe mock payment processing, and ACID transactional inventory reservations.',
+  duration: '8-10 hours',
+  orderIndex: 15,
+  status: 'locked',
+  isProject: true,
+  type: 'project',
+  xpReward: 600,
+  projectDetails: {
+    title: 'Advanced Capstone Project 1: Enterprise Full-Stack E-Commerce & Inventory Management Platform',
+    overview: 'Architect, engineer, and deploy an enterprise-grade full-stack e-commerce platform using React, TypeScript, Node.js, Express, PostgreSQL, Prisma ORM, JWT authentication with refresh token rotation, Stripe mock payment processing, and ACID transactional inventory reservations.',
+    learningObjectives: [
+      'Architect a full-stack system with separate frontend client, backend REST API, and PostgreSQL database',
+      'Implement secure authentication with bcrypt, HTTP-Only cookies, and Refresh Token Rotation',
+      'Design relational schemas with Prisma ORM and execute atomic ACID transactions for orders',
+      'Deploy the full-stack system using Docker containers and automated GitHub Actions CI/CD'
+    ],
+    requirements: [
+      'Complete React + TypeScript frontend with Tailwind CSS and TanStack Query data layer',
+      'Express.js backend with TypeScript, structured routers, and centralized error handling',
+      'PostgreSQL database modeled with Prisma ORM with users, products, orders, and order_items tables',
+      'Authentication system with bcrypt password hashing and HTTP-Only JWT cookies',
+      'Role-Based Access Control (Customer vs Store Admin) with protected API endpoints',
+      'ACID transactional checkout reserving product stock and creating order records atomically',
+      'Admin dashboard with inventory management, product creation, and sales metrics',
+      'Automated integration tests with Supertest and E2E verification with Playwright',
+      'Multi-stage Dockerfile and docker-compose.yml orchestrating app, database, and Redis cache',
+      'Live deployment on Cloud / Vercel / Railway with verified 95+ Lighthouse score'
+    ],
+    deliverables: [
+      {
+        id: 'deliv-adv1-01',
+        title: 'System Architecture & Database Schema Design',
+        description: 'Comprehensive system architecture blueprint and relational entity-relationship diagram (ERD) defining tables, foreign keys, and indexes.',
+        criteria: ['System architecture diagram', 'Prisma schema file', 'Relational ERD documentation'],
+        expectedOutput: 'Technical architecture manifesto and schema.prisma model.'
+      },
+      {
+        id: 'deliv-adv1-02',
+        title: 'Authentication Engine with Refresh Token Rotation',
+        description: 'Full authentication service implementing bcrypt password hashing, short-lived JWT access tokens, and HTTP-Only refresh token rotation cookies.',
+        criteria: ['bcrypt hashing with 12 rounds', 'HTTP-Only cookie configuration', 'Refresh token rotation security'],
+        expectedOutput: 'Secure authentication controller and middleware pipeline.'
+      },
+      {
+        id: 'deliv-adv1-03',
+        title: 'RESTful Product & Catalog Management API',
+        description: 'Express REST endpoints for catalog browsing, category filtering, search pagination, and admin product CRUD operations.',
+        criteria: ['Search and pagination parameters', 'Zod request validation', 'Admin RBAC authorization'],
+        expectedOutput: 'Product catalog router with validation middleware.'
+      },
+      {
+        id: 'deliv-adv1-04',
+        title: 'ACID Transactional Checkout & Inventory Reservation',
+        description: 'Checkout engine executing database transactions with row-level locks, stock availability checks, and order record generation.',
+        criteria: ['Prisma $transaction implementation', 'Stock decrement verification', 'Atomic rollback on error'],
+        expectedOutput: 'Transactional order processing controller.'
+      },
+      {
+        id: 'deliv-adv1-05',
+        title: 'React Client Application with TanStack Query',
+        description: 'Responsive React 18+ SPA featuring product catalog, shopping cart with optimistic quantity updates, and checkout workflow.',
+        criteria: ['TanStack Query caching', 'Optimistic cart mutations', 'Responsive Tailwind UI'],
+        expectedOutput: 'Frontend customer storefront client.'
+      },
+      {
+        id: 'deliv-adv1-06',
+        title: 'Store Administrator Analytics Dashboard',
+        description: 'Protected admin portal displaying inventory stock alerts, total revenue statistics, and recent order statuses.',
+        criteria: ['Admin route guard', 'Inventory stock status badges', 'Sales summary calculations'],
+        expectedOutput: 'Admin dashboard view with management tools.'
+      },
+      {
+        id: 'deliv-adv1-07',
+        title: 'Automated Integration & E2E Test Suite',
+        description: 'Automated test suite combining Supertest API integration tests with Playwright end-to-end shopping and checkout tests.',
+        criteria: ['Supertest API test coverage', 'Playwright E2E customer journey', '100% test pass rate'],
+        expectedOutput: 'Automated test suite passing in CI.'
+      },
+      {
+        id: 'deliv-adv1-08',
+        title: 'Multi-Stage Production Docker Configuration',
+        description: 'Optimized multi-stage Dockerfile and docker-compose.yml orchestrating frontend, backend, PostgreSQL, and Redis.',
+        criteria: ['Multi-stage build optimization', 'Docker Compose service health checks', 'Non-root user security'],
+        expectedOutput: 'Docker deployment configuration.'
+      },
+      {
+        id: 'deliv-adv1-09',
+        title: 'GitHub Actions CI/CD Pipeline',
+        description: 'Automated CI/CD workflow executing linting, typechecks, automated tests, and Docker image build on every pull request.',
+        criteria: ['Automated PR gates', 'Test execution reporting', 'Zero-error build verification'],
+        expectedOutput: '.github/workflows/ci.yml configuration.'
+      },
+      {
+        id: 'deliv-adv1-10',
+        title: 'Production Cloud Deployment & Documentation',
+        description: 'Live production deployment with HTTPS, verified database migrations, and comprehensive README documentation.',
+        criteria: ['Live public deployment URL', 'README with API documentation', 'Zero production console errors'],
+        expectedOutput: 'Production deployment URL and documentation.'
+      }
+    ],
+    evaluationRubric: [
+      { category: 'Architecture & Full-Stack Design', weight: '25%', criteria: 'Clean separation of client, server, and database; strict TypeScript typing.' },
+      { category: 'Security & Authentication', weight: '25%', criteria: 'bcrypt hashing, HTTP-Only cookies, token rotation, RBAC protection, input validation.' },
+      { category: 'Database & Transaction Integrity', weight: '25%', criteria: 'Relational schema design, Prisma ACID transactions, stock concurrency handling.' },
+      { category: 'DevOps, Testing & Quality', weight: '25%', criteria: 'Docker containerization, Playwright tests, CI/CD pipeline, production deployment.' }
+    ]
+  }
+};
+
+const ADVANCED_PROJECT_02 = {
+  id: 'web-adv-project-workspace',
+  title: '16. Advanced Capstone Project 2: High-Scale Cloud Collaborative Workspace with Microservices & CI/CD',
+  description: 'Design, architect, and deploy a distributed collaborative workspace application (similar to Notion/Slack) featuring real-time WebSockets/SSE, Redis Pub/Sub message broadcasting, OpenTelemetry distributed tracing, Prometheus monitoring, and containerized microservices deployment.',
+  duration: '8-10 hours',
+  orderIndex: 16,
+  status: 'locked',
+  isProject: true,
+  type: 'project',
+  xpReward: 650,
+  projectDetails: {
+    title: 'Advanced Capstone Project 2: High-Scale Cloud Collaborative Workspace with Microservices & CI/CD',
+    overview: 'Design, architect, and deploy a distributed collaborative workspace application (similar to Notion/Slack) featuring real-time WebSockets/SSE, Redis Pub/Sub message broadcasting, OpenTelemetry distributed tracing, Prometheus monitoring, and containerized microservices deployment.',
+    learningObjectives: [
+      'Architect an event-driven distributed system with real-time WebSocket communication and Redis Pub/Sub',
+      'Implement distributed rate limiting, circuit breaker fault tolerance, and message queues',
+      'Instrument full-stack observability with OpenTelemetry, Prometheus metrics, and structured logging',
+      'Deploy the system to cloud infrastructure with automated CI/CD and zero-downtime releases'
+    ],
+    requirements: [
+      'Real-time collaborative canvas / document editor with WebSocket synchronization',
+      'Redis Pub/Sub cluster broadcasting events across multiple backend server instances',
+      'Distributed rate limiting using Token Bucket algorithm with Redis in-memory storage',
+      'Circuit breaker fault tolerance on external microservice calls with fallback states',
+      'OpenTelemetry distributed tracing propagating correlation IDs across services',
+      'Prometheus /metrics endpoint exposing request counters, memory gauges, and latency histograms',
+      'Structured JSON logging with request duration and user contextual metadata',
+      'Kubernetes / Docker health check endpoints (/healthz/live and /healthz/ready)',
+      'Automated Playwright E2E tests verifying multi-user real-time collaboration',
+      'Cloud deployment with zero-downtime rolling update strategy and monitoring dashboard'
+    ],
+    deliverables: [
+      {
+        id: 'deliv-adv2-01',
+        title: 'Distributed System Design & Scalability Blueprint',
+        description: 'Comprehensive system architecture diagram detailing WebSocket gateway, Redis Pub/Sub message bus, and database sharding strategy.',
+        criteria: ['System design diagram', 'Microservices communication mapping', 'Scalability capacity projections'],
+        expectedOutput: 'Enterprise system design specification document.'
+      },
+      {
+        id: 'deliv-adv2-02',
+        title: 'Real-Time WebSocket Gateway with Redis Pub/Sub',
+        description: 'WebSocket gateway server handling real-time document collaboration and synchronizing messages across multiple backend instances via Redis Pub/Sub.',
+        criteria: ['WebSocket connection lifecycle', 'Redis Pub/Sub event broadcasting', 'Automatic reconnection handling'],
+        expectedOutput: 'Real-time WebSocket and Redis messaging service.'
+      },
+      {
+        id: 'deliv-adv2-03',
+        title: 'Distributed Rate Limiter & Token Bucket Engine',
+        description: 'High-throughput rate limiter middleware using Redis token buckets protecting API endpoints from abuse and DDoS attacks.',
+        criteria: ['Token bucket algorithm in Redis', 'HTTP 429 Too Many Requests response', 'Configurable tier limits'],
+        expectedOutput: 'Redis rate limiting middleware.'
+      },
+      {
+        id: 'deliv-adv2-04',
+        title: 'Circuit Breaker Fault Tolerance Module',
+        description: 'Circuit breaker implementation (Closed, Open, Half-Open) wrapping third-party API dependencies with fallback responses.',
+        criteria: ['Failure threshold detection', 'Automatic Half-Open recovery probe', 'Graceful fallback execution'],
+        expectedOutput: 'Circuit breaker reliability module.'
+      },
+      {
+        id: 'deliv-adv2-05',
+        title: 'Full Observability Suite: OpenTelemetry & Structured Logs',
+        description: 'Structured JSON logger and OpenTelemetry trace propagation attaching correlation IDs to all requests, logs, and outbound calls.',
+        criteria: ['JSON structured log output', 'Correlation ID propagation', 'Trace header injection'],
+        expectedOutput: 'Observability and logging subsystem.'
+      },
+      {
+        id: 'deliv-adv2-06',
+        title: 'Prometheus Metrics & Health Check Probes',
+        description: 'Prometheus /metrics endpoint exposing request histograms and gauges, accompanied by /healthz/live and /healthz/ready probes.',
+        criteria: ['Prometheus metric scrapers', 'Liveness and Readiness probes', 'Memory and event loop monitoring'],
+        expectedOutput: 'Metrics endpoint and health check service.'
+      },
+      {
+        id: 'deliv-adv2-07',
+        title: 'Collaborative Workspace React Frontend',
+        description: 'React client featuring live collaborative cursor indicators, document editing, and real-time activity feed.',
+        criteria: ['WebSocket hook integration', 'Live cursor presence indicators', 'Optimistic local editing'],
+        expectedOutput: 'Collaborative frontend workspace UI.'
+      },
+      {
+        id: 'deliv-adv2-08',
+        title: 'Playwright Multi-User E2E Collaboration Suite',
+        description: 'Playwright test suite opening two concurrent browser contexts to verify real-time message sync between separate users.',
+        criteria: ['Multi-browser context testing', 'Real-time synchronization assertion', 'Zero flaky failures'],
+        expectedOutput: 'Multi-user Playwright E2E test suite.'
+      },
+      {
+        id: 'deliv-adv2-09',
+        title: 'Docker Compose & Kubernetes Deployment Manifests',
+        description: 'Container manifests and Kubernetes deployment/service YAML configurations with resource limits and health probes.',
+        criteria: ['Kubernetes deployment YAML', 'Resource limits and requests', 'Liveness and readiness probe configs'],
+        expectedOutput: 'Container and orchestration manifests.'
+      },
+      {
+        id: 'deliv-adv2-10',
+        title: 'Production Release & SRE Operational Playbook',
+        description: 'Live cloud deployment with zero-downtime rolling updates and SRE incident response runbook with SLA/SLO metrics.',
+        criteria: ['Live production deployment', 'SRE incident runbook', 'Grafana dashboard specification'],
+        expectedOutput: 'Production deployment and SRE operational playbook.'
+      }
+    ],
+    evaluationRubric: [
+      { category: 'Distributed System & Real-Time Engineering', weight: '25%', criteria: 'WebSocket gateway, Redis Pub/Sub broadcasting, distributed architecture.' },
+      { category: 'Reliability & Fault Tolerance', weight: '25%', criteria: 'Circuit breaker, Redis rate limiter, error recovery, backpressure handling.' },
+      { category: 'Observability & Monitoring', weight: '25%', criteria: 'Prometheus metrics, structured JSON logs, OpenTelemetry tracing, health probes.' },
+      { category: 'DevOps & E2E Verification', weight: '25%', criteria: 'Multi-user Playwright tests, Docker/Kubernetes manifests, SRE runbook.' }
+    ]
+  }
+};
+
+// Assessment Task
+const ADVANCED_ASSESSMENT_TASK = {
+  id: 'web-adv-assessment',
+  title: '17. Level 3 Final Assessment: Full-Stack Architecture, TypeScript & System Design',
+  description: 'Official 40-question master examination testing full-stack Node.js/Express architecture, PostgreSQL database design, Redis caching, Docker containerization, microservices, and distributed systems. Score at least 35/40 (87.5%) to earn the Master Full-Stack Web Developer Certificate.',
+  duration: '60 min',
+  orderIndex: 17,
+  status: 'locked',
+  isProject: false,
+  isFinalAssessment: true,
+  type: 'assessment',
+  xpReward: 600,
+  passingScore: 35,
+  totalQuestions: 40,
+  questions: ADVANCED_ASSESSMENT
+};
+
+// Assemble all 17 tasks for Advanced
+const ALL_ADVANCED_TASKS = [
+  ...ADVANCED_MODULES_RAW.map((mod, idx) => ({
+    id: mod.id,
+    orderIndex: idx + 1,
+    title: mod.title,
+    description: mod.summary || 'Advanced theory module covering full-stack Node.js, Express, PostgreSQL, Docker, microservices, and distributed cloud system design.',
+    duration: mod.readingTime || '40 mins',
+    level: 'advanced',
+    status: 'locked',
+    isProject: false,
+    requiresQuiz: false,
+    type: 'theory',
+    xpReward: 150,
+    lessonContent: {
+      overview: mod.overview,
+      objectives: mod.learningObjectives || [],
+      estimatedTime: mod.readingTime || '40 mins',
+      sections: (mod.sections || []).map(s => ({
+        title: s.title,
+        content: s.content,
+        codeSnippets: s.codeSnippet ? [{
+          language: 'typescript',
+          code: s.codeSnippet,
+          explanation: s.content,
+          lineByLine: s.lineByLine || []
+        }] : [],
+        miniPractice: s.miniPractice ? {
+          question: s.miniPractice.task,
+          options: ['Option A', 'Option B', 'Option C', 'Option D'],
+          correctAnswer: 0,
+          explanation: s.miniPractice.solution || ''
+        } : undefined,
+        commonMistakes: mod.commonMistakes ? [mod.commonMistakes.mistake] : undefined
+      })),
+      keyTakeaways: [
+        ...(mod.keyTakeaways || []),
+        ...(mod.proTips || []),
+        'Design scalable, resilient distributed systems with robust fault tolerance.',
+        'Maintain ACID transaction guarantees and secure authorization at API boundaries.'
+      ].slice(0, Math.max(3, (mod.keyTakeaways || mod.proTips || []).length)),
+      summary: mod.summary,
+      syntaxGuide: mod.syntaxGuide,
+      practiceExercises: mod.practiceExercise ? [{
+        title: mod.practiceExercise.title,
+        instructions: mod.practiceExercise.instructions,
+        starterCode: mod.practiceExercise.starterCode,
+        solutionCode: mod.practiceExercise.solution
+      }] : []
+    }
+  })),
+  ADVANCED_PROJECT_01,
+  ADVANCED_PROJECT_02,
+  ADVANCED_ASSESSMENT_TASK
+];
+
+// Write file
+const fileContent = `// Web Development Masterclass — Level 3: Advanced Data
+// Auto-generated by build_web_dev_advanced.cjs
+
+import { Task, QuizQuestion } from '../../types/roadmap.types';
+
+export const WEB_DEV_ADVANCED_ASSESSMENT: QuizQuestion[] = ${JSON.stringify(ADVANCED_ASSESSMENT, null, 2)};
+
+export const WEB_DEV_ADVANCED_TASKS: Task[] = ${JSON.stringify(ALL_ADVANCED_TASKS, null, 2)};
+`;
+
+fs.writeFileSync(targetFile, fileContent, 'utf8');
+console.log(`✅ Successfully generated Advanced data at ${targetFile} (${ALL_ADVANCED_TASKS.length} tasks, ${ADVANCED_ASSESSMENT.length} MCQs)`);

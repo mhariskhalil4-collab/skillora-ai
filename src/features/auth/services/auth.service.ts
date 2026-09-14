@@ -72,10 +72,44 @@ export const AuthService = {
     };
   },
 
-  resetPassword: async (email: string): Promise<{ message: string }> => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+  resetPassword: async (email: string, redirectTo?: string): Promise<{ message: string }> => {
+    const redirectUrl = redirectTo || `${window.location.origin}/auth/reset-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl,
+    });
     if (error) throw new Error(error.message);
-    return { message: `Reset link sent to ${email}` };
+    return { message: `If an account exists for this email, you will receive password reset instructions.` };
+  },
+
+  updatePassword: async (password: string): Promise<{ message: string }> => {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw new Error(error.message);
+    return { message: 'Password has been updated successfully.' };
+  },
+
+  deleteAccount: async (): Promise<void> => {
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData.user) {
+      throw new Error('No authenticated user session found.');
+    }
+
+    // Call secure PostgreSQL RPC function
+    const { error } = await supabase.rpc('delete_user_account');
+    if (error) {
+      console.error('[AuthService] Error executing delete_user_account RPC:', error);
+      throw new Error(error.message || 'Failed to delete account. Please try again.');
+    }
+
+    // Clear local storage data caches
+    try {
+      localStorage.removeItem('skillora_user_profile');
+      localStorage.removeItem('skillora_user_projects');
+      localStorage.removeItem('skillora_active_roadmap');
+      localStorage.removeItem('skillora_portfolio_settings');
+    } catch (_) {}
+
+    // Sign out from Supabase Auth session
+    await supabase.auth.signOut();
   },
 
   logout: async (): Promise<void> => {
@@ -83,3 +117,4 @@ export const AuthService = {
     if (error) throw new Error(error.message);
   },
 };
+

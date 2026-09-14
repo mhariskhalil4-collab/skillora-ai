@@ -18,6 +18,7 @@ import {
   MapIcon,
 } from '@heroicons/react/24/solid';
 import { cn } from '@/utils/cn';
+import { sanitizeUrl } from '@/utils/url.utils';
 
 export const PublicPortfolioScreen: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -232,19 +233,23 @@ export const PublicPortfolioScreen: React.FC = () => {
                 </p>
               )}
 
-              {profile.resumeUrl && (
-                <div className="pt-2">
-                  <a
-                    href={profile.resumeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-heading font-medium text-white transition-all"
-                  >
-                    <DocumentArrowDownIcon className="w-4 h-4 text-[#635BFF]" />
-                    View &amp; Download Resume
-                  </a>
-                </div>
-              )}
+              {(() => {
+                const safeResumeUrl = sanitizeUrl(profile.resumeUrl, ['http:', 'https:']);
+                if (!safeResumeUrl) return null;
+                return (
+                  <div className="pt-2">
+                    <a
+                      href={safeResumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-heading font-medium text-white transition-all"
+                    >
+                      <DocumentArrowDownIcon className="w-4 h-4 text-[#635BFF]" />
+                      View &amp; Download Resume
+                    </a>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
@@ -318,59 +323,62 @@ export const PublicPortfolioScreen: React.FC = () => {
 
           {projects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {projects.map((project) => (
-                <div
-                  key={project.id}
-                  className="group relative flex flex-col justify-between rounded-2xl bg-gradient-to-b from-white/[0.05] to-transparent border border-white/10 hover:border-[#635BFF]/60 p-6 transition-all duration-300 hover:shadow-[0_4px_24px_rgba(99,91,255,0.15)]"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-lg font-heading font-bold text-white group-hover:text-[#635BFF] transition-colors">
-                        {project.title}
-                      </h3>
-                      {project.url && (
+              {projects.map((project) => {
+                const safeUrl = sanitizeUrl(project.url, ['http:', 'https:']);
+                return (
+                  <div
+                    key={project.id}
+                    className="group relative flex flex-col justify-between rounded-2xl bg-gradient-to-b from-white/[0.05] to-transparent border border-white/10 hover:border-[#635BFF]/60 p-6 transition-all duration-300 hover:shadow-[0_4px_24px_rgba(99,91,255,0.15)]"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <h3 className="text-lg font-heading font-bold text-white group-hover:text-[#635BFF] transition-colors">
+                          {project.title}
+                        </h3>
+                        {safeUrl && (
+                          <a
+                            href={safeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Open project in new tab"
+                            className="p-2 rounded-lg bg-white/5 hover:bg-[#635BFF]/20 border border-white/10 hover:border-[#635BFF]/40 text-[#635BFF] transition-all flex-shrink-0"
+                          >
+                            <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                          </a>
+                        )}
+                      </div>
+
+                      <p className="text-sm text-[#8A85B8] leading-relaxed line-clamp-4">
+                        {project.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-white/5 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex flex-wrap gap-1.5">
+                        {project.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="px-2.5 py-1 rounded-lg bg-[#635BFF]/10 text-[#635BFF] border border-[#635BFF]/20 text-[11px] font-mono font-medium"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      {safeUrl && (
                         <a
-                          href={project.url}
+                          href={safeUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          title="Open project in new tab"
-                          className="p-2 rounded-lg bg-white/5 hover:bg-[#635BFF]/20 border border-white/10 hover:border-[#635BFF]/40 text-[#635BFF] transition-all flex-shrink-0"
+                          className="inline-flex items-center gap-1 text-xs font-heading font-semibold text-[#00F0FF] hover:underline"
                         >
-                          <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                          <GlobeAltIcon className="w-3.5 h-3.5" /> View Project
                         </a>
                       )}
                     </div>
-
-                    <p className="text-sm text-[#8A85B8] leading-relaxed line-clamp-4">
-                      {project.description}
-                    </p>
                   </div>
-
-                  <div className="mt-6 pt-4 border-t border-white/5 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex flex-wrap gap-1.5">
-                      {project.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2.5 py-1 rounded-lg bg-[#635BFF]/10 text-[#635BFF] border border-[#635BFF]/20 text-[11px] font-mono font-medium"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    {project.url && (
-                      <a
-                        href={project.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-heading font-semibold text-[#00F0FF] hover:underline"
-                      >
-                        <GlobeAltIcon className="w-3.5 h-3.5" /> View Project
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12 px-6 rounded-2xl bg-white/[0.02] border border-dashed border-white/10 text-[#8A85B8] space-y-2">

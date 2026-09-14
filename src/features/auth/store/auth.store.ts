@@ -64,7 +64,7 @@ export const initAuthListener = () => {
         firstName: session.user.user_metadata?.full_name,
         role: session.user.user_metadata?.role,
       });
-    } else {
+    } else if (_event === 'SIGNED_OUT') {
       useAuthStore.setState({ token: null, user: null, isAuthenticated: false });
     }
   });

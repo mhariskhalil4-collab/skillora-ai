@@ -2,6 +2,8 @@ import { supabase } from '@/lib/supabase';
 import { Roadmap, Task, Resource } from '../types/roadmap.types';
 import { OnboardingData } from '@/features/onboarding/schemas/onboarding.schemas';
 import { useAuthStore } from '@/features/auth/store/auth.store';
+import { PYTHON_BEGINNER_TASKS } from '../data/python';
+import { CertificateService } from '@/features/certificate/certificate.service';
 
 const LOCAL_STORAGE_ROADMAP_KEY = 'skillora_active_roadmap';
 
@@ -59,7 +61,6 @@ export const RoadmapService = {
         for (const r of roadmaps) {
           if ((r.status === 'completed' || (r.progress_percentage ?? 0) >= 100) && effectiveUserId) {
             try {
-              const { CertificateService } = await import('@/features/certificate/certificate.service');
               await CertificateService.getOrCreateCertificate(effectiveUserId, r.title);
             } catch (certErr) {
               console.warn('[RoadmapService] Certificate auto-verification check note:', certErr);
@@ -93,14 +94,41 @@ export const RoadmapService = {
             })),
           }));
 
+          // SELF-HEALING: If no task is 'in_progress' and not all tasks are completed,
+          // unlock the first uncompleted task!
+          const hasInProgress = formattedTasks.some((t) => t.status === 'in_progress');
+          const firstUncompleted = formattedTasks.find((t) => t.status !== 'completed');
+          if (!hasInProgress && firstUncompleted) {
+            firstUncompleted.status = 'in_progress';
+            if (effectiveUserId && !firstUncompleted.id.startsWith('tsk_guest_')) {
+              supabase
+                .from('tasks')
+                .update({ status: 'in_progress' })
+                .eq('id', firstUncompleted.id)
+                .then(({ error: patchErr }) => {
+                  if (patchErr) {
+                    console.warn('[RoadmapService] Self-healing task unlock warning:', patchErr);
+                  } else {
+                    console.log('[RoadmapService] Self-healed locked task to in_progress:', firstUncompleted.id, firstUncompleted.title);
+                  }
+                });
+            }
+          }
+
+          // Calculate correct progress_percentage based on completed tasks count
+          const completedCount = formattedTasks.filter((t) => t.status === 'completed').length;
+          const calculatedProgress = formattedTasks.length > 0 
+            ? Math.round((completedCount / formattedTasks.length) * 100)
+            : 0;
+
           const activeRoadmap: Roadmap = {
             id: activeRoadmapRow.id,
             title: activeRoadmapRow.title,
-            progressPercentage: activeRoadmapRow.progress_percentage || 0,
+            progressPercentage: calculatedProgress,
             tasks: formattedTasks,
           };
 
-          console.log('[RoadmapService] Successfully loaded active roadmap from Supabase:', activeRoadmap.title, `(${activeRoadmap.tasks.length} tasks)`);
+          console.log('[RoadmapService] Successfully loaded active roadmap from Supabase:', activeRoadmap.title, `(${activeRoadmap.tasks.length} tasks, ${activeRoadmap.progressPercentage}% progress)`);
 
           // Cache latest active roadmap into localStorage
           try {
@@ -132,11 +160,17 @@ export const RoadmapService = {
                 } catch (_) {}
                 return null;
               }
-              return migratedRoadmap;
+              return migratedRoadmap || guestRoadmap;
             }
           }
         } catch (migrationErr) {
           console.error('[RoadmapService] Error migrating guest roadmap to Supabase:', migrationErr);
+          const stored = localStorage.getItem(LOCAL_STORAGE_ROADMAP_KEY);
+          if (stored) {
+            try {
+              return JSON.parse(stored);
+            } catch (_) {}
+          }
         }
       }
     }
@@ -150,6 +184,19 @@ export const RoadmapService = {
           console.log('[RoadmapService] Guest roadmap in localStorage is 100% complete. Returning null for active roadmap.');
           return null;
         }
+
+        if (Array.isArray(parsed.tasks) && parsed.tasks.length > 0) {
+          parsed.tasks.sort((a, b) => a.orderIndex - b.orderIndex);
+          const hasInProgress = parsed.tasks.some((t) => t.status === 'in_progress');
+          const firstUncompleted = parsed.tasks.find((t) => t.status !== 'completed');
+          if (!hasInProgress && firstUncompleted) {
+            firstUncompleted.status = 'in_progress';
+            localStorage.setItem(LOCAL_STORAGE_ROADMAP_KEY, JSON.stringify(parsed));
+          }
+          const completedCount = parsed.tasks.filter((t) => t.status === 'completed').length;
+          parsed.progressPercentage = Math.round((completedCount / parsed.tasks.length) * 100);
+        }
+
         console.log('[RoadmapService] Loaded active roadmap from local storage:', parsed.title);
         return parsed;
       }
@@ -179,29 +226,26 @@ export const RoadmapService = {
       await supabase.from('profiles').insert({ id: userId });
     }
 
-    // 2. Create Goal record (goals: user_id, target_role, is_active)
-    const isFullyCompleted =
-      guestRoadmap.progressPercentage === 100 ||
-      (guestRoadmap.tasks.length > 0 && guestRoadmap.tasks.every((t) => t.status === 'completed'));
-    const progressPercentage = isFullyCompleted ? 100 : (guestRoadmap.progressPercentage || 0);
-
-    console.log('[RoadmapService] Migration: Creating Goal record...');
+    // 2. Create Goal record (goals: user_id, target_role, is_active, current_skills)
     const { data: goalData, error: goalError } = await supabase
       .from('goals')
       .insert({
         user_id: userId,
         target_role: guestRoadmap.title,
-        is_active: !isFullyCompleted,
+        is_active: true,
+        current_skills: [],
       })
       .select('id')
       .single();
 
     if (goalError) {
-      console.warn('[RoadmapService] Migration Goal insert note:', goalError.message);
+      console.warn('[RoadmapService] Goal migration warning:', goalError);
     }
 
     // 3. Create Roadmap record (roadmaps: user_id, goal_id, title, progress_percentage, status)
-    console.log('[RoadmapService] Migration: Creating Roadmap record...');
+    const progressPercentage = guestRoadmap.progressPercentage || 0;
+    const isFullyCompleted = progressPercentage >= 100;
+
     const { data: roadmapData, error: roadmapError } = await supabase
       .from('roadmaps')
       .insert({
@@ -233,6 +277,13 @@ export const RoadmapService = {
       xp_reward: task.xpReward || 50,
     }));
 
+    // Ensure at least one task is in_progress if roadmap is not fully completed
+    const hasAnyInProgress = tasksPayload.some((t) => t.status === 'in_progress');
+    const firstPending = tasksPayload.find((t) => t.status !== 'completed');
+    if (!hasAnyInProgress && firstPending) {
+      firstPending.status = 'in_progress';
+    }
+
     const { data: insertedTasks, error: tasksError } = await supabase
       .from('tasks')
       .insert(tasksPayload)
@@ -243,19 +294,19 @@ export const RoadmapService = {
       throw new Error(`Failed to migrate roadmap tasks: ${tasksError?.message || 'Unknown tasks error'}`);
     }
 
+    console.log('[RoadmapService] Migration: Inserted tasks count:', insertedTasks.length);
+
     // 5. Insert Resources (resources: task_id, title, type, url, duration - NO user_id)
-    console.log('[RoadmapService] Migration: Seeding Resources...');
     const resourcesPayload: any[] = [];
-    guestRoadmap.tasks.forEach((guestTask, idx) => {
-      const targetOrder = guestTask.orderIndex || (idx + 1);
-      const matchedInsertedTask = insertedTasks.find((t) => t.order_index === targetOrder);
-      if (matchedInsertedTask && Array.isArray(guestTask.resources) && guestTask.resources.length > 0) {
-        guestTask.resources.forEach((r) => {
+    guestRoadmap.tasks.forEach((task) => {
+      const matchedInsertedTask = insertedTasks.find((t) => t.order_index === task.orderIndex);
+      if (matchedInsertedTask && Array.isArray(task.resources) && task.resources.length > 0) {
+        task.resources.forEach((r) => {
           resourcesPayload.push({
             task_id: matchedInsertedTask.id,
-            title: r.title || 'Learning Resource',
-            type: r.type || 'documentation',
-            url: r.url || 'https://developer.mozilla.org',
+            title: r.title,
+            type: r.type,
+            url: r.url,
             duration: r.duration || null,
           });
         });
@@ -263,73 +314,38 @@ export const RoadmapService = {
     });
 
     if (resourcesPayload.length > 0) {
-      const { error: resError } = await supabase.from('resources').insert(resourcesPayload);
-      if (resError) {
-        console.warn('[RoadmapService] Migration Resources insert note:', resError.message);
-      }
+      await supabase.from('resources').insert(resourcesPayload);
     }
 
-    // 6. Award XP and initialize streak in progress_tracking (single source of truth for XP & Streak)
-    const completedTasks = guestRoadmap.tasks.filter((t) => t.status === 'completed');
-    const earnedXp = completedTasks.reduce((sum, t) => sum + (t.xpReward || 50), 0);
-    const today = new Date().toISOString().slice(0, 10);
-
-    const { data: existingProgress } = await supabase
-      .from('progress_tracking')
-      .select('xp_total, streak_count')
-      .eq('user_id', userId)
-      .maybeSingle();
-
-    const currentXp = existingProgress?.xp_total || 0;
-    const currentStreak = existingProgress?.streak_count || 1;
-
-    await supabase
-      .from('progress_tracking')
-      .upsert({
-        user_id: userId,
-        xp_total: Math.max(currentXp, earnedXp),
-        streak_count: currentStreak,
-        last_active_date: today,
-        updated_at: new Date().toISOString(),
-      });
-
-    // 7. If roadmap reached 100%, generate certificate immediately!
+    // 6. If roadmap was completed, generate certificate
     if (isFullyCompleted) {
-      console.log('[RoadmapService] Migrated roadmap is 100% complete! Generating certificate immediately for:', userId, guestRoadmap.title);
       try {
-        const { CertificateService } = await import('@/features/certificate/certificate.service');
         await CertificateService.getOrCreateCertificate(userId, guestRoadmap.title);
-        console.log('[RoadmapService] Certificate successfully generated upon migration!');
       } catch (certErr) {
-        console.error('[RoadmapService] Failed to auto-generate certificate during migration:', certErr);
+        console.warn('[RoadmapService] Migration certificate generation warning:', certErr);
       }
     }
-
-    // 8. Format the migrated roadmap object and update localStorage
-    const formattedTasks: Task[] = insertedTasks.map((t) => ({
-      id: t.id,
-      orderIndex: t.order_index,
-      title: t.title,
-      description: t.description || '',
-      status: t.status as Task['status'],
-      requiresQuiz: Boolean(t.requires_quiz),
-      xpReward: t.xp_reward || 50,
-      resources: resourcesPayload
-        .filter((r) => r.task_id === t.id)
-        .map((r, rIdx) => ({
-          id: `res_mig_${r.task_id}_${rIdx}`,
-          title: r.title,
-          type: r.type,
-          url: r.url,
-          duration: r.duration || undefined,
-        })),
-    }));
 
     const completeRoadmap: Roadmap = {
       id: roadmapData.id,
       title: roadmapData.title,
-      progressPercentage: progressPercentage,
-      tasks: formattedTasks,
+      progressPercentage,
+      tasks: insertedTasks.map((t) => ({
+        id: t.id,
+        orderIndex: t.order_index,
+        title: t.title,
+        description: t.description || '',
+        status: t.status as Task['status'],
+        requiresQuiz: Boolean(t.requires_quiz),
+        xpReward: t.xp_reward || 50,
+        resources: (guestRoadmap.tasks.find((gt) => gt.orderIndex === t.order_index)?.resources || []).map((r) => ({
+          id: r.id,
+          title: r.title,
+          type: r.type,
+          url: r.url,
+          duration: r.duration,
+        })),
+      })),
     };
 
     if (isFullyCompleted) {
@@ -347,10 +363,242 @@ export const RoadmapService = {
   },
 
   /**
+   * Helper to generate personalized starter tasks and resources tailored to the user's selected persona and skills.
+   */
+  getPersonalizedStarterData: (onboardingData: OnboardingData) => {
+    const userType = onboardingData.userType || 'university_student';
+    const targetGoal = (onboardingData.targetGoal || '').trim();
+    const skillsList = onboardingData.currentSkills || [];
+    const skillsText = skillsList.length > 0 ? skillsList.slice(0, 3).join(', ') : '';
+
+    // Check if the user is studying Python
+    const isPythonSelected = 
+      skillsList.some((s) => s.toLowerCase().includes('python')) ||
+      targetGoal.toLowerCase().includes('python');
+
+    if (isPythonSelected) {
+      return {
+        isPython: true,
+        title: 'Python Masterclass (Beginner to Advanced)',
+        tasks: PYTHON_BEGINNER_TASKS.map((t, idx) => ({
+          orderIndex: t.orderIndex || (idx + 1),
+          title: t.title,
+          description: t.description,
+          status: t.status,
+          requiresQuiz: t.requiresQuiz,
+          xpReward: t.xpReward,
+          resources: (t.resources || []).map((r) => ({
+            title: r.title,
+            type: (r.type as any) || 'documentation',
+            url: r.url || 'https://docs.python.org/3/',
+            duration: r.duration || '20m',
+          })),
+        })),
+      };
+    }
+
+    // Resolve clean domain/skill name without personal names
+    let cleanSkill = targetGoal;
+    const isPersonalNameOrGeneric = 
+      !cleanSkill || 
+      cleanSkill.length < 3 || 
+      ['amir', 'john', 'alex', 'user', 'guest', 'me', 'self'].includes(cleanSkill.toLowerCase());
+
+    if (isPersonalNameOrGeneric) {
+      cleanSkill = skillsList.length > 0 ? skillsList[0] : 'Full-Stack Web Development';
+    }
+
+    if (userType === 'freelancer') {
+      return {
+        isPython: false,
+        title: `${cleanSkill} Freelance Acceleration Track`,
+        tasks: [
+          {
+            orderIndex: 1,
+            title: `Commercial Skill Mastery & Service Packaging for ${cleanSkill}`,
+            description: `Develop commercial-grade proficiency in ${cleanSkill}${skillsText ? ` expanding your current toolkit in ${skillsText}` : ''} and define high-ticket client service deliverables.`,
+            status: 'in_progress' as const,
+            requiresQuiz: true,
+            xpReward: 50,
+            resources: [
+              {
+                title: `${cleanSkill} Commercial Blueprint & Client Service Standards`,
+                type: 'video' as const,
+                url: 'https://youtube.com',
+                duration: '15m',
+              },
+              {
+                title: 'Client Deliverables & Technical Specification Guide',
+                type: 'documentation' as const,
+                url: 'https://developer.mozilla.org',
+                duration: '20m read',
+              },
+            ],
+          },
+          {
+            orderIndex: 2,
+            title: `Client Case Studies & Workflow Automation for ${cleanSkill}`,
+            description: `Implement client-ready workflows, rapid deployment templates, and automated testing in ${cleanSkill} to streamline project turnaround.`,
+            status: 'locked' as const,
+            requiresQuiz: true,
+            xpReward: 100,
+            resources: [
+              {
+                title: `High-Velocity Client Project Execution & Automation in ${cleanSkill}`,
+                type: 'video' as const,
+                url: 'https://youtube.com',
+                duration: '30m',
+              },
+              {
+                title: 'Standard Operating Procedures & Client Hand-Off Guide',
+                type: 'documentation' as const,
+                url: 'https://developer.mozilla.org',
+                duration: '15m read',
+              },
+            ],
+          },
+          {
+            orderIndex: 3,
+            title: `High-Ticket Client Portfolio Deliverable for ${cleanSkill}`,
+            description: `Construct a live, verified client-grade deliverable in ${cleanSkill} demonstrating measurable results, performance optimization, and polished commercial delivery.`,
+            status: 'locked' as const,
+            requiresQuiz: false,
+            xpReward: 150,
+            resources: [],
+          },
+        ],
+      };
+    }
+
+    if (userType === 'career_changer') {
+      return {
+        isPython: false,
+        title: `${cleanSkill} Career Transition Track`,
+        tasks: [
+          {
+            orderIndex: 1,
+            title: `Transferable Skills Mapping & Core ${cleanSkill} Competencies`,
+            description: `Bridge your previous background${skillsText ? ` and experience in ${skillsText}` : ''} to rapidly acquire the essential foundations of ${cleanSkill}.`,
+            status: 'in_progress' as const,
+            requiresQuiz: true,
+            xpReward: 50,
+            resources: [
+              {
+                title: `Career Transition Roadmap: Fast-Tracking ${cleanSkill}`,
+                type: 'video' as const,
+                url: 'https://youtube.com',
+                duration: '12m',
+              },
+              {
+                title: 'Core Competencies & Industry Landscape Overview',
+                type: 'documentation' as const,
+                url: 'https://developer.mozilla.org',
+                duration: '15m read',
+              },
+            ],
+          },
+          {
+            orderIndex: 2,
+            title: `Industry Toolchains & Applied ${cleanSkill} Practice`,
+            description: `Adopt industry-standard development workflows, collaborative tools, and practical problem-solving methodologies in ${cleanSkill}.`,
+            status: 'locked' as const,
+            requiresQuiz: true,
+            xpReward: 100,
+            resources: [
+              {
+                title: `Professional Tooling & Team Workflows in ${cleanSkill}`,
+                type: 'video' as const,
+                url: 'https://youtube.com',
+                duration: '25m',
+              },
+              {
+                title: 'Industry Patterns, Architecture & Coding Standards',
+                type: 'documentation' as const,
+                url: 'https://developer.mozilla.org',
+                duration: '18m read',
+              },
+            ],
+          },
+          {
+            orderIndex: 3,
+            title: `Industry-Transition Capstone & Verified Portfolio Project for ${cleanSkill}`,
+            description: `Build and launch a comprehensive capstone deliverable in ${cleanSkill} proving production readiness and domain competence to hiring managers.`,
+            status: 'locked' as const,
+            requiresQuiz: false,
+            xpReward: 150,
+            resources: [],
+          },
+        ],
+      };
+    }
+
+    // Default: University Student
+    return {
+      isPython: false,
+      title: `${cleanSkill} Academic & Industry Foundation Track`,
+      tasks: [
+        {
+          orderIndex: 1,
+          title: `Core Foundations & Architecture of ${cleanSkill}`,
+          description: `Master the fundamental architectural principles, theoretical models, and core syntax of ${cleanSkill}${skillsText ? ` while building on your foundation in ${skillsText}` : ''}.`,
+          status: 'in_progress' as const,
+          requiresQuiz: true,
+          xpReward: 50,
+          resources: [
+            {
+              title: `${cleanSkill} Core Architecture & Fundamentals`,
+              type: 'video' as const,
+              url: 'https://youtube.com',
+              duration: '10m',
+            },
+            {
+              title: 'Academic Standards, Specifications & Syntax Guide',
+              type: 'documentation' as const,
+              url: 'https://developer.mozilla.org',
+              duration: '15m read',
+            },
+          ],
+        },
+        {
+          orderIndex: 2,
+          title: `Hands-On Lab Projects & Applied Implementation in ${cleanSkill}`,
+          description: `Apply core concepts in ${cleanSkill} through practical mini-projects, modular coding exercises, and version-controlled GitHub repositories.`,
+          status: 'locked' as const,
+          requiresQuiz: true,
+          xpReward: 100,
+          resources: [
+            {
+              title: `Lab Project Walkthrough & Implementation Guide in ${cleanSkill}`,
+              type: 'video' as const,
+              url: 'https://youtube.com',
+              duration: '25m',
+            },
+            {
+              title: 'Best Practices for Code Quality & Modular Design',
+              type: 'documentation' as const,
+              url: 'https://developer.mozilla.org',
+              duration: '12m read',
+            },
+          ],
+        },
+        {
+          orderIndex: 3,
+          title: `Career Capstone & Employer-Ready Deliverable for ${cleanSkill}`,
+          description: `Design, build, and deploy a production-grade capstone project in ${cleanSkill} showcasing end-to-end technical mastery, verified by public repository.`,
+          status: 'locked' as const,
+          requiresQuiz: false,
+          xpReward: 150,
+          resources: [],
+        },
+      ],
+    };
+  },
+
+  /**
    * Creates a starter roadmap with goal, modules, and resources based on onboarding data.
    */
   createStarterRoadmap: async (userId: string, onboardingData: OnboardingData): Promise<Roadmap> => {
-    console.log('[RoadmapService] createStarterRoadmap initiated for user:', userId, 'Goal:', onboardingData.targetGoal);
+    console.log('[RoadmapService] createStarterRoadmap initiated for user:', userId, 'Goal:', onboardingData.targetGoal, 'UserType:', onboardingData.userType);
 
     // 1. Ensure Profile row exists and update skills (profiles: id, skills)
     console.log('[RoadmapService] 1/5: Upserting profile record...');
@@ -404,14 +652,16 @@ export const RoadmapService = {
       console.log('[RoadmapService] Goal record created ID:', goalData?.id);
     }
 
-    // 3. Create Roadmap record (roadmaps: user_id, goal_id, title, progress_percentage, status)
     console.log('[RoadmapService] 3/5: Creating Roadmap record...');
+    const personalizedData = RoadmapService.getPersonalizedStarterData(onboardingData);
+    const roadmapTitle = personalizedData.title || onboardingData.targetGoal;
+
     const { data: roadmapData, error: roadmapError } = await supabase
       .from('roadmaps')
       .insert({
         user_id: userId,
         goal_id: goalData?.id || null,
-        title: onboardingData.targetGoal,
+        title: roadmapTitle,
         progress_percentage: 0,
         status: 'in_progress',
       })
@@ -425,37 +675,18 @@ export const RoadmapService = {
 
     console.log('[RoadmapService] Roadmap record created ID:', roadmapData.id);
 
-    // 4. Seed initial sequential tasks (tasks: roadmap_id, order_index, title, description, status, requires_quiz, xp_reward - NO user_id)
-    console.log('[RoadmapService] 4/5: Seeding Roadmap Tasks...');
-    const starterTasksPayload = [
-      {
-        roadmap_id: roadmapData.id,
-        order_index: 1,
-        title: `Fundamentals of ${onboardingData.targetGoal}`,
-        description: `Understand the core architecture, key terminology, and foundational design principles of ${onboardingData.targetGoal}.`,
-        status: 'in_progress',
-        requires_quiz: true,
-        xp_reward: 50,
-      },
-      {
-        roadmap_id: roadmapData.id,
-        order_index: 2,
-        title: 'Advanced Tooling & Automation',
-        description: 'Master modern development workflows, automated pipelines, and component modularity.',
-        status: 'locked',
-        requires_quiz: true,
-        xp_reward: 100,
-      },
-      {
-        roadmap_id: roadmapData.id,
-        order_index: 3,
-        title: 'Production Capstone Deliverable',
-        description: 'Build and deploy a complete, scalable capstone project deliverable verified by repository URL.',
-        status: 'locked',
-        requires_quiz: false,
-        xp_reward: 150,
-      },
-    ];
+    // 4. Seed personalized sequential tasks (tasks: roadmap_id, order_index, title, description, status, requires_quiz, xp_reward - NO user_id)
+    console.log('[RoadmapService] 4/5: Seeding Personalized Roadmap Tasks for UserType:', onboardingData.userType);
+
+    const starterTasksPayload = personalizedData.tasks.map((t) => ({
+      roadmap_id: roadmapData.id,
+      order_index: t.orderIndex,
+      title: t.title,
+      description: t.description,
+      status: t.status,
+      requires_quiz: t.requiresQuiz,
+      xp_reward: t.xpReward,
+    }));
 
     const { data: insertedTasks, error: tasksError } = await supabase
       .from('tasks')
@@ -469,39 +700,23 @@ export const RoadmapService = {
 
     console.log('[RoadmapService] Inserted tasks count:', insertedTasks.length);
 
-    // 5. Seed initial resources for Task 1 and Task 2 (resources: task_id, title, type, url, duration - NO user_id)
-    console.log('[RoadmapService] 5/5: Seeding Resources...');
-    const task1 = insertedTasks.find((t) => t.order_index === 1);
-    const task2 = insertedTasks.find((t) => t.order_index === 2);
-
-    const resourcesPayload = [];
-    if (task1) {
-      resourcesPayload.push(
-        {
-          task_id: task1.id,
-          title: `${onboardingData.targetGoal} Architecture 101`,
-          type: 'video',
-          url: 'https://youtube.com',
-          duration: '10m',
-        },
-        {
-          task_id: task1.id,
-          title: 'Official Documentation & Standards',
-          type: 'documentation',
-          url: 'https://developer.mozilla.org',
-          duration: '15m read',
-        }
-      );
-    }
-    if (task2) {
-      resourcesPayload.push({
-        task_id: task2.id,
-        title: 'Workflow Automation Deep Dive',
-        type: 'video',
-        url: 'https://youtube.com',
-        duration: '25m',
-      });
-    }
+    // 5. Seed personalized resources for tasks (resources: task_id, title, type, url, duration - NO user_id)
+    console.log('[RoadmapService] 5/5: Seeding Personalized Resources...');
+    const resourcesPayload: any[] = [];
+    personalizedData.tasks.forEach((taskData) => {
+      const matchedInsertedTask = insertedTasks.find((t) => t.order_index === taskData.orderIndex);
+      if (matchedInsertedTask && Array.isArray(taskData.resources) && taskData.resources.length > 0) {
+        taskData.resources.forEach((r) => {
+          resourcesPayload.push({
+            task_id: matchedInsertedTask.id,
+            title: r.title,
+            type: r.type,
+            url: r.url,
+            duration: r.duration || null,
+          });
+        });
+      }
+    });
 
     if (resourcesPayload.length > 0) {
       const { error: resError } = await supabase.from('resources').insert(resourcesPayload);
@@ -529,66 +744,30 @@ export const RoadmapService = {
    * Generates a starter roadmap in local storage for guest/offline sessions.
    */
   createGuestStarterRoadmap: (onboardingData: OnboardingData): Roadmap => {
-    console.log('[RoadmapService] Creating guest starter roadmap for goal:', onboardingData.targetGoal);
+    console.log('[RoadmapService] Creating guest starter roadmap for goal:', onboardingData.targetGoal, 'UserType:', onboardingData.userType);
+    const personalizedData = RoadmapService.getPersonalizedStarterData(onboardingData);
+    const roadmapTitle = personalizedData.title || onboardingData.targetGoal;
+
     const guestRoadmap: Roadmap = {
       id: `rmp_guest_${Date.now()}`,
-      title: onboardingData.targetGoal,
+      title: roadmapTitle,
       progressPercentage: 0,
-      tasks: [
-        {
-          id: `tsk_guest_1`,
-          orderIndex: 1,
-          title: `Fundamentals of ${onboardingData.targetGoal}`,
-          description: `Understand the core architecture, key terminology, and foundational design principles of ${onboardingData.targetGoal}.`,
-          status: 'in_progress',
-          requiresQuiz: true,
-          xpReward: 50,
-          resources: [
-            {
-              id: 'res_1',
-              title: `${onboardingData.targetGoal} Architecture 101`,
-              type: 'video',
-              url: 'https://youtube.com',
-              duration: '10m',
-            },
-            {
-              id: 'res_2',
-              title: 'Official Documentation & Standards',
-              type: 'documentation',
-              url: 'https://developer.mozilla.org',
-              duration: '15m read',
-            },
-          ],
-        },
-        {
-          id: `tsk_guest_2`,
-          orderIndex: 2,
-          title: 'Advanced Tooling & Automation',
-          description: 'Master modern development workflows, automated pipelines, and component modularity.',
-          status: 'locked',
-          requiresQuiz: true,
-          xpReward: 100,
-          resources: [
-            {
-              id: 'res_3',
-              title: 'Workflow Automation Deep Dive',
-              type: 'video',
-              url: 'https://youtube.com',
-              duration: '25m',
-            },
-          ],
-        },
-        {
-          id: `tsk_guest_3`,
-          orderIndex: 3,
-          title: 'Production Capstone Deliverable',
-          description: 'Build and deploy a complete, scalable capstone project deliverable verified by repository URL.',
-          status: 'locked',
-          requiresQuiz: false,
-          xpReward: 150,
-          resources: [],
-        },
-      ],
+      tasks: personalizedData.tasks.map((task) => ({
+        id: `tsk_guest_${task.orderIndex}`,
+        orderIndex: task.orderIndex,
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        requiresQuiz: task.requiresQuiz,
+        xpReward: task.xpReward,
+        resources: task.resources.map((r, rIdx) => ({
+          id: `res_guest_${task.orderIndex}_${rIdx + 1}`,
+          title: r.title,
+          type: r.type,
+          url: r.url,
+          duration: r.duration || undefined,
+        })),
+      })),
     };
 
     try {
@@ -619,16 +798,22 @@ export const RoadmapService = {
         const stored = localStorage.getItem(LOCAL_STORAGE_ROADMAP_KEY);
         if (stored) {
           const roadmap = JSON.parse(stored) as Roadmap;
-          const updatedTasks = roadmap.tasks.map((task, idx, arr) => {
+          const sorted = [...(roadmap.tasks || [])].sort((a, b) => a.orderIndex - b.orderIndex);
+          const currentIdx = sorted.findIndex((t) => t.id === taskId);
+
+          const updatedTasks = sorted.map((task) => {
             if (task.id === taskId) {
               return { ...task, status: 'completed' as const };
             }
-            const prevTask = arr[idx - 1];
-            if (prevTask && prevTask.id === taskId && task.status === 'locked') {
-              return { ...task, status: 'in_progress' as const };
-            }
             return task;
           });
+
+          // Unlock next locked or pending task
+          const nextTask = updatedTasks.find((t, idx) => idx > currentIdx && t.status !== 'completed') ||
+                           updatedTasks.find((t) => t.status === 'locked');
+          if (nextTask) {
+            nextTask.status = 'in_progress';
+          }
 
           const completedCount = updatedTasks.filter((t) => t.status === 'completed').length;
           const progressPercentage = Math.round((completedCount / updatedTasks.length) * 100);
@@ -644,7 +829,6 @@ export const RoadmapService = {
           // If roadmap reached 100% and we have an authenticated user, generate a certificate
           if (progressPercentage === 100 && effectiveUserId) {
             try {
-              const { CertificateService } = await import('@/features/certificate/certificate.service');
               await CertificateService.getOrCreateCertificate(effectiveUserId, roadmap.title);
             } catch (certErr) {
               console.error('[RoadmapService] Failed to generate certificate for guest/cached roadmap:', certErr);
@@ -682,9 +866,11 @@ export const RoadmapService = {
       throw allTasksError;
     }
 
-    // 3. Find and unlock next locked task (tasks has NO user_id column)
+    // 3. Find and unlock next locked/pending task (tasks has NO user_id column)
     const nextLockedTask = allTasks.find(
-      (t) => t.order_index > completedTask.order_index && t.status === 'locked'
+      (t) => t.order_index > completedTask.order_index && t.status !== 'completed'
+    ) || allTasks.find(
+      (t) => t.id !== taskId && t.status === 'locked'
     );
 
     if (nextLockedTask) {
@@ -718,7 +904,6 @@ export const RoadmapService = {
         .single();
 
       if (roadmapData?.title) {
-        const { CertificateService } = await import('@/features/certificate/certificate.service');
         await CertificateService.getOrCreateCertificate(effectiveUserId, roadmapData.title);
       }
     }

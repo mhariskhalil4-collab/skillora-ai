@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { MarketTrend, SkillGap, RecommendedSkill } from '../types/gps.types';
+import { MarketTrend, SkillGap, RecommendedSkill, AiSkillGapAnalysisResult, NextBestAction } from '../types/gps.types';
 import { RoadmapService } from '@/features/roadmap/services/roadmap.service';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { Roadmap, Task, Resource } from '@/features/roadmap/types/roadmap.types';
@@ -212,14 +212,39 @@ export const CareerGpsService = {
     console.log('[CareerGpsService] addSkillToRoadmap called for skill:', skill.title, 'User:', effectiveUserId);
 
     // 1. Fetch user's active roadmap (which auto-migrates guest roadmaps if effectiveUserId exists)
-    const activeRoadmap = await RoadmapService.fetchActiveRoadmap(effectiveUserId);
+    let activeRoadmap = await RoadmapService.fetchActiveRoadmap(effectiveUserId);
+    
+    // If user has no active roadmap, initialize a starter one
     if (!activeRoadmap) {
-      console.warn('[CareerGpsService] No active roadmap found to append task.');
+      console.log('[CareerGpsService] No active roadmap found. Initializing new roadmap for skill:', skill.title);
+      if (effectiveUserId) {
+        activeRoadmap = await RoadmapService.createStarterRoadmap(effectiveUserId, {
+          userType: 'freelancer',
+          targetGoal: skill.title,
+          currentSkills: [skill.title],
+          skillLevel: 'beginner',
+        });
+      } else {
+        activeRoadmap = RoadmapService.createGuestStarterRoadmap({
+          userType: 'freelancer',
+          targetGoal: skill.title,
+          currentSkills: [skill.title],
+          skillLevel: 'beginner',
+        });
+      }
+    }
+
+    if (!activeRoadmap) {
+      console.warn('[CareerGpsService] Failed to find or create active roadmap.');
       return false;
     }
 
-    // 2. Determine sequential order index
+    // 2. Determine sequential order index and initial status
     const nextOrderIndex = (activeRoadmap.tasks.length || 0) + 1;
+    const hasAnyInProgress = activeRoadmap.tasks.some((t) => t.status === 'in_progress');
+    const hasAnyPending = activeRoadmap.tasks.some((t) => t.status !== 'completed');
+    // If no module is currently in progress, unlock this newly added module immediately
+    const initialStatus: Task['status'] = (!hasAnyInProgress || !hasAnyPending) ? 'in_progress' : 'locked';
 
     // 3. Insert task into Supabase tasks table if authenticated and roadmap is persisted in Supabase (tasks: roadmap_id, order_index, title, description, status, requires_quiz, xp_reward - NO user_id)
     if (effectiveUserId && !activeRoadmap.id.startsWith('rmp_guest_')) {
@@ -230,7 +255,7 @@ export const CareerGpsService = {
           order_index: nextOrderIndex,
           title: `Mastery: ${skill.title}`,
           description: `${skill.reason} Focused deep dive with verified code examples and hands-on exercises (~${skill.estimatedHours}h).`,
-          status: 'locked',
+          status: initialStatus,
           requires_quiz: true,
           xp_reward: 100,
         })
@@ -242,7 +267,7 @@ export const CareerGpsService = {
         throw taskError;
       }
 
-      console.log('[CareerGpsService] Inserted new task in Supabase with UUID:', newTask.id);
+      console.log('[CareerGpsService] Inserted new task in Supabase with UUID:', newTask.id, 'Status:', initialStatus);
 
       // Seed resources for the new module (resources: task_id, title, type, url, duration - NO user_id)
       const resourcesPayload = [
@@ -290,9 +315,14 @@ export const CareerGpsService = {
           })),
         };
 
+        const updatedTasks = [...activeRoadmap.tasks, formattedNewTask];
+        const completedCount = updatedTasks.filter((t) => t.status === 'completed').length;
+        const progressPercentage = Math.round((completedCount / updatedTasks.length) * 100);
+
         const updatedRoadmap: Roadmap = {
           ...activeRoadmap,
-          tasks: [...activeRoadmap.tasks, formattedNewTask],
+          progressPercentage,
+          tasks: updatedTasks,
         };
         localStorage.setItem('skillora_active_roadmap', JSON.stringify(updatedRoadmap));
       } catch (_) {}
@@ -304,7 +334,7 @@ export const CareerGpsService = {
         orderIndex: nextOrderIndex,
         title: `Mastery: ${skill.title}`,
         description: `${skill.reason} Focused deep dive with verified code examples and hands-on exercises (~${skill.estimatedHours}h).`,
-        status: 'locked',
+        status: initialStatus,
         requiresQuiz: true,
         xpReward: 100,
         resources: [
@@ -317,6 +347,10 @@ export const CareerGpsService = {
           }
         ],
       });
+
+      const completedCount = guestRoadmap.tasks.filter((t) => t.status === 'completed').length;
+      guestRoadmap.progressPercentage = Math.round((completedCount / guestRoadmap.tasks.length) * 100);
+
       try {
         localStorage.setItem('skillora_active_roadmap', JSON.stringify(guestRoadmap));
       } catch (_) {}
@@ -324,4 +358,188 @@ export const CareerGpsService = {
 
     return true;
   },
+
+  /**
+   * Invokes the server-side Gemini Edge Function to perform in-depth AI Skill Gap Analysis
+   */
+  triggerAiSkillGapAnalysis: async (userId?: string): Promise<AiSkillGapAnalysisResult> => {
+    let effectiveUserId = userId;
+    if (!effectiveUserId) {
+      const { data: authData } = await supabase.auth.getUser();
+      effectiveUserId = authData.user?.id || useAuthStore.getState().user?.id;
+    }
+
+    let userSkills: string[] = [];
+    if (effectiveUserId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('skills')
+        .eq('id', effectiveUserId)
+        .maybeSingle();
+
+      if (profile?.skills && Array.isArray(profile.skills)) {
+        userSkills = profile.skills;
+      }
+    }
+
+    const activeRoadmap = await RoadmapService.fetchActiveRoadmap(effectiveUserId);
+    const targetRole = activeRoadmap?.title || 'Full-Stack AI & Software Engineer';
+    const totalMilestones = activeRoadmap?.tasks?.length || 5;
+    const completedMilestones = activeRoadmap?.tasks?.filter(t => t.status === 'completed').length || 0;
+
+    const payload = {
+      careerGoal: targetRole,
+      targetRole,
+      currentSkills: userSkills,
+      completedMilestones,
+      totalMilestones,
+      quizScoreAverage: 90,
+      experienceLevel: 'Intermediate',
+    };
+
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-skill-gap', {
+        body: payload,
+      });
+
+      if (error) {
+        console.warn('[CareerGpsService] Edge Function ai-skill-gap notice:', error);
+      }
+
+      if (data && data.strengths) {
+        // Unlock career-ready achievement if user is authenticated
+        if (effectiveUserId) {
+          try {
+            await supabase.rpc('unlock_achievement', { p_achievement_id: 'career-ready' });
+          } catch (_) {}
+        }
+        return data as AiSkillGapAnalysisResult;
+      }
+    } catch (err) {
+      console.error('[CareerGpsService] Error triggering AI skill gap:', err);
+    }
+
+    // Deterministic fallback if offline/edge failure
+    return {
+      overallMatchScore: Math.min(95, Math.max(40, Math.round((completedMilestones / Math.max(1, totalMilestones)) * 50 + 45))),
+      summary: `Strategic career assessment for ${targetRole}. You have completed ${completedMilestones} milestones. Prioritizing system design and automated testing will accelerate job readiness.`,
+      strengths: userSkills.length > 0 ? userSkills : ['Core Programming Fundamentals', 'Active Learning Discipline'],
+      missingSkills: ['System Design & Scalability', 'CI/CD & Cloud Infrastructure', 'Automated Testing Patterns'],
+      prioritySkills: [
+        {
+          skill: 'System Architecture & Design',
+          importance: 'High',
+          reason: `High priority for ${targetRole} positions to build production-scale web applications.`
+        },
+        {
+          skill: 'CI/CD & Automated Testing',
+          importance: 'High',
+          reason: 'Critical for enterprise quality standards and deployment pipelines.'
+        },
+        {
+          skill: 'Cloud Infrastructure & Serverless',
+          importance: 'Medium',
+          reason: 'Expands deployment flexibility and distributed backend capabilities.'
+        }
+      ],
+      suggestedProjects: [
+        {
+          title: 'Production-Ready Enterprise Microservice',
+          description: 'Build a containerized API microservice with comprehensive automated tests and CI/CD pipelines.',
+          keySkills: ['TypeScript', 'Testing', 'Docker', 'PostgreSQL']
+        },
+        {
+          title: 'Full-Stack Scalable SaaS Platform',
+          description: 'Develop a modern multi-tenant application with authentication, Stripe billing, and dashboard analytics.',
+          keySkills: ['React', 'Supabase', 'Stripe', 'Tailwind']
+        }
+      ],
+      estimatedLearningSequence: [
+        'Master End-to-End Testing & Mocking',
+        'Implement Cloud Database & Edge Functions',
+        'Deploy Portfolio Capstone Project to Production',
+        'Conduct Mock Technical Interviews & Portfolio Review'
+      ]
+    };
+  },
+
+  /**
+   * Computes the "Next Best Action" for the user based on real database state.
+   */
+  computeNextBestAction: async (userId?: string): Promise<NextBestAction> => {
+    let effectiveUserId = userId;
+    if (!effectiveUserId) {
+      const { data: authData } = await supabase.auth.getUser();
+      effectiveUserId = authData.user?.id || useAuthStore.getState().user?.id;
+    }
+
+    const activeRoadmap = await RoadmapService.fetchActiveRoadmap(effectiveUserId);
+
+    if (activeRoadmap && activeRoadmap.tasks && activeRoadmap.tasks.length > 0) {
+      // 1. In-progress task
+      const inProgressTask = activeRoadmap.tasks.find((t) => t.status === 'in_progress');
+      if (inProgressTask) {
+        if (inProgressTask.requiresQuiz) {
+          return {
+            type: 'quiz',
+            title: `Take Quiz: ${inProgressTask.title}`,
+            description: `Test your mastery on "${inProgressTask.title}" to complete this milestone and earn +${inProgressTask.xpReward} XP.`,
+            badge: 'Milestone Assessment',
+            actionLabel: 'Take Quiz Now',
+            actionUrl: `/roadmap/lesson/${inProgressTask.id}`,
+            xpReward: inProgressTask.xpReward,
+          };
+        }
+        return {
+          type: 'lesson',
+          title: `Continue: ${inProgressTask.title}`,
+          description: `Resume your active milestone. Master hands-on code examples and complete the requirements.`,
+          badge: 'In Progress',
+          actionLabel: 'Continue Lesson',
+          actionUrl: `/roadmap/lesson/${inProgressTask.id}`,
+          xpReward: inProgressTask.xpReward,
+        };
+      }
+
+      // 2. Next locked task if available
+      const lockedTask = activeRoadmap.tasks.find((t) => t.status === 'locked');
+      if (lockedTask) {
+        return {
+          type: 'lesson',
+          title: `Unlock Next: ${lockedTask.title}`,
+          description: `You're ready to proceed to the next module in your ${activeRoadmap.title} roadmap.`,
+          badge: 'Next Milestone',
+          actionLabel: 'View Roadmap',
+          actionUrl: '/roadmap',
+          xpReward: lockedTask.xpReward,
+        };
+      }
+
+      // 3. If all completed, capstone project
+      const allCompleted = activeRoadmap.tasks.every((t) => t.status === 'completed');
+      if (allCompleted) {
+        return {
+          type: 'project',
+          title: 'Submit Capstone Project',
+          description: 'Congratulations on completing your roadmap milestones! Submit your capstone project to earn your verified Certificate.',
+          badge: 'Certification Ready',
+          actionLabel: 'Submit Project',
+          actionUrl: '/profile',
+          xpReward: 300,
+        };
+      }
+    }
+
+    // Default recommendation
+    return {
+      type: 'skill_gap',
+      title: 'Analyze Skill Gaps with Career GPS',
+      description: 'Run our server-side AI evaluation to match your skills with real-time job market requirements.',
+      badge: 'Career Strategy',
+      actionLabel: 'Open Career GPS',
+      actionUrl: '/career-gps',
+      xpReward: 200,
+    };
+  },
 };
+

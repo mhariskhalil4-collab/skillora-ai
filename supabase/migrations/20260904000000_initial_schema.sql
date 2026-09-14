@@ -33,6 +33,20 @@ create table if not exists public.profiles (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+-- Ensure all columns exist if table was already created
+alter table public.profiles
+  add column if not exists full_name text,
+  add column if not exists headline text,
+  add column if not exists bio text,
+  add column if not exists user_type text check (user_type in ('university_student', 'freelancer', 'career_changer')),
+  add column if not exists skill_level text check (skill_level in ('beginner', 'intermediate', 'advanced')),
+  add column if not exists skills text[] default '{}'::text[],
+  add column if not exists resume_url text,
+  add column if not exists avatar_url text,
+  add column if not exists streak_count integer not null default 0,
+  add column if not exists xp_total integer not null default 0,
+  add column if not exists updated_at timestamp with time zone default timezone('utc'::text, now());
+
 -- Trigger: auto-update updated_at on profiles
 drop trigger if exists set_profiles_updated_at on public.profiles;
 create trigger set_profiles_updated_at
@@ -55,6 +69,14 @@ create table if not exists public.goals (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- Ensure all columns exist if table was already created
+alter table public.goals
+  add column if not exists title text,
+  add column if not exists description text,
+  add column if not exists target_date date,
+  add column if not exists status text not null default 'active',
+  add column if not exists updated_at timestamp with time zone default timezone('utc'::text, now());
 
 create index if not exists idx_goals_user_id on public.goals(user_id);
 
@@ -81,6 +103,12 @@ create table if not exists public.roadmaps (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- Ensure all columns exist if table was already created
+alter table public.roadmaps
+  add column if not exists description text,
+  add column if not exists status text not null default 'in_progress',
+  add column if not exists updated_at timestamp with time zone default timezone('utc'::text, now());
 
 create index if not exists idx_roadmaps_user_id on public.roadmaps(user_id);
 create index if not exists idx_roadmaps_goal_id on public.roadmaps(goal_id);
@@ -111,6 +139,11 @@ create table if not exists public.tasks (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+-- Ensure all columns exist if table was already created
+alter table public.tasks
+  add column if not exists user_id uuid references public.profiles(id) on delete cascade,
+  add column if not exists updated_at timestamp with time zone default timezone('utc'::text, now());
+
 create index if not exists idx_tasks_roadmap_id on public.tasks(roadmap_id);
 create index if not exists idx_tasks_user_id on public.tasks(user_id);
 
@@ -136,6 +169,10 @@ create table if not exists public.resources (
   duration text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- Ensure all columns exist if table was already created
+alter table public.resources
+  add column if not exists user_id uuid references public.profiles(id) on delete cascade;
 
 create index if not exists idx_resources_task_id on public.resources(task_id);
 create index if not exists idx_resources_user_id on public.resources(user_id);

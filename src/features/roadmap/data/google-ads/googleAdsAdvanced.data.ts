@@ -1,0 +1,4217 @@
+import { Task, QuizQuestion } from '../../types/roadmap.types';
+
+export const GOOGLE_ADS_ADVANCED_FINAL_ASSESSMENT: QuizQuestion[] = [
+  {
+    "id": 1,
+    "topic": "Offline Conversion Imports (OCI)",
+    "question": "How does Offline Conversion Import (OCI) bridge the gap between initial Google ad clicks and downstream CRM revenue?",
+    "options": [
+      "By capturing the Google Click ID (GCLID) or Gbraid/Wbraid upon web form submission, storing it in the CRM alongside the lead record, and uploading converted sales milestones back to Google Ads via API or scheduled spreadsheet",
+      "By guessing which leads converted using zip codes",
+      "By automatically sending physical mail to prospective customers",
+      "By replacing Google Ads with Salesforce reporting"
+    ],
+    "correctAnswer": 0,
+    "explanation": "OCI tracks the GCLID/Gbraid from the ad click through web form submission into the CRM. When a lead advances to a Qualified Lead, Closed Deal, or Won Revenue stage, the CRM transmits the timestamped GCLID and monetary value back to Google Ads, feeding downstream business value into Smart Bidding."
+  },
+  {
+    "id": 2,
+    "topic": "Google Consent Mode v2",
+    "question": "Under the EU Digital Markets Act (DMA) enforcement of Google Consent Mode v2, which two new consent parameters became mandatory for advertising personalization and remarketing?",
+    "options": [
+      "ad_storage and analytics_storage only",
+      "ad_user_data and ad_personalization",
+      "cookie_consent and banner_accepted",
+      "ip_masking and geo_filtering"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Consent Mode v2 introduced `ad_user_data` (consent for sending user data to Google for advertising) and `ad_personalization` (consent for personalized ads/remarketing). Without these parameters, audiences and conversion modeling for EEA traffic are severely degraded."
+  },
+  {
+    "id": 3,
+    "topic": "Performance Max Brand Cannibalization",
+    "question": "How can an enterprise advertiser prevent Performance Max from taking credit for high-converting branded search queries and cannibalizing dedicated Brand Search campaigns?",
+    "options": [
+      "There is no way to prevent Performance Max from bidding on brand terms",
+      "Pause the Performance Max campaign on weekends",
+      "Apply a Brand Exclusion List to the Performance Max campaign via Campaign Settings (or request account-level negative keywords via Google Support)",
+      "Lower the daily budget to $1.00"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Advertisers can create a Brand List in the Shared Library and apply it as a Brand Exclusion in Performance Max campaign settings, ensuring PMax bids exclusively on non-brand prospecting inventory while dedicated Brand campaigns retain strict control over brand traffic."
+  },
+  {
+    "id": 4,
+    "topic": "Marketing Efficiency Ratio (MER)",
+    "question": "How is the Marketing Efficiency Ratio (MER, or Blended ROAS) calculated, and why is it essential for omnichannel profitability analysis?",
+    "options": [
+      "MER = Google Ads Cost / Google Ads Clicks",
+      "MER = Website Pageviews / Conversion Rate",
+      "MER = Total Email Subscribers / Monthly Ad Spend",
+      "MER = Total Ecosystem Revenue / Total Marketing Ad Spend Across All Channels; it provides a single source of truth that avoids channel-attribution double counting"
+    ],
+    "correctAnswer": 3,
+    "explanation": "MER (Total Revenue / Total Ad Spend) measures blended business efficiency across all channels (Google, Meta, TikTok, Email, Organic). It eliminates intra-platform attribution overlap where each ad network claims 100% credit for the same sale."
+  },
+  {
+    "id": 5,
+    "topic": "Google Ads Scripts Automation",
+    "question": "Which Google Ads Script function is commonly used to automate daily budget anomaly detection and email alerts when spend exceeds expected pacing?",
+    "options": [
+      "AdsApp.createCampaign() only",
+      "AdsApp.campaigns().withCondition(\"Status = ENABLED\").get() combined with MailApp.sendEmail() or UrlFetchApp for Slack webhooks",
+      "document.getElementById(\"budget_box\")",
+      "window.localStorage.getItem(\"spend\")"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Google Ads Scripts use `AdsApp` selectors to query campaign telemetry and execute actions or dispatch alerts via `MailApp.sendEmail()` or `UrlFetchApp.fetch()` to external Webhooks (e.g., Slack/Discord) when spend spikes unexpectedly."
+  },
+  {
+    "id": 6,
+    "topic": "Data-Driven Attribution (DDA)",
+    "question": "How does Google Ads Data-Driven Attribution (DDA) model conversion credit across multi-touch customer search journeys?",
+    "options": [
+      "It assigns 100% of conversion credit to the very first ad clicked",
+      "It gives equal 25% credit to the last 4 clicks regardless of timing",
+      "It uses machine learning to evaluate all interacting click paths (both converting and non-converting) to statistically distribute fractional conversion credit based on how each ad touchpoint shifted conversion probability",
+      "It gives 100% credit to the last paid click only"
+    ],
+    "correctAnswer": 2,
+    "explanation": "DDA analyzes account conversion paths using sophisticated algorithmic modeling, comparing converting paths against paths that did not convert to calculate the true incremental contribution of each keyword and campaign touchpoint."
+  },
+  {
+    "id": 7,
+    "topic": "Geo-Experimentation & Incrementality Testing",
+    "question": "How does an advertiser conduct a statistically valid Geo-Holdout Experiment to measure the true incrementality of Non-Brand Search campaigns?",
+    "options": [
+      "Turn ads on for 3 days, then off for 3 days across the entire country",
+      "Ask customers on a phone survey where they first heard of the company",
+      "Compare this year’s December sales to last year’s July sales",
+      "Segment matched geographic clusters (e.g., 20 control DMAs vs 20 test DMAs with identical historical sales trends), turn off non-brand search ads in the control markets, and measure the net lift in organic + paid total sales in test markets"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Geo-experiments split matched geographic regions (Designated Market Areas) into Test and Control groups. Holding out ad spend in control regions isolates baseline organic demand and proves the true incremental revenue generated by paid search."
+  },
+  {
+    "id": 8,
+    "topic": "Value-Based Bidding (VBB) with Conversion Value Rules",
+    "question": "How can an enterprise advertiser use Google Ads Conversion Value Rules to train Smart Bidding algorithms to prioritize high-value customer segments?",
+    "options": [
+      "By creating rules that multiply conversion values by a factor (e.g., 1.5x) based on geographic location, specific audience lists (e.g., past high-LTV buyers), or device types",
+      "By manually clicking on your own ads from those locations",
+      "By blocking all users who use mobile phones",
+      "By doubling the daily budget every Friday afternoon"
+    ],
+    "correctAnswer": 0,
+    "explanation": "Conversion Value Rules allow advertisers to adjust conversion values in real time based on geographic criteria, audience membership, or device, steering Smart Bidding algorithms toward bidding aggressively on high-LTV customer cohorts."
+  },
+  {
+    "id": 9,
+    "topic": "Account Suspension Defense: Circumventing Systems",
+    "question": "Which advertiser action triggers an immediate, severe \"Circumventing Systems\" account suspension in Google Ads?",
+    "options": [
+      "Updating headline copy once per month",
+      "Adding 10 new negative keywords",
+      "Using cloaking to show different landing page content to Google review bots than to real human users, or attempting to recreate new ad accounts to bypass an active suspension",
+      "Switching billing credit cards with bank notification"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Google strictly prohibits \"Circumventing Systems\", which includes cloaking destination URLs, manipulating ad text to evade policy enforcement, and spinning up new ad accounts under fake names to bypass existing suspensions."
+  },
+  {
+    "id": 10,
+    "topic": "Enterprise MCC Hierarchy & Shared Budgets",
+    "question": "In a global multi-brand enterprise with 40 distinct regional entities, what is the best practice for account architecture and billing management?",
+    "options": [
+      "Combine all 40 global entities into a single ad account with 10,000 ad groups",
+      "Create 40 separate consumer Gmail accounts with personal credit cards",
+      "Run all advertising through personal Facebook Ad accounts instead",
+      "A structured Manager Account (MCC) hierarchy with dedicated child accounts per country/brand, consolidated Monthly Invoicing billing profiles, and centralized Shared Libraries for script governance and brand exclusions"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Enterprise MCC architecture isolates brands/geos into modular sub-accounts for clean currency/timezone alignment and security, while leveraging Consolidated Invoicing and centralized script/asset management."
+  },
+  {
+    "id": 11,
+    "topic": "Smart Bidding Volatility Recovery",
+    "question": "Following a major landing page redesign, a campaign with Target CPA experienced a 65% drop in conversion volume and CPCs doubled. What is the immediate recovery protocol?",
+    "options": [
+      "1. Verify conversion tracking tag firing and GTM triggers on the new landing page; 2. Temporarily switch from tCPA to Manual CPC or Maximize Clicks with a bid cap to re-establish baseline traffic; 3. Fix landing page message match and Core Web Vitals",
+      "Delete the campaign and all conversion actions immediately",
+      "Raise Target CPA by 1,000%",
+      "File an immediate lawsuit against Google"
+    ],
+    "correctAnswer": 0,
+    "explanation": "A sudden collapse after landing page changes indicates broken tracking tags or catastrophic drop in conversion rate. Verifying GTM tags, temporarily stabilizing bids with Manual CPC/bid caps, and fixing UX prevents algorithmic death spirals."
+  },
+  {
+    "id": 12,
+    "topic": "Profit-Driven Bidding & POAS",
+    "question": "Why is Profit on Ad Spend (POAS) superior to standard Return on Ad Spend (ROAS) for e-commerce retailers with variable product margins?",
+    "options": [
+      "Because POAS requires no tracking tags",
+      "Because ROAS measures top-line gross revenue, which incentivizes bidding algorithms to push high-revenue but low-margin products that generate net losses; POAS passes exact gross profit margins to optimize for actual net profit",
+      "Because Google guarantees 100% tax deductions on POAS campaigns",
+      "Because POAS automatically eliminates shipping costs"
+    ],
+    "correctAnswer": 1,
+    "explanation": "A 400% ROAS on a 10% margin product results in financial loss, whereas a 250% ROAS on an 80% margin product is highly profitable. Passing profit margin values into Google Ads aligns Smart Bidding with bottom-line profitability."
+  },
+  {
+    "id": 13,
+    "topic": "Google Ads API & Custom App Scripts",
+    "question": "What is the primary technical advantage of using the Google Ads API over the standard web user interface for enterprise agency operations?",
+    "options": [
+      "The API provides free ad spend credits",
+      "The API prevents Google from collecting taxes",
+      "The API allows advertisers to edit competitor ad headlines",
+      "The API enables automated programmatic campaign deployment, custom bidirectional CRM synchronization, real-time bid adjustments via proprietary machine learning models, and automated compliance auditing at scale"
+    ],
+    "correctAnswer": 3,
+    "explanation": "The Google Ads API provides direct programmatic access to create, update, manage, and report on campaigns at enterprise scale, connecting proprietary algorithms and enterprise ERPs with Google auctions."
+  },
+  {
+    "id": 14,
+    "topic": "Campaign Drafts and Experiments",
+    "question": "What is the scientifically rigorous way to test a new Smart Bidding strategy (Target CPA) against an existing Manual CPC campaign in Google Ads?",
+    "options": [
+      "Create a Campaign Experiment with a 50/50 cookie-based or search-split allocation, running concurrently over a 30-day period with statistical significance indicators",
+      "Change the bid strategy on the live campaign on Friday and check results on Monday",
+      "Duplicate the campaign with identical keywords and run both simultaneously with unconstrained budgets",
+      "Run the new strategy in a different country"
+    ],
+    "correctAnswer": 0,
+    "explanation": "Google Ads Campaign Experiments split auction traffic 50/50 in real time against the original control campaign, eliminating time-of-year seasonality and external market bias while calculating statistical significance (p-values)."
+  },
+  {
+    "id": 15,
+    "topic": "Diminishing Marginal Returns in Scaling",
+    "question": "What economic principle explains why increasing a campaign’s daily budget from $1,000 to $5,000 rarely yields 5x the conversion volume at the same CPA?",
+    "options": [
+      "The Second Law of Thermodynamics",
+      "The Law of Diminishing Marginal Returns: Scaling forces algorithms to participate in lower-intent auctions, expand into broader search queries, and pay higher marginal CPCs to win incremental impression share",
+      "Google deliberately charges higher rates to large advertisers",
+      "Search volume decreases as budget increases"
+    ],
+    "correctAnswer": 1,
+    "explanation": "As campaigns exhaust the most efficient top-tier search queries, scaling requires bidding into more competitive auctions, broader match variants, and marginal audiences, naturally lifting average CPA."
+  },
+  {
+    "id": 16,
+    "topic": "Enhanced Conversions for Leads",
+    "question": "How does \"Enhanced Conversions for Leads\" improve conversion tracking accuracy for B2B companies without relying on third-party cookies?",
+    "options": [
+      "It records audio phone calls without consent",
+      "It forces every visitor to log into a Google Account before submitting a form",
+      "It captures first-party user data (such as hashed email address) on the initial web form, securely transmits it to Google, and matches it against Google account profiles when offline CRM deals close weeks later",
+      "It eliminates the need for any CRM software"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Enhanced Conversions for Leads captures and hashes lead information at form submission. When offline CRM milestones are uploaded with that hashed email, Google matches the offline conversion back to the original ad click without needing GCLIDs."
+  },
+  {
+    "id": 17,
+    "topic": "Server-Side Tagging via Google Tag Manager",
+    "question": "What are the core performance and security benefits of deploying Server-Side Google Tag Manager (sGTM) on a custom first-party subdomain (e.g., `metrics.yourdomain.com`)?",
+    "options": [
+      "It eliminates client-side JavaScript execution bloat (faster Core Web Vitals), secures sensitive customer data from browser snooping, bypasses ad-blocker domain filtering, and extends first-party cookie longevity",
+      "It reduces cloud hosting costs to zero",
+      "It gives free access to Google Cloud Platform unlimited servers",
+      "It guarantees a Quality Score of 10 on all keywords"
+    ],
+    "correctAnswer": 0,
+    "explanation": "Server-side GTM routes telemetry through your own first-party server container, shielding user PII, reducing client-side JavaScript overhead for faster page speed, and bypassing client-side cookie expiration limitations."
+  },
+  {
+    "id": 18,
+    "topic": "Customer Match List Hygiene & Match Rates",
+    "question": "What factors directly elevate the \"Match Rate\" when uploading customer email and phone lists into Google Customer Match?",
+    "options": [
+      "Uploading only lowercase text with zero formatting",
+      "Uploading the list 50 times in one hour",
+      "Providing normalized and formatted data (E.164 phone formats, trimmed lowercase emails, first/last name, postal code, and country code) to maximize Google identity graph matching",
+      "Using public Gmail addresses only"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Google identity matching requires standardized data formatting (E.164 international phone formatting, sanitized emails, complete address fields). Providing multiple matching keys lifts match rates from 30% to 65%+."
+  },
+  {
+    "id": 19,
+    "topic": "Attribution Window Calibration",
+    "question": "For a high-end enterprise B2B software with a 90-day sales cycle, what is the impact of leaving the Google Ads conversion window at the default 30 days?",
+    "options": [
+      "Zero impact on reporting",
+      "Under-reporting conversions by 40–60%, because prospects who convert between day 31 and day 90 are completely dropped from attribution, starving Smart Bidding of optimization signals",
+      "Google automatically extends it to 365 days",
+      "Campaign budgets will be reduced by 50%"
+    ],
+    "correctAnswer": 1,
+    "explanation": "When customer consideration cycles exceed 30 days, standard 30-day click-through conversion windows fail to capture downstream conversions, misleading bidding algorithms into believing campaigns are underperforming."
+  },
+  {
+    "id": 20,
+    "topic": "Script-Based Automated Negative Keyword Sculpting",
+    "question": "In a tiered campaign structure (e.g., Exact Match Campaign vs Broad Match Discovery Campaign), how does an automated negative keyword script maintain traffic isolation?",
+    "options": [
+      "By deleting the broad match campaign every night",
+      "By changing all bids to $1.00",
+      "By notifying Google support via chat",
+      "By automatically extracting all active keywords from the Exact Match campaign and adding them as exact match negative keywords in the Broad Match campaign, preventing query cannibalization"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Cross-campaign negative sculpting scripts ensure that search queries matching exact match keywords are exclusively served by high-priority exact ad groups, preventing lower-priority broad discovery campaigns from stealing auction volume."
+  },
+  {
+    "id": 21,
+    "topic": "Lead Quality & Spam Prevention",
+    "question": "A B2B campaign suddenly experiences 100 fake form submissions per day from bot traffic. Which technical implementation effectively cleanses Google Ads conversion data?",
+    "options": [
+      "Implement enterprise reCAPTCHA v3 / Cloudflare Turnstile on landing pages, qualify leads via CRM validation, and switch Google Ads conversion optimization to offline CRM Qualified Lead events rather than raw form submissions",
+      "Turn off conversion tracking permanently",
+      "Double the daily budget",
+      "Change the campaign location to Antarctica"
+    ],
+    "correctAnswer": 0,
+    "explanation": "Preventing bot pollution requires bot protection (reCAPTCHA v3/Turnstile) on forms combined with switching Smart Bidding optimization to verified CRM stages (MQL/SQL), preventing algorithms from optimizing for spam bot submissions."
+  },
+  {
+    "id": 22,
+    "topic": "Performance Max URL Expansion Settings",
+    "question": "What is the risk of leaving \"Final URL Expansion\" enabled in a Performance Max campaign without URL exclusions?",
+    "options": [
+      "Google will delete your domain name",
+      "Google may automatically direct paid traffic to non-commercial pages like your Privacy Policy, Terms of Service, Blog Archives, or Career listings, wasting ad dollars on zero-intent URLs",
+      "The website will crash under server load",
+      "Ads will only be displayed on Google Maps"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Final URL Expansion allows Google to replace your final URL with any relevant page on your domain. Without URL exclusion rules (excluding blog posts, career pages, legal disclaimers), budget is wasted on non-commercial pages."
+  },
+  {
+    "id": 23,
+    "topic": "Seasonality Adjustments for Smart Bidding",
+    "question": "When should an enterprise advertiser use Google Ads \"Seasonality Adjustments\" instead of letting Smart Bidding adapt automatically?",
+    "options": [
+      "For normal month-to-month seasonal shifts lasting 6 months",
+      "Every single weekend",
+      "For short, extreme, predictable conversion rate surges lasting 1 to 7 days (e.g., Black Friday 48-hour flash sale with expected 3x CVR), where machine learning would otherwise lag in reacting to immediate demand spikes",
+      "When launching a brand new website with zero sales history"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Smart Bidding uses historical trends. For short, massive conversion rate spikes (like a 48-hour 50% off Black Friday flash sale), Seasonality Adjustments inform the algorithm in advance of the expected CVR lift, allowing aggressive bidding without post-sale lag."
+  },
+  {
+    "id": 24,
+    "topic": "Trademark Policy and Competitor Bidding",
+    "question": "Under Google Ads trademark policy in the US and most regions, what is legally permissible when bidding on competitor brand keywords?",
+    "options": [
+      "Bidding on competitor brand names is strictly prohibited by Google under penalty of law",
+      "You must pay the competitor a 50% royalty on every click",
+      "Competitor ads are automatically translated into Greek",
+      "You can bid on competitor brand names as keywords, but you cannot use their registered trademark in your ad copy to deceive users or imply authorized reseller status"
+    ],
+    "correctAnswer": 3,
+    "explanation": "In the US and most regions, Google allows advertisers to bid on competitor brand names as keywords in auctions. However, using registered trademark terms in your ad copy (headlines/descriptions) can be restricted if the trademark owner files a formal complaint."
+  },
+  {
+    "id": 25,
+    "topic": "Portfolio Bidding Strategies with Shared Budgets",
+    "question": "What is the strategic advantage of grouping multiple related campaigns under a single Portfolio Bidding Strategy with a Shared Budget?",
+    "options": [
+      "It reduces Google ad billing by 20%",
+      "It pools conversion volume across multiple campaigns into a single machine learning model, accelerating Smart Bidding learning periods while dynamically allocating budget to whichever campaign has the highest live ROI",
+      "It forces all campaigns to use identical ad headlines",
+      "It disables keyword Quality Score calculations"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Portfolio bid strategies aggregate conversion data across multiple campaigns, helping campaigns with moderate volume reach the 30–50 monthly conversion threshold faster, while shared budgets dynamically route spend to the most efficient opportunities in real time."
+  },
+  {
+    "id": 26,
+    "topic": "First-Party Data Strategy in Post-Cookie Marketing",
+    "question": "In an ecosystem dominated by Safari ITP, Firefox tracking protection, and Chrome Privacy Sandbox, what is the foundational requirement for resilient conversion measurement?",
+    "options": [
+      "Relying entirely on third-party tracking pixels",
+      "Stopping all digital advertising and moving to billboard ads",
+      "Deploying a robust First-Party Data pipeline: Server-Side Tagging, Enhanced Conversions with SHA-256 customer data, Consent Mode v2, and Offline CRM Conversion Imports",
+      "Asking users to disable all browser security settings"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Modern measurement resilience requires first-party data architecture: server-side tag routing, enhanced conversions with cryptographic hashing, Consent Mode compliance, and CRM offline conversion feedback loops."
+  },
+  {
+    "id": 27,
+    "topic": "B2B Lead Scoring & Value-Based Smart Bidding",
+    "question": "A B2B enterprise generates 1,000 raw leads/mo. 100 become Sales Qualified Leads ($500 value) and 10 become Won Deals ($10,000 value). How should conversion values be configured in Google Ads?",
+    "options": [
+      "Assign $1 value to all leads regardless of stage",
+      "Only track website visits and ignore sales data",
+      "Manually adjust bids once every 6 months",
+      "Pass weighted values into Google Ads conversion actions: Raw Lead ($10), SQL ($500), Closed Won ($10,000), and switch bidding to Maximize Conversion Value with Target ROAS"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Assigning weighted monetary values to progressive funnel stages (Raw Lead vs SQL vs Won Deal) enables Maximize Conversion Value algorithms to optimize for revenue-generating buyer profiles rather than low-quality lead volume."
+  },
+  {
+    "id": 28,
+    "topic": "Impression Share Diagnostics: Lost IS Rank Analysis",
+    "question": "If an Exact Match Search campaign targeting high-intent keywords has 60% Lost Impression Share due to Rank, which diagnosis is mathematically sound?",
+    "options": [
+      "Either the Max CPC bid / Target CPA is too low relative to auction competition, or keyword Quality Scores (eCTR, ad relevance, landing page experience) are substandard, depressing Ad Rank below the top-of-page threshold",
+      "The daily budget is 10x too high",
+      "The campaign is showing ads in too many countries",
+      "The landing page has too many images"
+    ],
+    "correctAnswer": 0,
+    "explanation": "Lost IS (Rank) is directly caused by low Ad Rank. To recapture lost impressions, the advertiser must either raise bids/CPA targets to compete in higher-tier auctions or elevate Quality Score components to achieve higher rank at current bid levels."
+  },
+  {
+    "id": 29,
+    "topic": "Automated Anomaly Detection with Google Apps Scripts",
+    "question": "Why should enterprise accounts deploy daily automated anomaly detection scripts checking 0-impression or 0-conversion anomalies?",
+    "options": [
+      "Because Google employees require daily script logs",
+      "To increase the daily spending limit on the account",
+      "To detect broken landing page servers, expired payment methods, accidental GTM tag drops, or tracking breakages within hours rather than discovering lost revenue weeks later",
+      "To bypass Google Ads account policies"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Anomaly detection scripts continuously inspect account health, instantly firing alert webhooks when conversion volume, impressions, or spend deviate significantly from historical baselines, preventing silent revenue leakage."
+  },
+  {
+    "id": 30,
+    "topic": "Statistical Significance in Creative Experimentation",
+    "question": "When analyzing a 50/50 RSA creative split test with 500 clicks per variant, Variant A has a 4.2% CVR (21 conversions) and Variant B has a 5.0% CVR (25 conversions). Is this result statistically significant at a 95% confidence level ($p < 0.05$)?",
+    "options": [
+      "Yes, Variant B is definitively the winner and should be scaled immediately",
+      "Conversion rates do not matter in A/B testing",
+      "Variant A won because 4.2 is a lower number",
+      "No, with only 21 vs 25 conversions, the sample size is insufficient and the observed difference is likely due to random chance ($p > 0.05$); the test must run longer until higher conversion volume is reached"
+    ],
+    "correctAnswer": 3,
+    "explanation": "A sample of 21 vs 25 conversions on 500 clicks yields a p-value well above 0.05. Declaring winners prematurely without statistical confidence leads to false conclusions and degraded campaign performance."
+  },
+  {
+    "id": 31,
+    "topic": "Cross-Network Cannibalization Auditing",
+    "question": "When running both Standard Shopping and Performance Max campaigns for the same product inventory, which campaign takes auction priority in Google Ads?",
+    "options": [
+      "Performance Max takes priority over Standard Shopping campaigns containing the same products, unless the Standard Shopping campaign has a significantly higher Ad Rank",
+      "Standard Shopping always wins priority over Performance Max",
+      "Both ads display side-by-side simultaneously for the same user",
+      "Google pauses both campaigns automatically"
+    ],
+    "correctAnswer": 0,
+    "explanation": "In general, Performance Max takes precedence over Standard Shopping campaigns targeting the same product IDs, which is why product catalogs must be segmented cleanly across campaigns to prevent cannibalization."
+  },
+  {
+    "id": 32,
+    "topic": "Ad Schedule Bid Adjustments under Smart Bidding",
+    "question": "How do Ad Schedule (dayparting) percentage bid adjustments interact with fully automated Smart Bidding strategies (e.g., Target CPA / Target ROAS)?",
+    "options": [
+      "They override all machine learning and set fixed bids",
+      "Smart Bidding already models auction-time time-of-day signals dynamically; setting Ad Schedule bid adjustments in tCPA/tROAS modifies the target goal (e.g., a +20% adjustment tells the algorithm to accept a 20% higher CPA for that time window) rather than directly setting CPC bids",
+      "Ad schedule adjustments are completely deleted by Google",
+      "They cause campaigns to spend 10x the daily budget"
+    ],
+    "correctAnswer": 1,
+    "explanation": "In Smart Bidding, bid adjustments do not adjust CPC bids directly. In Target CPA, a +20% bid adjustment raises the Target CPA target itself for that scheduled window, signaling the algorithm to bid more aggressively."
+  },
+  {
+    "id": 33,
+    "topic": "Lead Form Extensions & Webhook Integration",
+    "question": "How can lead form asset submissions captured inside Google search ads be instantly delivered into an enterprise CRM (e.g., HubSpot or Salesforce) in real time?",
+    "options": [
+      "By manually downloading CSV files from Google Ads every 30 days",
+      "By sending a fax to Google headquarters",
+      "By taking a screenshot of the search ad",
+      "By configuring the Google Ads Lead Form Webhook URL and Key to post lead payloads directly to an API endpoint or automation middleware (e.g., Zapier/Make) in real time"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Google Ads Lead Form assets support native Webhooks. When a user submits an in-ad lead form, Google delivers JSON lead data to the configured Webhook endpoint instantly, enabling real-time sales team dispatch."
+  },
+  {
+    "id": 34,
+    "topic": "Negative Keyword Match Conflicts at Scale",
+    "question": "In a large enterprise account with 200,000 keywords, an advertiser notices that a top-converting Exact Match keyword [enterprise cloud backup] has zero impressions. What is the most common technical culprit?",
+    "options": [
+      "A broad or phrase negative keyword (e.g., \"backup\" or \"cloud backup\") in a shared negative list or campaign negative list is conflicting with and blocking the positive keyword",
+      "The keyword was banned by the government",
+      "The landing page URL has too many capital letters",
+      "The ad copy contains a colon"
+    ],
+    "correctAnswer": 0,
+    "explanation": "Negative keyword conflicts are common in large accounts. A broad or phrase negative added to a shared list can inadvertently block high-value positive exact match keywords, dropping impressions to zero until the conflict is resolved."
+  },
+  {
+    "id": 35,
+    "topic": "Google Display Network Viewability (vCPM)",
+    "question": "What constitutes an \"Active View Viewable Impression\" under Google and MRC standards for Display ads?",
+    "options": [
+      "The user clicked on the ad 5 times",
+      "At least 50% of the ad pixels are in view on the screen for a minimum of 1 continuous second for display ads (or 2 seconds for video)",
+      "The ad was loaded somewhere in the hidden bottom footer of the webpage",
+      "The user printed the webpage on paper"
+    ],
+    "correctAnswer": 1,
+    "explanation": "The Media Rating Council (MRC) standard for viewability requires at least 50% of the ad creative pixels to be visible in the user viewport for a continuous duration of at least 1 second for display ads (2 seconds for video)."
+  },
+  {
+    "id": 36,
+    "topic": "Google Ads Auction Insights Interpretation",
+    "question": "In the Auction Insights report for an enterprise Search campaign, Competitor X has an 85% \"Impression Share\" but a 15% \"Outranking Share\" against your account. What does this indicate?",
+    "options": [
+      "Competitor X is outranking you on almost every search auction",
+      "Competitor X has been banned from advertising",
+      "Competitor X is entering 85% of eligible auctions, but your ad ranks higher than Competitor X (or shows when they do not) in 85% of shared auctions (since Outranking Share is the % of times you outranked them or showed when they didn’t)",
+      "Competitor X is bidding on different keywords"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Auction Insights Outranking Share represents how often your ad ranked higher in the auction than the competitor ad, plus how often your ad showed when theirs did not. High Outranking Share proves superior Ad Rank over that competitor."
+  },
+  {
+    "id": 37,
+    "topic": "Target Impression Share Strategy Risks",
+    "question": "What is the primary risk of using \"Target Impression Share: Absolute Top of Page 100%\" on generic, non-brand keywords?",
+    "options": [
+      "The bidding algorithm will bid astronomical CPC amounts to win 100% of top positions regardless of conversion rate or profitability, rapidly draining budget on unprofitable auctions",
+      "The campaign will generate zero impressions",
+      "Google Ads will convert all keywords to phrase match",
+      "Competitors will receive your company emails"
+    ],
+    "correctAnswer": 0,
+    "explanation": "Target Impression Share focuses entirely on ad position rather than conversions or ROI. Applying 100% Absolute Top of Page to broad or non-brand keywords can cause CPCs to spike to $50–$100+ per click as the system tries to win every auction."
+  },
+  {
+    "id": 38,
+    "topic": "Performance Max Search Themes",
+    "question": "What is the function of \"Search Themes\" in Performance Max campaigns?",
+    "options": [
+      "They change the color theme of Google search results",
+      "They replace all Responsive Search Ads in the account",
+      "They provide explicit intent signals and query guidance to Google AI regarding topics and terms your customers search for, steering PMax matching toward relevant search categories without replacing negative keyword exclusions",
+      "They block competitor ads automatically"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Search Themes inform Performance Max algorithms about specific search intents, categories, and terminology relevant to your business, helping machine learning discover relevant search queries faster across Google inventory."
+  },
+  {
+    "id": 39,
+    "topic": "MCC Currency & Timezone Immutability",
+    "question": "Once a Google Ads account is created and billing is established, can the account Timezone and Currency be changed in account settings?",
+    "options": [
+      "Yes, they can be changed anytime in Account Preferences",
+      "No, Currency and Timezone are permanently locked upon account creation; correcting an erroneous timezone or currency requires creating a new account and migrating campaigns",
+      "Only the Currency can be changed, but not Timezone",
+      "Only the Timezone can be changed, but not Currency"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Google Ads accounts permanently lock Currency and Timezone settings upon creation for billing, reporting, and regulatory integrity. To change them, a new account must be created within the MCC."
+  },
+  {
+    "id": 40,
+    "topic": "Enterprise Growth & Scaling Playbook",
+    "question": "Which holistic strategy represents the gold standard for scaling a multi-million dollar annual Google Ads enterprise acquisition program?",
+    "options": [
+      "Increase all campaign budgets by 500% overnight and enable broad match everywhere with no negatives",
+      "Rely exclusively on Google automated recommendations tab and apply all auto-apply recommendations without review",
+      "Pause all search advertising and rely entirely on organic viral social media",
+      "1. High-intent Search STAGs (tCPA/tROAS); 2. PMax with rich creative asset libraries & Brand Exclusions; 3. First-party measurement via sGTM & Enhanced Conversions; 4. CRM Offline Conversion feedback loops; 5. Automated scripting & daily anomaly alerts; 6. Controlled incrementality experiments"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Enterprise excellence combines disciplined search architecture, multi-channel PMax scaling with brand defense, first-party measurement infrastructure (sGTM/Enhanced Conversions), CRM offline revenue feedback, automated scripting, and rigorous incrementality testing."
+  }
+];
+
+export const GOOGLE_ADS_ADVANCED_TASKS: Task[] = [
+  {
+    "id": "gads-adv-01",
+    "title": "Advanced Google Ads Account Strategy",
+    "description": "Enterprise-level masterclass covering advanced google ads account strategy with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 1,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering advanced google ads account strategy in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise advanced google ads account strategy like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for advanced google ads account strategy",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering advanced google ads account strategy enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Advanced Google Ads Account Strategy Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-1-1",
+          "title": "1. Enterprise Architecture & Mechanics of Advanced Google Ads Account Strategy",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, advanced google ads account strategy separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, advanced google ads account strategy separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_1_script.js",
+              "language": "javascript",
+              "title": "Advanced Google Ads Account Strategy — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Advanced Google Ads Account Strategy\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-1-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing advanced google ads account strategy with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_1.ts",
+              "language": "typescript",
+              "title": "Advanced Google Ads Account Strategy — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Advanced Google Ads Account Strategy\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-1-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of advanced google ads account strategy:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_1.js",
+              "language": "javascript",
+              "title": "Advanced Google Ads Account Strategy — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-02",
+    "title": "Performance Max Campaign Strategy",
+    "description": "Enterprise-level masterclass covering performance max campaign strategy with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 2,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering performance max campaign strategy in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise performance max campaign strategy like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for performance max campaign strategy",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering performance max campaign strategy enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Performance Max Campaign Strategy Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-2-1",
+          "title": "1. Enterprise Architecture & Mechanics of Performance Max Campaign Strategy",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, performance max campaign strategy separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, performance max campaign strategy separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_2_script.js",
+              "language": "javascript",
+              "title": "Performance Max Campaign Strategy — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Performance Max Campaign Strategy\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-2-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing performance max campaign strategy with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_2.ts",
+              "language": "typescript",
+              "title": "Performance Max Campaign Strategy — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Performance Max Campaign Strategy\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-2-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of performance max campaign strategy:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_2.js",
+              "language": "javascript",
+              "title": "Performance Max Campaign Strategy — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-03",
+    "title": "Advanced Conversion Measurement",
+    "description": "Enterprise-level masterclass covering advanced conversion measurement with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 3,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering advanced conversion measurement in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise advanced conversion measurement like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for advanced conversion measurement",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering advanced conversion measurement enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Advanced Conversion Measurement Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-3-1",
+          "title": "1. Enterprise Architecture & Mechanics of Advanced Conversion Measurement",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, advanced conversion measurement separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, advanced conversion measurement separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_3_script.js",
+              "language": "javascript",
+              "title": "Advanced Conversion Measurement — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Advanced Conversion Measurement\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-3-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing advanced conversion measurement with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_3.ts",
+              "language": "typescript",
+              "title": "Advanced Conversion Measurement — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Advanced Conversion Measurement\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-3-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of advanced conversion measurement:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_3.js",
+              "language": "javascript",
+              "title": "Advanced Conversion Measurement — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-04",
+    "title": "Attribution and Incrementality",
+    "description": "Enterprise-level masterclass covering attribution and incrementality with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 4,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering attribution and incrementality in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise attribution and incrementality like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for attribution and incrementality",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering attribution and incrementality enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Attribution and Incrementality Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-4-1",
+          "title": "1. Enterprise Architecture & Mechanics of Attribution and Incrementality",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, attribution and incrementality separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, attribution and incrementality separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_4_script.js",
+              "language": "javascript",
+              "title": "Attribution and Incrementality — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Attribution and Incrementality\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-4-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing attribution and incrementality with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_4.ts",
+              "language": "typescript",
+              "title": "Attribution and Incrementality — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Attribution and Incrementality\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-4-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of attribution and incrementality:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_4.js",
+              "language": "javascript",
+              "title": "Attribution and Incrementality — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-05",
+    "title": "Advanced Smart Bidding and Value-Based Optimization",
+    "description": "Enterprise-level masterclass covering advanced smart bidding and value-based optimization with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 5,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering advanced smart bidding and value-based optimization in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise advanced smart bidding and value-based optimization like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for advanced smart bidding and value-based optimization",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering advanced smart bidding and value-based optimization enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Advanced Smart Bidding and Value-Based Optimization Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-5-1",
+          "title": "1. Enterprise Architecture & Mechanics of Advanced Smart Bidding and Value-Based Optimization",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, advanced smart bidding and value-based optimization separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, advanced smart bidding and value-based optimization separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_5_script.js",
+              "language": "javascript",
+              "title": "Advanced Smart Bidding and Value-Based Optimization — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Advanced Smart Bidding and Value-Based Optimization\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-5-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing advanced smart bidding and value-based optimization with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_5.ts",
+              "language": "typescript",
+              "title": "Advanced Smart Bidding and Value-Based Optimization — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Advanced Smart Bidding and Value-Based Optimization\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-5-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of advanced smart bidding and value-based optimization:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_5.js",
+              "language": "javascript",
+              "title": "Advanced Smart Bidding and Value-Based Optimization — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-06",
+    "title": "Advanced Search Campaign Experimentation",
+    "description": "Enterprise-level masterclass covering advanced search campaign experimentation with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 6,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering advanced search campaign experimentation in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise advanced search campaign experimentation like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for advanced search campaign experimentation",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering advanced search campaign experimentation enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Advanced Search Campaign Experimentation Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-6-1",
+          "title": "1. Enterprise Architecture & Mechanics of Advanced Search Campaign Experimentation",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, advanced search campaign experimentation separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, advanced search campaign experimentation separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_6_script.js",
+              "language": "javascript",
+              "title": "Advanced Search Campaign Experimentation — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Advanced Search Campaign Experimentation\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-6-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing advanced search campaign experimentation with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_6.ts",
+              "language": "typescript",
+              "title": "Advanced Search Campaign Experimentation — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Advanced Search Campaign Experimentation\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-6-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of advanced search campaign experimentation:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_6.js",
+              "language": "javascript",
+              "title": "Advanced Search Campaign Experimentation — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-07",
+    "title": "Google Ads Scripts and Automation Concepts",
+    "description": "Enterprise-level masterclass covering google ads scripts and automation concepts with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 7,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering google ads scripts and automation concepts in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise google ads scripts and automation concepts like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for google ads scripts and automation concepts",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering google ads scripts and automation concepts enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Google Ads Scripts and Automation Concepts Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-7-1",
+          "title": "1. Enterprise Architecture & Mechanics of Google Ads Scripts and Automation Concepts",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, google ads scripts and automation concepts separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, google ads scripts and automation concepts separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_7_script.js",
+              "language": "javascript",
+              "title": "Google Ads Scripts and Automation Concepts — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Google Ads Scripts and Automation Concepts\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-7-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing google ads scripts and automation concepts with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_7.ts",
+              "language": "typescript",
+              "title": "Google Ads Scripts and Automation Concepts — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Google Ads Scripts and Automation Concepts\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-7-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of google ads scripts and automation concepts:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_7.js",
+              "language": "javascript",
+              "title": "Google Ads Scripts and Automation Concepts — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-08",
+    "title": "Advanced Reporting and Dashboard Design",
+    "description": "Enterprise-level masterclass covering advanced reporting and dashboard design with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 8,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering advanced reporting and dashboard design in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise advanced reporting and dashboard design like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for advanced reporting and dashboard design",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering advanced reporting and dashboard design enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Advanced Reporting and Dashboard Design Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-8-1",
+          "title": "1. Enterprise Architecture & Mechanics of Advanced Reporting and Dashboard Design",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, advanced reporting and dashboard design separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, advanced reporting and dashboard design separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_8_script.js",
+              "language": "javascript",
+              "title": "Advanced Reporting and Dashboard Design — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Advanced Reporting and Dashboard Design\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-8-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing advanced reporting and dashboard design with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_8.ts",
+              "language": "typescript",
+              "title": "Advanced Reporting and Dashboard Design — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Advanced Reporting and Dashboard Design\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-8-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of advanced reporting and dashboard design:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_8.js",
+              "language": "javascript",
+              "title": "Advanced Reporting and Dashboard Design — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-09",
+    "title": "Lead Generation Quality and CRM Optimization",
+    "description": "Enterprise-level masterclass covering lead generation quality and crm optimization with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 9,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering lead generation quality and crm optimization in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise lead generation quality and crm optimization like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for lead generation quality and crm optimization",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering lead generation quality and crm optimization enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Lead Generation Quality and CRM Optimization Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-9-1",
+          "title": "1. Enterprise Architecture & Mechanics of Lead Generation Quality and CRM Optimization",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, lead generation quality and crm optimization separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, lead generation quality and crm optimization separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_9_script.js",
+              "language": "javascript",
+              "title": "Lead Generation Quality and CRM Optimization — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Lead Generation Quality and CRM Optimization\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-9-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing lead generation quality and crm optimization with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_9.ts",
+              "language": "typescript",
+              "title": "Lead Generation Quality and CRM Optimization — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Lead Generation Quality and CRM Optimization\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-9-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of lead generation quality and crm optimization:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_9.js",
+              "language": "javascript",
+              "title": "Lead Generation Quality and CRM Optimization — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-10",
+    "title": "E-commerce Profitability and MER Analysis",
+    "description": "Enterprise-level masterclass covering e-commerce profitability and mer analysis with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 10,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering e-commerce profitability and mer analysis in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise e-commerce profitability and mer analysis like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for e-commerce profitability and mer analysis",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering e-commerce profitability and mer analysis enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "E-commerce Profitability and MER Analysis Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-10-1",
+          "title": "1. Enterprise Architecture & Mechanics of E-commerce Profitability and MER Analysis",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, e-commerce profitability and mer analysis separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, e-commerce profitability and mer analysis separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_10_script.js",
+              "language": "javascript",
+              "title": "E-commerce Profitability and MER Analysis — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for E-commerce Profitability and MER Analysis\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-10-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing e-commerce profitability and mer analysis with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_10.ts",
+              "language": "typescript",
+              "title": "E-commerce Profitability and MER Analysis — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for E-commerce Profitability and MER Analysis\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-10-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of e-commerce profitability and mer analysis:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_10.js",
+              "language": "javascript",
+              "title": "E-commerce Profitability and MER Analysis — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-11",
+    "title": "Policy, Privacy, Consent, and Account Safety",
+    "description": "Enterprise-level masterclass covering policy, privacy, consent, and account safety with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 11,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering policy, privacy, consent, and account safety in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise policy, privacy, consent, and account safety like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for policy, privacy, consent, and account safety",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering policy, privacy, consent, and account safety enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Policy, Privacy, Consent, and Account Safety Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-11-1",
+          "title": "1. Enterprise Architecture & Mechanics of Policy, Privacy, Consent, and Account Safety",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, policy, privacy, consent, and account safety separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, policy, privacy, consent, and account safety separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_11_script.js",
+              "language": "javascript",
+              "title": "Policy, Privacy, Consent, and Account Safety — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Policy, Privacy, Consent, and Account Safety\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-11-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing policy, privacy, consent, and account safety with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_11.ts",
+              "language": "typescript",
+              "title": "Policy, Privacy, Consent, and Account Safety — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Policy, Privacy, Consent, and Account Safety\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-11-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of policy, privacy, consent, and account safety:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_11.js",
+              "language": "javascript",
+              "title": "Policy, Privacy, Consent, and Account Safety — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-12",
+    "title": "Advanced Troubleshooting and Performance Recovery",
+    "description": "Enterprise-level masterclass covering advanced troubleshooting and performance recovery with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 12,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering advanced troubleshooting and performance recovery in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise advanced troubleshooting and performance recovery like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for advanced troubleshooting and performance recovery",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering advanced troubleshooting and performance recovery enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Advanced Troubleshooting and Performance Recovery Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-12-1",
+          "title": "1. Enterprise Architecture & Mechanics of Advanced Troubleshooting and Performance Recovery",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, advanced troubleshooting and performance recovery separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, advanced troubleshooting and performance recovery separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_12_script.js",
+              "language": "javascript",
+              "title": "Advanced Troubleshooting and Performance Recovery — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Advanced Troubleshooting and Performance Recovery\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-12-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing advanced troubleshooting and performance recovery with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_12.ts",
+              "language": "typescript",
+              "title": "Advanced Troubleshooting and Performance Recovery — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Advanced Troubleshooting and Performance Recovery\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-12-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of advanced troubleshooting and performance recovery:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_12.js",
+              "language": "javascript",
+              "title": "Advanced Troubleshooting and Performance Recovery — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-13",
+    "title": "Enterprise Multi-Account Architecture and MCC Management",
+    "description": "Enterprise-level masterclass covering enterprise multi-account architecture and mcc management with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 13,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering enterprise multi-account architecture and mcc management in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise enterprise multi-account architecture and mcc management like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for enterprise multi-account architecture and mcc management",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering enterprise multi-account architecture and mcc management enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Enterprise Multi-Account Architecture and MCC Management Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-13-1",
+          "title": "1. Enterprise Architecture & Mechanics of Enterprise Multi-Account Architecture and MCC Management",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, enterprise multi-account architecture and mcc management separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, enterprise multi-account architecture and mcc management separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_13_script.js",
+              "language": "javascript",
+              "title": "Enterprise Multi-Account Architecture and MCC Management — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Enterprise Multi-Account Architecture and MCC Management\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-13-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing enterprise multi-account architecture and mcc management with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_13.ts",
+              "language": "typescript",
+              "title": "Enterprise Multi-Account Architecture and MCC Management — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Enterprise Multi-Account Architecture and MCC Management\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-13-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of enterprise multi-account architecture and mcc management:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_13.js",
+              "language": "javascript",
+              "title": "Enterprise Multi-Account Architecture and MCC Management — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-14",
+    "title": "Advanced Campaign Scaling and Diminishing Marginal Returns Strategy",
+    "description": "Enterprise-level masterclass covering advanced campaign scaling and diminishing marginal returns strategy with offline CRM syncing, sGTM, scripts automation, and geo-testing.",
+    "level": "advanced",
+    "orderIndex": 14,
+    "status": "locked",
+    "requiresQuiz": false,
+    "type": "theory",
+    "duration": "60 mins",
+    "xpReward": 200,
+    "lessonContent": {
+      "overview": "Elite enterprise masterclass covering advanced campaign scaling and diminishing marginal returns strategy in Google Ads. Master programmatic automation, offline CRM conversion loops, Server-Side Tagging, incrementality testing, and profit-driven scaling architectures.",
+      "analogyHero": "Think of enterprise advanced campaign scaling and diminishing marginal returns strategy like high-frequency algorithmic financial trading: success depends on closed-loop feedback, programmatic risk boundaries, and mathematical incrementality over platform vanity metrics.",
+      "objectives": [
+        "Master enterprise-scale strategies for advanced campaign scaling and diminishing marginal returns strategy",
+        "Deploy automated Google Ads Scripts, sGTM architecture, or offline conversion data pipelines",
+        "Execute geo-holdout experiments and multi-touch data-driven attribution models",
+        "Build resilient performance marketing systems resistant to algorithmic volatility and tracking loss"
+      ],
+      "estimatedTime": "60 mins",
+      "keyTakeaways": [
+        "Integrate offline CRM conversion signals to optimize Smart Bidding toward qualified pipeline and closed revenue.",
+        "Deploy Server-Side GTM and Consent Mode v2 to ensure privacy compliance and robust data hygiene.",
+        "Validate platform-reported ROAS through controlled geo-holdout incrementality experiments."
+      ],
+      "summary": "Mastering advanced campaign scaling and diminishing marginal returns strategy enables enterprise marketing architects to manage multimillion-dollar budgets with deterministic revenue attribution and profit maximization.",
+      "syntaxGuide": "// Incremental ROAS:\niROAS = (Test Revenue - Counterfactual Baseline Revenue) / Test Ad Spend\n// POAS (Profit On Ad Spend):\nPOAS = Gross Profit Margin / Ad Spend",
+      "practiceExercises": [
+        {
+          "title": "Advanced Campaign Scaling and Diminishing Marginal Returns Strategy Enterprise Architecture Challenge",
+          "instructions": "A B2B SaaS account reports a 5.0x platform ROAS, but CRM data shows that 75% of leads never reach qualified discovery calls. Architect an Offline Conversion Import (OCI) pipeline and Value-Based Bidding model to solve this.",
+          "starterCode": "const ociStrategy = {\n  milestoneConversions: [],\n  valueWeights: {},\n  biddingAdjustment: ''\n};",
+          "solutionCode": "const ociStrategy = {\n  milestoneConversions: ['MQL_Qualified_Lead', 'SQL_Discovery_Completed', 'Opportunity_Won'],\n  valueWeights: { MQL: 50, SQL: 350, Won: 5000 },\n  biddingAdjustment: 'Switch to Maximize Conversion Value with Target ROAS calibrated to closed pipeline'\n};"
+        }
+      ],
+      "sections": [
+        {
+          "id": "sec-adv-14-1",
+          "title": "1. Enterprise Architecture & Mechanics of Advanced Campaign Scaling and Diminishing Marginal Returns Strategy",
+          "difficulty": "Advanced",
+          "content": "At the highest levels of performance marketing, advanced campaign scaling and diminishing marginal returns strategy separates amateur media buyers from elite growth engineers. When managing high-velocity budgets across global markets, advertisers must transition from manual adjustments to programmatic governance, first-party data infrastructure, and mathematical unit economics.\n\n### Core Strategic Pillars\n- **First-Party Data Primacy**: Leveraging Server-Side GTM, Consent Mode v2, and Enhanced Conversions to ensure data resilience in a post-cookie landscape.\n- **Value-Based Optimization (VBO)**: Feeding downstream CRM revenue, profit margins, and customer lifetime value (LTV) directly into Smart Bidding algorithms.\n- **Scientific Incrementality**: Distinguishing between organic baseline conversions and true paid ad incrementality via controlled geo-experiments.",
+          "explanation": "At the highest levels of performance marketing, advanced campaign scaling and diminishing marginal returns strategy separates amateur media buyers from elite growth engineers through first-party data pipelines and programmatic controls.",
+          "codeSnippets": [
+            {
+              "filename": "enterprise_14_script.js",
+              "language": "javascript",
+              "title": "Advanced Campaign Scaling and Diminishing Marginal Returns Strategy — Google Ads Automated Enterprise Health Script",
+              "code": "// Google Ads Automated Script for Advanced Campaign Scaling and Diminishing Marginal Returns Strategy\nfunction main() {\n  const config = {\n    spendAnomalyThresholdPercent: 35,\n    slackWebhookUrl: 'https://hooks.slack.com/services/T00/B00/XXXX',\n    emailAlerts: 'growth-team@enterprise.com'\n  };\n\n  const campaignIterator = AdsApp.campaigns()\n    .withCondition('Status = ENABLED')\n    .withCondition('Cost > 100')\n    .forDateRange('TODAY')\n    .get();\n\n  const alerts = [];\n\n  while (campaignIterator.hasNext()) {\n    const campaign = campaignIterator.next();\n    const stats = campaign.getStatsFor('TODAY');\n    const budget = campaign.getBudget().getAmount();\n    const spend = stats.getCost();\n\n    if (spend > budget * 1.8) {\n      alerts.push(`[ALERT] Campaign \"${campaign.getName()}\" has spent $${spend.toFixed(2)} vs $${budget.toFixed(2)} daily budget.`);\n    }\n  }\n\n  if (alerts.length > 0) {\n    MailApp.sendEmail(config.emailAlerts, 'Google Ads Automated Spend Anomaly Alert', alerts.join('\\n'));\n    console.log('[Automation] Alerts dispatched successfully:', alerts.length);\n  } else {\n    console.log('[Automation] All campaigns operating within standard spend parameters.');\n  }\n}",
+              "lineByLine": [
+                {
+                  "line": "const config = { ... }",
+                  "explanation": "Defines configuration parameters, spend thresholds, and notification endpoints for enterprise monitoring."
+                },
+                {
+                  "line": "const campaignIterator = AdsApp.campaigns() ...",
+                  "explanation": "Queries active Google Ads campaigns spending budget in real time using AdsApp selectors."
+                },
+                {
+                  "line": "if (spend > budget * 1.8) { ... }",
+                  "explanation": "Evaluates spend velocity against daily budgets and triggers automated alerts upon anomaly detection."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "What are the two mandatory consent parameters required by Google Consent Mode v2 for EEA traffic?",
+            "options": [
+              "ad_user_data and ad_personalization",
+              "analytics_storage and user_id",
+              "security_storage and geo_location",
+              "cookie_domain and session_id"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Consent Mode v2 introduced ad_user_data and ad_personalization as mandatory flags to communicate user consent for advertising data and remarketing in the EEA."
+          },
+          "proTip": "Run automated JavaScript scripts nightly to audit broken landing page URLs and detect sudden spend anomalies.",
+          "commonMistakes": [
+            "Ignoring Consent Mode v2 parameters, which disables audience modeling and remarketing lists in the EU.",
+            "Relying entirely on platform-reported in-platform ROAS without verifying CRM closed revenue."
+          ]
+        },
+        {
+          "id": "sec-adv-14-2",
+          "title": "2. Programmatic Execution & Technical Blueprints",
+          "difficulty": "Advanced",
+          "content": "Executing advanced campaign scaling and diminishing marginal returns strategy with institutional rigor requires:\n\n1. **Automation Pipelines**: Deploy Google Ads JavaScript scripts and BigQuery data exports to monitor spend anomalies, brand query cannibalization, and broken final URLs in real time.\n2. **Offline Data Ingestion**: Map CRM deal stages (MQL, SQL, Won Revenue) to Google Click IDs (GCLID/Gbraid) and upload hashed conversion adjustments daily.\n3. **Continuous Hypothesis Testing**: Run 50/50 Campaign Drafts & Experiments to validate bidding targets and creative angles before allocating capital.",
+          "explanation": "Executing with institutional rigor involves automated JavaScript scripts, BigQuery data streams, and daily offline CRM conversion uploads.",
+          "codeSnippets": [
+            {
+              "filename": "offline_conversion_uploader_14.ts",
+              "language": "typescript",
+              "title": "Advanced Campaign Scaling and Diminishing Marginal Returns Strategy — Offline Conversion Import (OCI) Generator",
+              "code": "// Offline Conversion Import (OCI) Payload Generator for Advanced Campaign Scaling and Diminishing Marginal Returns Strategy\ninterface CrmClosedDeal {\n  gclid: string;\n  conversionActionName: string; // e.g., 'CRM_Closed_Won_Deal'\n  conversionTime: string; // 'yyyy-mm-dd hh:mm:ss+tz'\n  dealValue: number;\n  currency: string;\n}\n\nexport function formatGoogleAdsConversionPayload(deal: CrmClosedDeal) {\n  return {\n    googleClickId: deal.gclid,\n    conversionCustomVariable: deal.conversionActionName,\n    conversionDateTime: deal.conversionTime,\n    conversionValue: deal.dealValue,\n    conversionCurrency: deal.currency,\n    userIdentifierSource: 'FIRST_PARTY',\n    status: 'READY_FOR_API_DISPATCH'\n  };\n}\n\n// Example CRM Closed-Won Deal Payload\nconsole.log(formatGoogleAdsConversionPayload({\n  gclid: 'Cj0KCQjw_sample_gclid_enterprise_99812',\n  conversionActionName: 'Enterprise_Contract_Signed',\n  conversionTime: '2026-09-12 14:30:00-05:00',\n  dealValue: 24500.00,\n  currency: 'USD'\n}));",
+              "lineByLine": [
+                {
+                  "line": "interface CrmClosedDeal { ... }",
+                  "explanation": "Defines TypeScript interface for downstream CRM closed deals linked to Google Click IDs."
+                },
+                {
+                  "line": "return { googleClickId: deal.gclid, ... }",
+                  "explanation": "Formats API-compliant conversion upload payload matching Google Ads REST API specifications."
+                },
+                {
+                  "line": "dealValue: 24500.00",
+                  "explanation": "Demonstrates production formatting feeding high-value $24,500 contract closing data into Smart Bidding."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "Why is Offline Conversion Import (OCI) crucial for high-ticket B2B and lead generation companies?",
+            "options": [
+              "It passes actual closed revenue and qualified deal milestones back to Google Ads, enabling Smart Bidding to optimize for paying customers instead of junk leads",
+              "It bypasses Google ad policy approvals automatically",
+              "It gives advertisers free ad credits every month",
+              "It removes all negative keyword requirements"
+            ],
+            "correctAnswer": 0,
+            "explanation": "OCI grounds the machine learning algorithm in actual revenue and downstream deal stages rather than superficial initial lead form fills."
+          },
+          "proTip": "Capture GCLID, GBRAID, and WBRAID URL parameters at the moment of form submission and store them permanently on the CRM contact record.",
+          "commonMistakes": [
+            "Uploading offline conversions with timestamps older than 90 days, which Google Ads cannot attribute.",
+            "Failing to include transaction currency codes in offline conversion upload files."
+          ]
+        },
+        {
+          "id": "sec-adv-14-3",
+          "title": "3. High-Scale Enterprise Case Study",
+          "difficulty": "Advanced",
+          "content": "An enterprise B2B SaaS platform and global DTC e-commerce conglomerate deployed the advanced frameworks of advanced campaign scaling and diminishing marginal returns strategy:\n- **Increased Net Closed-Won Revenue by 142%**\n- **Slashed Wasted Brand Cannibalization Spend by $340,000 Annually**\n- **Achieved 99.4% Attribution Accuracy across European and North American Territories via Consent Mode v2 and sGTM**",
+          "explanation": "Deploying statistical geo-holdout tests and offline conversion ingestion unlocks massive revenue lift while cutting non-incremental ad waste.",
+          "codeSnippets": [
+            {
+              "filename": "geo_experiment_analyzer_14.js",
+              "language": "javascript",
+              "title": "Advanced Campaign Scaling and Diminishing Marginal Returns Strategy — Statistical Geo-Holdout Incrementality Calculator",
+              "code": "// Statistical Geo-Holdout Incrementality Calculator\nfunction calculateGeoIncrementality(controlGroup, testGroup) {\n  // Pre-test baseline vs post-test revenue\n  const controlGrowth = (controlGroup.postRevenue - controlGroup.preRevenue) / controlGroup.preRevenue;\n  const expectedTestRevenue = testGroup.preRevenue * (1 + controlGrowth);\n  const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;\n  const incrementalRoas = incrementalRevenue / testGroup.adSpend;\n\n  return {\n    controlGrowthRate: `${(controlGrowth * 100).toFixed(2)}%`,\n    actualTestRevenue: `$${testGroup.postRevenue.toLocaleString()}`,\n    counterfactualBaseline: `$${Math.round(expectedTestRevenue).toLocaleString()}`,\n    netIncrementalRevenue: `$${Math.round(incrementalRevenue).toLocaleString()}`,\n    incrementalRoas: `${incrementalRoas.toFixed(2)}x`,\n    isIncrementallyProfitable: incrementalRoas > 1.0\n  };\n}\n\nconsole.log(calculateGeoIncrementality(\n  { preRevenue: 500000, postRevenue: 525000 }, // Control (No Ad Spend)\n  { preRevenue: 500000, postRevenue: 680000, adSpend: 60000 } // Test (With Google Ads Spend)\n));",
+              "lineByLine": [
+                {
+                  "line": "const controlGrowth = ...",
+                  "explanation": "Calculates counterfactual baseline revenue in control regions vs test regions to isolate organic demand."
+                },
+                {
+                  "line": "const incrementalRevenue = testGroup.postRevenue - expectedTestRevenue;",
+                  "explanation": "Computes true Net Incremental Revenue and Incremental ROAS generated strictly by paid ads."
+                },
+                {
+                  "line": "incrementalRoas > 1.0",
+                  "explanation": "Executes geo-experiment simulation proving incremental profitability ($155k lift on $60k spend = 2.58x iROAS)."
+                }
+              ]
+            }
+          ],
+          "miniPractice": {
+            "question": "How does a Geo-Holdout Experiment measure true ad incrementality?",
+            "options": [
+              "By comparing revenue in test regions (where ads run) against counterfactual baseline revenue modeled from matched control regions (where ads are turned off)",
+              "By asking website visitors in a survey if they remember seeing an ad",
+              "By counting total clicks in Google Analytics",
+              "By increasing bids by 100% across all keywords simultaneously"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Geo-holdout experiments isolate organic baseline demand from paid ad lift by comparing matched geographic treatment and control cells."
+          },
+          "proTip": "Run matched-market geo-holdout tests for 4 to 6 weeks to establish accurate Incremental ROAS (iROAS) benchmarks.",
+          "commonMistakes": [
+            "Selecting non-homogeneous geographic markets without historical correlation for control and treatment groups.",
+            "Ending geo-experiments prematurely before reaching statistical power."
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-p1",
+    "title": "Advanced Project 1: Multi-Channel Performance Marketing System",
+    "description": "Architect and execute an enterprise multi-channel acquisition system across Search, PMax, YouTube, sGTM, Consent Mode v2, and Offline CRM feedback.",
+    "level": "advanced",
+    "orderIndex": 15,
+    "status": "locked",
+    "requiresQuiz": false,
+    "isProject": true,
+    "type": "project",
+    "duration": "300 mins",
+    "xpReward": 600,
+    "projectDetails": {
+      "overview": "You are the VP of Growth / Principal Performance Marketing Architect for OmniHealth Global, a hybrid telemedicine and premium health subscription platform spending $150,000/month across North America. You must design and build a multi-channel acquisition system integrating Search, Performance Max, YouTube Shorts/In-Stream, Display Remarketing, Server-Side GTM, Consent Mode v2, and Offline CRM Conversion Imports.",
+      "scenario": "You are the VP of Growth / Principal Performance Marketing Architect for OmniHealth Global, a hybrid telemedicine and premium health subscription platform spending $150,000/month across North America. You must design and build a multi-channel acquisition system integrating Search, Performance Max, YouTube Shorts/In-Stream, Display Remarketing, Server-Side GTM, Consent Mode v2, and Offline CRM Conversion Imports.",
+      "estimatedHours": "5 hours",
+      "learningObjectives": [
+        "Architect an enterprise multi-channel acquisition blueprint across Search, PMax, YouTube, and Display",
+        "Deploy Server-Side GTM and Google Consent Mode v2 with Enhanced Conversions architecture",
+        "Engineer a bidirectional CRM offline conversion pipeline linking qualified consultations to Google Ads",
+        "Design value-based bidding (VBB) rules and a profit-driven budget allocation matrix",
+        "Build an automated Google Ads Script suite for spend anomaly detection and query governance"
+      ],
+      "objectives": [
+        "Architect an enterprise multi-channel acquisition blueprint across Search, PMax, YouTube, and Display",
+        "Deploy Server-Side GTM and Google Consent Mode v2 with Enhanced Conversions architecture",
+        "Engineer a bidirectional CRM offline conversion pipeline linking qualified consultations to Google Ads",
+        "Design value-based bidding (VBB) rules and a profit-driven budget allocation matrix",
+        "Build an automated Google Ads Script suite for spend anomaly detection and query governance"
+      ],
+      "requirements": [
+        "Segment campaigns across Brand, Non-Brand Search, PMax, and YouTube Demand Gen",
+        "Implement Server-Side GTM container with Consent Mode v2 (ad_user_data, ad_personalization)",
+        "Engineer Offline Conversion Import pipeline passing CRM deal values back into Google Ads",
+        "Configure Value-Based Bidding with Conversion Value Rules for geographic and audience tiers",
+        "Write and deploy Google Ads automated scripts for spend anomaly and 404 URL detection",
+        "Formulate a 90-day scaling plan with statistical geo-holdout experiment framework"
+      ],
+      "deliverables": [
+        "1. Enterprise Account & Channel Architecture (Search STAGs, Brand Isolation, PMax, YouTube, Display Remarketing)",
+        "2. Customer Journey Mapping & Funnel Taxonomy (Top-of-funnel awareness to bottom-of-funnel subscription activation)",
+        "3. Master Campaign Naming & Labeling Framework (Enterprise taxonomy across regions, objectives, and bidding models)",
+        "4. High-Intent Search Keyword & Match-Type Blueprint (Non-brand telehealth, prescription therapy, specialist consultations)",
+        "5. Cross-Campaign Negative Keyword Sculpting Plan (Automated scripts, shared lists, and brand exclusion parameters)",
+        "6. Comprehensive Creative Asset Engine (15-headline RSAs, PMax assets in all ratios, video scripts, sitelinks, callouts)",
+        "7. Technical Server-Side GTM & Consent Mode v2 Architecture (sGTM container schema, ad_user_data/ad_personalization compliance)",
+        "8. Offline Conversion Import (OCI) & CRM Integration Plan (GCLID/Gbraid capture, HIPAA-compliant hashing, revenue mapping)",
+        "9. Value-Based Smart Bidding (VBB) Model (Conversion Value Rules by geo/audience, Target ROAS / Target CPA calibration)",
+        "10. Automated Google Ads Scripts Suite (Spend anomaly alerts, broken URL checkers, zero-impression keyword monitors)",
+        "11. Executive KPI & Blended MER Dashboard Specification (MER, POAS, New Customer CAC, Assisted Conversions, Lost IS)",
+        "12. 90-Day Scaling, Experimentation & Incrementality Roadmap (Geo-holdout test protocol, bid strategy testing, quarterly reviews)"
+      ],
+      "rubric": [
+        {
+          "criteria": "Enterprise Multi-Channel Architecture",
+          "criterion": "Enterprise Multi-Channel Architecture",
+          "weight": "25%",
+          "description": "Flawless channel segmentation, brand isolation, and coordinated multi-channel acquisition strategy."
+        },
+        {
+          "criteria": "Measurement, Consent Mode v2 & CRM Pipeline",
+          "criterion": "Measurement, Consent Mode v2 & CRM Pipeline",
+          "weight": "25%",
+          "description": "Compliant Server-Side GTM architecture, Consent Mode v2 parameters, and robust offline CRM closed-loop feedback."
+        },
+        {
+          "criteria": "Value-Based Bidding & Profit Optimization",
+          "criterion": "Value-Based Bidding & Profit Optimization",
+          "weight": "25%",
+          "description": "Advanced Conversion Value Rules, Target ROAS calibration, and blended MER revenue alignment."
+        },
+        {
+          "criteria": "Automation, Governance & Experimentation",
+          "criterion": "Automation, Governance & Experimentation",
+          "weight": "25%",
+          "description": "Automated script deployment, statistical geo-holdout testing methodology, and 90-day scaling roadmap."
+        }
+      ],
+      "submissionChecklist": [
+        "Designed multi-campaign blueprint isolating Brand Search, Non-Brand Search, and Performance Max",
+        "Configured Google Consent Mode v2 parameters (ad_user_data, ad_personalization)",
+        "Mapped CRM Offline Conversion Import schema with GCLID and milestone values",
+        "Created custom Conversion Value Rules for high-LTV geographic and audience segments",
+        "Drafted complete Google Ads Script for spend anomaly and broken URL monitoring",
+        "Formulated 90-day scaling plan with statistical geo-holdout experiment framework"
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-p2",
+    "title": "Advanced Project 2: Google Ads Audit and Recovery Case Study",
+    "description": "Perform a forensic 10-dimension audit and execute a 30/60/90-day turnaround recovery playbook for an enterprise B2B SaaS account.",
+    "level": "advanced",
+    "orderIndex": 16,
+    "status": "locked",
+    "requiresQuiz": false,
+    "isProject": true,
+    "type": "project",
+    "duration": "300 mins",
+    "xpReward": 600,
+    "projectDetails": {
+      "overview": "You are retained as an Elite Google Ads Turnaround Consultant by CyberShield Cloud Security, an enterprise B2B SaaS company spending $80,000/month. Over the last 90 days, CPA spiked by 210%, lead quality plummeted (sales team reports 80% spam leads), and the account entered a Smart Bidding death spiral. You must perform an audit across all 10 core dimensions and produce a 30/60/90-day turnaround recovery playbook.",
+      "scenario": "You are retained as an Elite Google Ads Turnaround Consultant by CyberShield Cloud Security, an enterprise B2B SaaS company spending $80,000/month. Over the last 90 days, CPA spiked by 210%, lead quality plummeted (sales team reports 80% spam leads), and the account entered a Smart Bidding death spiral. You must perform an audit across all 10 core dimensions and produce a 30/60/90-day turnaround recovery playbook.",
+      "estimatedHours": "5 hours",
+      "learningObjectives": [
+        "Conduct an exhaustive 10-dimension forensic audit of the failing Google Ads account",
+        "Diagnose the exact root causes of CPA inflation, bot lead spam, and Smart Bidding instability",
+        "Formulate prioritized immediate triage actions (Days 1–7), stabilization fixes (Days 8–30), and scaling systems (Days 31–90)",
+        "Re-engineer conversion tracking, negative keyword lists, ad copy, landing pages, and bid strategies",
+        "Model financial recovery assumptions and construct an executive risk register"
+      ],
+      "objectives": [
+        "Conduct an exhaustive 10-dimension forensic audit of the failing Google Ads account",
+        "Diagnose the exact root causes of CPA inflation, bot lead spam, and Smart Bidding instability",
+        "Formulate prioritized immediate triage actions (Days 1–7), stabilization fixes (Days 8–30), and scaling systems (Days 31–90)",
+        "Re-engineer conversion tracking, negative keyword lists, ad copy, landing pages, and bid strategies",
+        "Model financial recovery assumptions and construct an executive risk register"
+      ],
+      "requirements": [
+        "Complete 10-dimension forensic audit scorecard evaluating tracking, structure, and keywords",
+        "Identify and remediate conversion tracking double counting and bot spam lead vulnerabilities",
+        "Formulate immediate Emergency Triage Plan (Days 1-7) to stop immediate budget bleed",
+        "Rebuild keyword and ad group architecture into disciplined Single-Theme Ad Groups",
+        "Develop 30/60/90-Day Turnaround Roadmap with Value-Based Bidding and CRM syncing",
+        "Construct financial recovery model demonstrating CPA reduction from $280 to $85"
+      ],
+      "deliverables": [
+        "1. Executive Summary & Audit Scorecard (Overall account health grade, lost revenue analysis, immediate risk assessment)",
+        "2. Conversion Tracking & Tagging Forensic Audit (Double counting identification, primary vs secondary misconfigurations, GTM issues)",
+        "3. Account Structure & Cannibalization Analysis (Broad match bleed, brand vs non-brand mixing, PMax query overlap)",
+        "4. Search Terms & Wasted Spend Diagnostic (Quantified wasted ad spend on non-commercial, competitor, and student queries)",
+        "5. Quality Score & Ad Relevance Forensic Matrix (Breakdown of eCTR, Ad Relevance, and Landing Page Experience across top spenders)",
+        "6. Ad Copy & Creative Asset Audit (RSA asset diversity, pinning misuse, missing extensions, low CTR copy angles)",
+        "7. Landing Page Conversion Architecture Audit (Speed bottlenecks, mobile form friction, lack of trust signals, spam bot vulnerabilities)",
+        "8. Bidding Strategy & Budget Pacing Diagnosis (Smart Bidding learning resets, unrealistic tCPA targets, Lost IS Budget vs Rank)",
+        "9. Lead Quality & CRM Feedback Loop Audit (Bot spam causes, lack of reCAPTCHA v3, absence of offline conversion imports)",
+        "10. Immediate Emergency Triage Action Plan (Days 1–7 actions to stop bleeding $25,000/mo in wasted spend)",
+        "11. 30/60/90-Day Full Account Turnaround Roadmap (Stabilization, structural rebuild, value-based scaling)",
+        "12. Financial Recovery Model & Risk Register (Expected CPA reduction from $280 to $85, projected ROI lift, and mitigation strategies)"
+      ],
+      "rubric": [
+        {
+          "criteria": "Forensic Depth & Root-Cause Diagnosis",
+          "criterion": "Forensic Depth & Root-Cause Diagnosis",
+          "weight": "25%",
+          "description": "Exhaustive data analysis identifying exact mechanisms of tracking breakdown, wasted spend, and bidding failure."
+        },
+        {
+          "criteria": "Technical Remediation & GTM Engineering",
+          "criterion": "Technical Remediation & GTM Engineering",
+          "weight": "25%",
+          "description": "Clear, correct technical fixes for conversion tracking, spam prevention (reCAPTCHA/turnstile), and CRM syncing."
+        },
+        {
+          "criteria": "Actionable Triage & 30/60/90 Roadmap",
+          "criterion": "Actionable Triage & 30/60/90 Roadmap",
+          "weight": "25%",
+          "description": "Prioritized, realistic timeline from emergency Day 1 triage to long-term value-based bidding scaling."
+        },
+        {
+          "criteria": "Financial Modeling & Executive Delivery",
+          "criterion": "Financial Modeling & Executive Delivery",
+          "weight": "25%",
+          "description": "Professional executive presentation, mathematical unit economics recovery model, and thorough risk register."
+        }
+      ],
+      "submissionChecklist": [
+        "Completed 10-dimension forensic audit scorecard with quantified wasted spend analysis",
+        "Identified tracking discrepancies and resolved primary vs secondary conversion errors",
+        "Designed bot spam prevention protocol with reCAPTCHA v3 and CRM-qualified lead tracking",
+        "Restructured failing ad groups into disciplined Single-Theme Ad Groups (STAGs)",
+        "Formulated emergency Day 1–7 triage protocol to halt immediate budget bleed",
+        "Delivered 30/60/90-day turnaround roadmap with financial recovery assumptions"
+      ]
+    }
+  },
+  {
+    "id": "gads-adv-assessment",
+    "title": "Level 3: Google Ads Advanced Master Final Assessment",
+    "description": "Master certification exam covering enterprise automation, offline conversions, sGTM, Consent Mode v2, incrementality, and recovery audits.",
+    "level": "advanced",
+    "orderIndex": 17,
+    "status": "locked",
+    "requiresQuiz": true,
+    "isFinalAssessment": true,
+    "type": "quiz",
+    "duration": "90 mins",
+    "xpReward": 600,
+    "passingScore": 35,
+    "totalQuestions": 40,
+    "questions": [
+      {
+        "id": 1,
+        "topic": "Offline Conversion Imports (OCI)",
+        "question": "How does Offline Conversion Import (OCI) bridge the gap between initial Google ad clicks and downstream CRM revenue?",
+        "options": [
+          "By guessing which leads converted using zip codes",
+          "By capturing the Google Click ID (GCLID) or Gbraid/Wbraid upon web form submission, storing it in the CRM alongside the lead record, and uploading converted sales milestones back to Google Ads via API or scheduled spreadsheet",
+          "By automatically sending physical mail to prospective customers",
+          "By replacing Google Ads with Salesforce reporting"
+        ],
+        "correctAnswer": 1,
+        "explanation": "OCI tracks the GCLID/Gbraid from the ad click through web form submission into the CRM. When a lead advances to a Qualified Lead, Closed Deal, or Won Revenue stage, the CRM transmits the timestamped GCLID and monetary value back to Google Ads, feeding downstream business value into Smart Bidding."
+      },
+      {
+        "id": 2,
+        "topic": "Google Consent Mode v2",
+        "question": "Under the EU Digital Markets Act (DMA) enforcement of Google Consent Mode v2, which two new consent parameters became mandatory for advertising personalization and remarketing?",
+        "options": [
+          "ad_storage and analytics_storage only",
+          "ad_user_data and ad_personalization",
+          "cookie_consent and banner_accepted",
+          "ip_masking and geo_filtering"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Consent Mode v2 introduced `ad_user_data` (consent for sending user data to Google for advertising) and `ad_personalization` (consent for personalized ads/remarketing). Without these parameters, audiences and conversion modeling for EEA traffic are severely degraded."
+      },
+      {
+        "id": 3,
+        "topic": "Performance Max Brand Cannibalization",
+        "question": "How can an enterprise advertiser prevent Performance Max from taking credit for high-converting branded search queries and cannibalizing dedicated Brand Search campaigns?",
+        "options": [
+          "There is no way to prevent Performance Max from bidding on brand terms",
+          "Apply a Brand Exclusion List to the Performance Max campaign via Campaign Settings (or request account-level negative keywords via Google Support)",
+          "Pause the Performance Max campaign on weekends",
+          "Lower the daily budget to $1.00"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Advertisers can create a Brand List in the Shared Library and apply it as a Brand Exclusion in Performance Max campaign settings, ensuring PMax bids exclusively on non-brand prospecting inventory while dedicated Brand campaigns retain strict control over brand traffic."
+      },
+      {
+        "id": 4,
+        "topic": "Marketing Efficiency Ratio (MER)",
+        "question": "How is the Marketing Efficiency Ratio (MER, or Blended ROAS) calculated, and why is it essential for omnichannel profitability analysis?",
+        "options": [
+          "MER = Google Ads Cost / Google Ads Clicks",
+          "MER = Total Ecosystem Revenue / Total Marketing Ad Spend Across All Channels; it provides a single source of truth that avoids channel-attribution double counting",
+          "MER = Website Pageviews / Conversion Rate",
+          "MER = Total Email Subscribers / Monthly Ad Spend"
+        ],
+        "correctAnswer": 1,
+        "explanation": "MER (Total Revenue / Total Ad Spend) measures blended business efficiency across all channels (Google, Meta, TikTok, Email, Organic). It eliminates intra-platform attribution overlap where each ad network claims 100% credit for the same sale."
+      },
+      {
+        "id": 5,
+        "topic": "Google Ads Scripts Automation",
+        "question": "Which Google Ads Script function is commonly used to automate daily budget anomaly detection and email alerts when spend exceeds expected pacing?",
+        "options": [
+          "AdsApp.createCampaign() only",
+          "AdsApp.campaigns().withCondition(\"Status = ENABLED\").get() combined with MailApp.sendEmail() or UrlFetchApp for Slack webhooks",
+          "document.getElementById(\"budget_box\")",
+          "window.localStorage.getItem(\"spend\")"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Google Ads Scripts use `AdsApp` selectors to query campaign telemetry and execute actions or dispatch alerts via `MailApp.sendEmail()` or `UrlFetchApp.fetch()` to external Webhooks (e.g., Slack/Discord) when spend spikes unexpectedly."
+      },
+      {
+        "id": 6,
+        "topic": "Data-Driven Attribution (DDA)",
+        "question": "How does Google Ads Data-Driven Attribution (DDA) model conversion credit across multi-touch customer search journeys?",
+        "options": [
+          "It assigns 100% of conversion credit to the very first ad clicked",
+          "It uses machine learning to evaluate all interacting click paths (both converting and non-converting) to statistically distribute fractional conversion credit based on how each ad touchpoint shifted conversion probability",
+          "It gives equal 25% credit to the last 4 clicks regardless of timing",
+          "It gives 100% credit to the last paid click only"
+        ],
+        "correctAnswer": 1,
+        "explanation": "DDA analyzes account conversion paths using sophisticated algorithmic modeling, comparing converting paths against paths that did not convert to calculate the true incremental contribution of each keyword and campaign touchpoint."
+      },
+      {
+        "id": 7,
+        "topic": "Geo-Experimentation & Incrementality Testing",
+        "question": "How does an advertiser conduct a statistically valid Geo-Holdout Experiment to measure the true incrementality of Non-Brand Search campaigns?",
+        "options": [
+          "Turn ads on for 3 days, then off for 3 days across the entire country",
+          "Segment matched geographic clusters (e.g., 20 control DMAs vs 20 test DMAs with identical historical sales trends), turn off non-brand search ads in the control markets, and measure the net lift in organic + paid total sales in test markets",
+          "Ask customers on a phone survey where they first heard of the company",
+          "Compare this year’s December sales to last year’s July sales"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Geo-experiments split matched geographic regions (Designated Market Areas) into Test and Control groups. Holding out ad spend in control regions isolates baseline organic demand and proves the true incremental revenue generated by paid search."
+      },
+      {
+        "id": 8,
+        "topic": "Value-Based Bidding (VBB) with Conversion Value Rules",
+        "question": "How can an enterprise advertiser use Google Ads Conversion Value Rules to train Smart Bidding algorithms to prioritize high-value customer segments?",
+        "options": [
+          "By manually clicking on your own ads from those locations",
+          "By creating rules that multiply conversion values by a factor (e.g., 1.5x) based on geographic location, specific audience lists (e.g., past high-LTV buyers), or device types",
+          "By blocking all users who use mobile phones",
+          "By doubling the daily budget every Friday afternoon"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Conversion Value Rules allow advertisers to adjust conversion values in real time based on geographic criteria, audience membership, or device, steering Smart Bidding algorithms toward bidding aggressively on high-LTV customer cohorts."
+      },
+      {
+        "id": 9,
+        "topic": "Account Suspension Defense: Circumventing Systems",
+        "question": "Which advertiser action triggers an immediate, severe \"Circumventing Systems\" account suspension in Google Ads?",
+        "options": [
+          "Updating headline copy once per month",
+          "Using cloaking to show different landing page content to Google review bots than to real human users, or attempting to recreate new ad accounts to bypass an active suspension",
+          "Adding 10 new negative keywords",
+          "Switching billing credit cards with bank notification"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Google strictly prohibits \"Circumventing Systems\", which includes cloaking destination URLs, manipulating ad text to evade policy enforcement, and spinning up new ad accounts under fake names to bypass existing suspensions."
+      },
+      {
+        "id": 10,
+        "topic": "Enterprise MCC Hierarchy & Shared Budgets",
+        "question": "In a global multi-brand enterprise with 40 distinct regional entities, what is the best practice for account architecture and billing management?",
+        "options": [
+          "Combine all 40 global entities into a single ad account with 10,000 ad groups",
+          "A structured Manager Account (MCC) hierarchy with dedicated child accounts per country/brand, consolidated Monthly Invoicing billing profiles, and centralized Shared Libraries for script governance and brand exclusions",
+          "Create 40 separate consumer Gmail accounts with personal credit cards",
+          "Run all advertising through personal Facebook Ad accounts instead"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Enterprise MCC architecture isolates brands/geos into modular sub-accounts for clean currency/timezone alignment and security, while leveraging Consolidated Invoicing and centralized script/asset management."
+      },
+      {
+        "id": 11,
+        "topic": "Smart Bidding Volatility Recovery",
+        "question": "Following a major landing page redesign, a campaign with Target CPA experienced a 65% drop in conversion volume and CPCs doubled. What is the immediate recovery protocol?",
+        "options": [
+          "Delete the campaign and all conversion actions immediately",
+          "1. Verify conversion tracking tag firing and GTM triggers on the new landing page; 2. Temporarily switch from tCPA to Manual CPC or Maximize Clicks with a bid cap to re-establish baseline traffic; 3. Fix landing page message match and Core Web Vitals",
+          "Raise Target CPA by 1,000%",
+          "File an immediate lawsuit against Google"
+        ],
+        "correctAnswer": 1,
+        "explanation": "A sudden collapse after landing page changes indicates broken tracking tags or catastrophic drop in conversion rate. Verifying GTM tags, temporarily stabilizing bids with Manual CPC/bid caps, and fixing UX prevents algorithmic death spirals."
+      },
+      {
+        "id": 12,
+        "topic": "Profit-Driven Bidding & POAS",
+        "question": "Why is Profit on Ad Spend (POAS) superior to standard Return on Ad Spend (ROAS) for e-commerce retailers with variable product margins?",
+        "options": [
+          "Because POAS requires no tracking tags",
+          "Because ROAS measures top-line gross revenue, which incentivizes bidding algorithms to push high-revenue but low-margin products that generate net losses; POAS passes exact gross profit margins to optimize for actual net profit",
+          "Because Google guarantees 100% tax deductions on POAS campaigns",
+          "Because POAS automatically eliminates shipping costs"
+        ],
+        "correctAnswer": 1,
+        "explanation": "A 400% ROAS on a 10% margin product results in financial loss, whereas a 250% ROAS on an 80% margin product is highly profitable. Passing profit margin values into Google Ads aligns Smart Bidding with bottom-line profitability."
+      },
+      {
+        "id": 13,
+        "topic": "Google Ads API & Custom App Scripts",
+        "question": "What is the primary technical advantage of using the Google Ads API over the standard web user interface for enterprise agency operations?",
+        "options": [
+          "The API provides free ad spend credits",
+          "The API enables automated programmatic campaign deployment, custom bidirectional CRM synchronization, real-time bid adjustments via proprietary machine learning models, and automated compliance auditing at scale",
+          "The API prevents Google from collecting taxes",
+          "The API allows advertisers to edit competitor ad headlines"
+        ],
+        "correctAnswer": 1,
+        "explanation": "The Google Ads API provides direct programmatic access to create, update, manage, and report on campaigns at enterprise scale, connecting proprietary algorithms and enterprise ERPs with Google auctions."
+      },
+      {
+        "id": 14,
+        "topic": "Campaign Drafts and Experiments",
+        "question": "What is the scientifically rigorous way to test a new Smart Bidding strategy (Target CPA) against an existing Manual CPC campaign in Google Ads?",
+        "options": [
+          "Change the bid strategy on the live campaign on Friday and check results on Monday",
+          "Create a Campaign Experiment with a 50/50 cookie-based or search-split allocation, running concurrently over a 30-day period with statistical significance indicators",
+          "Duplicate the campaign with identical keywords and run both simultaneously with unconstrained budgets",
+          "Run the new strategy in a different country"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Google Ads Campaign Experiments split auction traffic 50/50 in real time against the original control campaign, eliminating time-of-year seasonality and external market bias while calculating statistical significance (p-values)."
+      },
+      {
+        "id": 15,
+        "topic": "Diminishing Marginal Returns in Scaling",
+        "question": "What economic principle explains why increasing a campaign’s daily budget from $1,000 to $5,000 rarely yields 5x the conversion volume at the same CPA?",
+        "options": [
+          "The Second Law of Thermodynamics",
+          "The Law of Diminishing Marginal Returns: Scaling forces algorithms to participate in lower-intent auctions, expand into broader search queries, and pay higher marginal CPCs to win incremental impression share",
+          "Google deliberately charges higher rates to large advertisers",
+          "Search volume decreases as budget increases"
+        ],
+        "correctAnswer": 1,
+        "explanation": "As campaigns exhaust the most efficient top-tier search queries, scaling requires bidding into more competitive auctions, broader match variants, and marginal audiences, naturally lifting average CPA."
+      },
+      {
+        "id": 16,
+        "topic": "Enhanced Conversions for Leads",
+        "question": "How does \"Enhanced Conversions for Leads\" improve conversion tracking accuracy for B2B companies without relying on third-party cookies?",
+        "options": [
+          "It records audio phone calls without consent",
+          "It captures first-party user data (such as hashed email address) on the initial web form, securely transmits it to Google, and matches it against Google account profiles when offline CRM deals close weeks later",
+          "It forces every visitor to log into a Google Account before submitting a form",
+          "It eliminates the need for any CRM software"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Enhanced Conversions for Leads captures and hashes lead information at form submission. When offline CRM milestones are uploaded with that hashed email, Google matches the offline conversion back to the original ad click without needing GCLIDs."
+      },
+      {
+        "id": 17,
+        "topic": "Server-Side Tagging via Google Tag Manager",
+        "question": "What are the core performance and security benefits of deploying Server-Side Google Tag Manager (sGTM) on a custom first-party subdomain (e.g., `metrics.yourdomain.com`)?",
+        "options": [
+          "It reduces cloud hosting costs to zero",
+          "It eliminates client-side JavaScript execution bloat (faster Core Web Vitals), secures sensitive customer data from browser snooping, bypasses ad-blocker domain filtering, and extends first-party cookie longevity",
+          "It gives free access to Google Cloud Platform unlimited servers",
+          "It guarantees a Quality Score of 10 on all keywords"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Server-side GTM routes telemetry through your own first-party server container, shielding user PII, reducing client-side JavaScript overhead for faster page speed, and bypassing client-side cookie expiration limitations."
+      },
+      {
+        "id": 18,
+        "topic": "Customer Match List Hygiene & Match Rates",
+        "question": "What factors directly elevate the \"Match Rate\" when uploading customer email and phone lists into Google Customer Match?",
+        "options": [
+          "Uploading only lowercase text with zero formatting",
+          "Providing normalized and formatted data (E.164 phone formats, trimmed lowercase emails, first/last name, postal code, and country code) to maximize Google identity graph matching",
+          "Uploading the list 50 times in one hour",
+          "Using public Gmail addresses only"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Google identity matching requires standardized data formatting (E.164 international phone formatting, sanitized emails, complete address fields). Providing multiple matching keys lifts match rates from 30% to 65%+."
+      },
+      {
+        "id": 19,
+        "topic": "Attribution Window Calibration",
+        "question": "For a high-end enterprise B2B software with a 90-day sales cycle, what is the impact of leaving the Google Ads conversion window at the default 30 days?",
+        "options": [
+          "Zero impact on reporting",
+          "Under-reporting conversions by 40–60%, because prospects who convert between day 31 and day 90 are completely dropped from attribution, starving Smart Bidding of optimization signals",
+          "Google automatically extends it to 365 days",
+          "Campaign budgets will be reduced by 50%"
+        ],
+        "correctAnswer": 1,
+        "explanation": "When customer consideration cycles exceed 30 days, standard 30-day click-through conversion windows fail to capture downstream conversions, misleading bidding algorithms into believing campaigns are underperforming."
+      },
+      {
+        "id": 20,
+        "topic": "Script-Based Automated Negative Keyword Sculpting",
+        "question": "In a tiered campaign structure (e.g., Exact Match Campaign vs Broad Match Discovery Campaign), how does an automated negative keyword script maintain traffic isolation?",
+        "options": [
+          "By deleting the broad match campaign every night",
+          "By automatically extracting all active keywords from the Exact Match campaign and adding them as exact match negative keywords in the Broad Match campaign, preventing query cannibalization",
+          "By changing all bids to $1.00",
+          "By notifying Google support via chat"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Cross-campaign negative sculpting scripts ensure that search queries matching exact match keywords are exclusively served by high-priority exact ad groups, preventing lower-priority broad discovery campaigns from stealing auction volume."
+      },
+      {
+        "id": 21,
+        "topic": "Lead Quality & Spam Prevention",
+        "question": "A B2B campaign suddenly experiences 100 fake form submissions per day from bot traffic. Which technical implementation effectively cleanses Google Ads conversion data?",
+        "options": [
+          "Turn off conversion tracking permanently",
+          "Implement enterprise reCAPTCHA v3 / Cloudflare Turnstile on landing pages, qualify leads via CRM validation, and switch Google Ads conversion optimization to offline CRM Qualified Lead events rather than raw form submissions",
+          "Double the daily budget",
+          "Change the campaign location to Antarctica"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Preventing bot pollution requires bot protection (reCAPTCHA v3/Turnstile) on forms combined with switching Smart Bidding optimization to verified CRM stages (MQL/SQL), preventing algorithms from optimizing for spam bot submissions."
+      },
+      {
+        "id": 22,
+        "topic": "Performance Max URL Expansion Settings",
+        "question": "What is the risk of leaving \"Final URL Expansion\" enabled in a Performance Max campaign without URL exclusions?",
+        "options": [
+          "Google will delete your domain name",
+          "Google may automatically direct paid traffic to non-commercial pages like your Privacy Policy, Terms of Service, Blog Archives, or Career listings, wasting ad dollars on zero-intent URLs",
+          "The website will crash under server load",
+          "Ads will only be displayed on Google Maps"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Final URL Expansion allows Google to replace your final URL with any relevant page on your domain. Without URL exclusion rules (excluding blog posts, career pages, legal disclaimers), budget is wasted on non-commercial pages."
+      },
+      {
+        "id": 23,
+        "topic": "Seasonality Adjustments for Smart Bidding",
+        "question": "When should an enterprise advertiser use Google Ads \"Seasonality Adjustments\" instead of letting Smart Bidding adapt automatically?",
+        "options": [
+          "For normal month-to-month seasonal shifts lasting 6 months",
+          "For short, extreme, predictable conversion rate surges lasting 1 to 7 days (e.g., Black Friday 48-hour flash sale with expected 3x CVR), where machine learning would otherwise lag in reacting to immediate demand spikes",
+          "Every single weekend",
+          "When launching a brand new website with zero sales history"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Smart Bidding uses historical trends. For short, massive conversion rate spikes (like a 48-hour 50% off Black Friday flash sale), Seasonality Adjustments inform the algorithm in advance of the expected CVR lift, allowing aggressive bidding without post-sale lag."
+      },
+      {
+        "id": 24,
+        "topic": "Trademark Policy and Competitor Bidding",
+        "question": "Under Google Ads trademark policy in the US and most regions, what is legally permissible when bidding on competitor brand keywords?",
+        "options": [
+          "You can bid on competitor brand names as keywords, but you cannot use their registered trademark in your ad copy to deceive users or imply authorized reseller status",
+          "Bidding on competitor brand names is strictly prohibited by Google under penalty of law",
+          "You must pay the competitor a 50% royalty on every click",
+          "Competitor ads are automatically translated into Greek"
+        ],
+        "correctAnswer": 0,
+        "explanation": "In the US and most regions, Google allows advertisers to bid on competitor brand names as keywords in auctions. However, using registered trademark terms in your ad copy (headlines/descriptions) can be restricted if the trademark owner files a formal complaint."
+      },
+      {
+        "id": 25,
+        "topic": "Portfolio Bidding Strategies with Shared Budgets",
+        "question": "What is the strategic advantage of grouping multiple related campaigns under a single Portfolio Bidding Strategy with a Shared Budget?",
+        "options": [
+          "It reduces Google ad billing by 20%",
+          "It pools conversion volume across multiple campaigns into a single machine learning model, accelerating Smart Bidding learning periods while dynamically allocating budget to whichever campaign has the highest live ROI",
+          "It forces all campaigns to use identical ad headlines",
+          "It disables keyword Quality Score calculations"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Portfolio bid strategies aggregate conversion data across multiple campaigns, helping campaigns with moderate volume reach the 30–50 monthly conversion threshold faster, while shared budgets dynamically route spend to the most efficient opportunities in real time."
+      },
+      {
+        "id": 26,
+        "topic": "First-Party Data Strategy in Post-Cookie Marketing",
+        "question": "In an ecosystem dominated by Safari ITP, Firefox tracking protection, and Chrome Privacy Sandbox, what is the foundational requirement for resilient conversion measurement?",
+        "options": [
+          "Relying entirely on third-party tracking pixels",
+          "Deploying a robust First-Party Data pipeline: Server-Side Tagging, Enhanced Conversions with SHA-256 customer data, Consent Mode v2, and Offline CRM Conversion Imports",
+          "Stopping all digital advertising and moving to billboard ads",
+          "Asking users to disable all browser security settings"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Modern measurement resilience requires first-party data architecture: server-side tag routing, enhanced conversions with cryptographic hashing, Consent Mode compliance, and CRM offline conversion feedback loops."
+      },
+      {
+        "id": 27,
+        "topic": "B2B Lead Scoring & Value-Based Smart Bidding",
+        "question": "A B2B enterprise generates 1,000 raw leads/mo. 100 become Sales Qualified Leads ($500 value) and 10 become Won Deals ($10,000 value). How should conversion values be configured in Google Ads?",
+        "options": [
+          "Assign $1 value to all leads regardless of stage",
+          "Pass weighted values into Google Ads conversion actions: Raw Lead ($10), SQL ($500), Closed Won ($10,000), and switch bidding to Maximize Conversion Value with Target ROAS",
+          "Only track website visits and ignore sales data",
+          "Manually adjust bids once every 6 months"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Assigning weighted monetary values to progressive funnel stages (Raw Lead vs SQL vs Won Deal) enables Maximize Conversion Value algorithms to optimize for revenue-generating buyer profiles rather than low-quality lead volume."
+      },
+      {
+        "id": 28,
+        "topic": "Impression Share Diagnostics: Lost IS Rank Analysis",
+        "question": "If an Exact Match Search campaign targeting high-intent keywords has 60% Lost Impression Share due to Rank, which diagnosis is mathematically sound?",
+        "options": [
+          "The daily budget is 10x too high",
+          "Either the Max CPC bid / Target CPA is too low relative to auction competition, or keyword Quality Scores (eCTR, ad relevance, landing page experience) are substandard, depressing Ad Rank below the top-of-page threshold",
+          "The campaign is showing ads in too many countries",
+          "The landing page has too many images"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Lost IS (Rank) is directly caused by low Ad Rank. To recapture lost impressions, the advertiser must either raise bids/CPA targets to compete in higher-tier auctions or elevate Quality Score components to achieve higher rank at current bid levels."
+      },
+      {
+        "id": 29,
+        "topic": "Automated Anomaly Detection with Google Apps Scripts",
+        "question": "Why should enterprise accounts deploy daily automated anomaly detection scripts checking 0-impression or 0-conversion anomalies?",
+        "options": [
+          "Because Google employees require daily script logs",
+          "To detect broken landing page servers, expired payment methods, accidental GTM tag drops, or tracking breakages within hours rather than discovering lost revenue weeks later",
+          "To increase the daily spending limit on the account",
+          "To bypass Google Ads account policies"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Anomaly detection scripts continuously inspect account health, instantly firing alert webhooks when conversion volume, impressions, or spend deviate significantly from historical baselines, preventing silent revenue leakage."
+      },
+      {
+        "id": 30,
+        "topic": "Statistical Significance in Creative Experimentation",
+        "question": "When analyzing a 50/50 RSA creative split test with 500 clicks per variant, Variant A has a 4.2% CVR (21 conversions) and Variant B has a 5.0% CVR (25 conversions). Is this result statistically significant at a 95% confidence level ($p < 0.05$)?",
+        "options": [
+          "Yes, Variant B is definitively the winner and should be scaled immediately",
+          "No, with only 21 vs 25 conversions, the sample size is insufficient and the observed difference is likely due to random chance ($p > 0.05$); the test must run longer until higher conversion volume is reached",
+          "Conversion rates do not matter in A/B testing",
+          "Variant A won because 4.2 is a lower number"
+        ],
+        "correctAnswer": 1,
+        "explanation": "A sample of 21 vs 25 conversions on 500 clicks yields a p-value well above 0.05. Declaring winners prematurely without statistical confidence leads to false conclusions and degraded campaign performance."
+      },
+      {
+        "id": 31,
+        "topic": "Cross-Network Cannibalization Auditing",
+        "question": "When running both Standard Shopping and Performance Max campaigns for the same product inventory, which campaign takes auction priority in Google Ads?",
+        "options": [
+          "Standard Shopping always wins priority over Performance Max",
+          "Performance Max takes priority over Standard Shopping campaigns containing the same products, unless the Standard Shopping campaign has a significantly higher Ad Rank",
+          "Both ads display side-by-side simultaneously for the same user",
+          "Google pauses both campaigns automatically"
+        ],
+        "correctAnswer": 1,
+        "explanation": "In general, Performance Max takes precedence over Standard Shopping campaigns targeting the same product IDs, which is why product catalogs must be segmented cleanly across campaigns to prevent cannibalization."
+      },
+      {
+        "id": 32,
+        "topic": "Ad Schedule Bid Adjustments under Smart Bidding",
+        "question": "How do Ad Schedule (dayparting) percentage bid adjustments interact with fully automated Smart Bidding strategies (e.g., Target CPA / Target ROAS)?",
+        "options": [
+          "They override all machine learning and set fixed bids",
+          "Smart Bidding already models auction-time time-of-day signals dynamically; setting Ad Schedule bid adjustments in tCPA/tROAS modifies the target goal (e.g., a +20% adjustment tells the algorithm to accept a 20% higher CPA for that time window) rather than directly setting CPC bids",
+          "Ad schedule adjustments are completely deleted by Google",
+          "They cause campaigns to spend 10x the daily budget"
+        ],
+        "correctAnswer": 1,
+        "explanation": "In Smart Bidding, bid adjustments do not adjust CPC bids directly. In Target CPA, a +20% bid adjustment raises the Target CPA target itself for that scheduled window, signaling the algorithm to bid more aggressively."
+      },
+      {
+        "id": 33,
+        "topic": "Lead Form Extensions & Webhook Integration",
+        "question": "How can lead form asset submissions captured inside Google search ads be instantly delivered into an enterprise CRM (e.g., HubSpot or Salesforce) in real time?",
+        "options": [
+          "By manually downloading CSV files from Google Ads every 30 days",
+          "By configuring the Google Ads Lead Form Webhook URL and Key to post lead payloads directly to an API endpoint or automation middleware (e.g., Zapier/Make) in real time",
+          "By sending a fax to Google headquarters",
+          "By taking a screenshot of the search ad"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Google Ads Lead Form assets support native Webhooks. When a user submits an in-ad lead form, Google delivers JSON lead data to the configured Webhook endpoint instantly, enabling real-time sales team dispatch."
+      },
+      {
+        "id": 34,
+        "topic": "Negative Keyword Match Conflicts at Scale",
+        "question": "In a large enterprise account with 200,000 keywords, an advertiser notices that a top-converting Exact Match keyword [enterprise cloud backup] has zero impressions. What is the most common technical culprit?",
+        "options": [
+          "The keyword was banned by the government",
+          "A broad or phrase negative keyword (e.g., \"backup\" or \"cloud backup\") in a shared negative list or campaign negative list is conflicting with and blocking the positive keyword",
+          "The landing page URL has too many capital letters",
+          "The ad copy contains a colon"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Negative keyword conflicts are common in large accounts. A broad or phrase negative added to a shared list can inadvertently block high-value positive exact match keywords, dropping impressions to zero until the conflict is resolved."
+      },
+      {
+        "id": 35,
+        "topic": "Google Display Network Viewability (vCPM)",
+        "question": "What constitutes an \"Active View Viewable Impression\" under Google and MRC standards for Display ads?",
+        "options": [
+          "The user clicked on the ad 5 times",
+          "At least 50% of the ad pixels are in view on the screen for a minimum of 1 continuous second for display ads (or 2 seconds for video)",
+          "The ad was loaded somewhere in the hidden bottom footer of the webpage",
+          "The user printed the webpage on paper"
+        ],
+        "correctAnswer": 1,
+        "explanation": "The Media Rating Council (MRC) standard for viewability requires at least 50% of the ad creative pixels to be visible in the user viewport for a continuous duration of at least 1 second for display ads (2 seconds for video)."
+      },
+      {
+        "id": 36,
+        "topic": "Google Ads Auction Insights Interpretation",
+        "question": "In the Auction Insights report for an enterprise Search campaign, Competitor X has an 85% \"Impression Share\" but a 15% \"Outranking Share\" against your account. What does this indicate?",
+        "options": [
+          "Competitor X is outranking you on almost every search auction",
+          "Competitor X is entering 85% of eligible auctions, but your ad ranks higher than Competitor X (or shows when they do not) in 85% of shared auctions (since Outranking Share is the % of times you outranked them or showed when they didn’t)",
+          "Competitor X has been banned from advertising",
+          "Competitor X is bidding on different keywords"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Auction Insights Outranking Share represents how often your ad ranked higher in the auction than the competitor ad, plus how often your ad showed when theirs did not. High Outranking Share proves superior Ad Rank over that competitor."
+      },
+      {
+        "id": 37,
+        "topic": "Target Impression Share Strategy Risks",
+        "question": "What is the primary risk of using \"Target Impression Share: Absolute Top of Page 100%\" on generic, non-brand keywords?",
+        "options": [
+          "The campaign will generate zero impressions",
+          "The bidding algorithm will bid astronomical CPC amounts to win 100% of top positions regardless of conversion rate or profitability, rapidly draining budget on unprofitable auctions",
+          "Google Ads will convert all keywords to phrase match",
+          "Competitors will receive your company emails"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Target Impression Share focuses entirely on ad position rather than conversions or ROI. Applying 100% Absolute Top of Page to broad or non-brand keywords can cause CPCs to spike to $50–$100+ per click as the system tries to win every auction."
+      },
+      {
+        "id": 38,
+        "topic": "Performance Max Search Themes",
+        "question": "What is the function of \"Search Themes\" in Performance Max campaigns?",
+        "options": [
+          "They change the color theme of Google search results",
+          "They provide explicit intent signals and query guidance to Google AI regarding topics and terms your customers search for, steering PMax matching toward relevant search categories without replacing negative keyword exclusions",
+          "They replace all Responsive Search Ads in the account",
+          "They block competitor ads automatically"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Search Themes inform Performance Max algorithms about specific search intents, categories, and terminology relevant to your business, helping machine learning discover relevant search queries faster across Google inventory."
+      },
+      {
+        "id": 39,
+        "topic": "MCC Currency & Timezone Immutability",
+        "question": "Once a Google Ads account is created and billing is established, can the account Timezone and Currency be changed in account settings?",
+        "options": [
+          "Yes, they can be changed anytime in Account Preferences",
+          "No, Currency and Timezone are permanently locked upon account creation; correcting an erroneous timezone or currency requires creating a new account and migrating campaigns",
+          "Only the Currency can be changed, but not Timezone",
+          "Only the Timezone can be changed, but not Currency"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Google Ads accounts permanently lock Currency and Timezone settings upon creation for billing, reporting, and regulatory integrity. To change them, a new account must be created within the MCC."
+      },
+      {
+        "id": 40,
+        "topic": "Enterprise Growth & Scaling Playbook",
+        "question": "Which holistic strategy represents the gold standard for scaling a multi-million dollar annual Google Ads enterprise acquisition program?",
+        "options": [
+          "Increase all campaign budgets by 500% overnight and enable broad match everywhere with no negatives",
+          "1. High-intent Search STAGs (tCPA/tROAS); 2. PMax with rich creative asset libraries & Brand Exclusions; 3. First-party measurement via sGTM & Enhanced Conversions; 4. CRM Offline Conversion feedback loops; 5. Automated scripting & daily anomaly alerts; 6. Controlled incrementality experiments",
+          "Rely exclusively on Google automated recommendations tab and apply all auto-apply recommendations without review",
+          "Pause all search advertising and rely entirely on organic viral social media"
+        ],
+        "correctAnswer": 1,
+        "explanation": "Enterprise excellence combines disciplined search architecture, multi-channel PMax scaling with brand defense, first-party measurement infrastructure (sGTM/Enhanced Conversions), CRM offline revenue feedback, automated scripting, and rigorous incrementality testing."
+      }
+    ],
+    "assessmentDetails": {
+      "passingScore": 35,
+      "totalQuestions": 40,
+      "timeLimitMinutes": 90,
+      "questions": [
+        {
+          "id": 1,
+          "topic": "Offline Conversion Imports (OCI)",
+          "question": "How does Offline Conversion Import (OCI) bridge the gap between initial Google ad clicks and downstream CRM revenue?",
+          "options": [
+            "By capturing the Google Click ID (GCLID) or Gbraid/Wbraid upon web form submission, storing it in the CRM alongside the lead record, and uploading converted sales milestones back to Google Ads via API or scheduled spreadsheet",
+            "By guessing which leads converted using zip codes",
+            "By automatically sending physical mail to prospective customers",
+            "By replacing Google Ads with Salesforce reporting"
+          ],
+          "correctAnswer": 0,
+          "explanation": "OCI tracks the GCLID/Gbraid from the ad click through web form submission into the CRM. When a lead advances to a Qualified Lead, Closed Deal, or Won Revenue stage, the CRM transmits the timestamped GCLID and monetary value back to Google Ads, feeding downstream business value into Smart Bidding."
+        },
+        {
+          "id": 2,
+          "topic": "Google Consent Mode v2",
+          "question": "Under the EU Digital Markets Act (DMA) enforcement of Google Consent Mode v2, which two new consent parameters became mandatory for advertising personalization and remarketing?",
+          "options": [
+            "ad_storage and analytics_storage only",
+            "ad_user_data and ad_personalization",
+            "cookie_consent and banner_accepted",
+            "ip_masking and geo_filtering"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Consent Mode v2 introduced `ad_user_data` (consent for sending user data to Google for advertising) and `ad_personalization` (consent for personalized ads/remarketing). Without these parameters, audiences and conversion modeling for EEA traffic are severely degraded."
+        },
+        {
+          "id": 3,
+          "topic": "Performance Max Brand Cannibalization",
+          "question": "How can an enterprise advertiser prevent Performance Max from taking credit for high-converting branded search queries and cannibalizing dedicated Brand Search campaigns?",
+          "options": [
+            "There is no way to prevent Performance Max from bidding on brand terms",
+            "Pause the Performance Max campaign on weekends",
+            "Apply a Brand Exclusion List to the Performance Max campaign via Campaign Settings (or request account-level negative keywords via Google Support)",
+            "Lower the daily budget to $1.00"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Advertisers can create a Brand List in the Shared Library and apply it as a Brand Exclusion in Performance Max campaign settings, ensuring PMax bids exclusively on non-brand prospecting inventory while dedicated Brand campaigns retain strict control over brand traffic."
+        },
+        {
+          "id": 4,
+          "topic": "Marketing Efficiency Ratio (MER)",
+          "question": "How is the Marketing Efficiency Ratio (MER, or Blended ROAS) calculated, and why is it essential for omnichannel profitability analysis?",
+          "options": [
+            "MER = Google Ads Cost / Google Ads Clicks",
+            "MER = Website Pageviews / Conversion Rate",
+            "MER = Total Email Subscribers / Monthly Ad Spend",
+            "MER = Total Ecosystem Revenue / Total Marketing Ad Spend Across All Channels; it provides a single source of truth that avoids channel-attribution double counting"
+          ],
+          "correctAnswer": 3,
+          "explanation": "MER (Total Revenue / Total Ad Spend) measures blended business efficiency across all channels (Google, Meta, TikTok, Email, Organic). It eliminates intra-platform attribution overlap where each ad network claims 100% credit for the same sale."
+        },
+        {
+          "id": 5,
+          "topic": "Google Ads Scripts Automation",
+          "question": "Which Google Ads Script function is commonly used to automate daily budget anomaly detection and email alerts when spend exceeds expected pacing?",
+          "options": [
+            "AdsApp.createCampaign() only",
+            "AdsApp.campaigns().withCondition(\"Status = ENABLED\").get() combined with MailApp.sendEmail() or UrlFetchApp for Slack webhooks",
+            "document.getElementById(\"budget_box\")",
+            "window.localStorage.getItem(\"spend\")"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Google Ads Scripts use `AdsApp` selectors to query campaign telemetry and execute actions or dispatch alerts via `MailApp.sendEmail()` or `UrlFetchApp.fetch()` to external Webhooks (e.g., Slack/Discord) when spend spikes unexpectedly."
+        },
+        {
+          "id": 6,
+          "topic": "Data-Driven Attribution (DDA)",
+          "question": "How does Google Ads Data-Driven Attribution (DDA) model conversion credit across multi-touch customer search journeys?",
+          "options": [
+            "It assigns 100% of conversion credit to the very first ad clicked",
+            "It gives equal 25% credit to the last 4 clicks regardless of timing",
+            "It uses machine learning to evaluate all interacting click paths (both converting and non-converting) to statistically distribute fractional conversion credit based on how each ad touchpoint shifted conversion probability",
+            "It gives 100% credit to the last paid click only"
+          ],
+          "correctAnswer": 2,
+          "explanation": "DDA analyzes account conversion paths using sophisticated algorithmic modeling, comparing converting paths against paths that did not convert to calculate the true incremental contribution of each keyword and campaign touchpoint."
+        },
+        {
+          "id": 7,
+          "topic": "Geo-Experimentation & Incrementality Testing",
+          "question": "How does an advertiser conduct a statistically valid Geo-Holdout Experiment to measure the true incrementality of Non-Brand Search campaigns?",
+          "options": [
+            "Turn ads on for 3 days, then off for 3 days across the entire country",
+            "Ask customers on a phone survey where they first heard of the company",
+            "Compare this year’s December sales to last year’s July sales",
+            "Segment matched geographic clusters (e.g., 20 control DMAs vs 20 test DMAs with identical historical sales trends), turn off non-brand search ads in the control markets, and measure the net lift in organic + paid total sales in test markets"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Geo-experiments split matched geographic regions (Designated Market Areas) into Test and Control groups. Holding out ad spend in control regions isolates baseline organic demand and proves the true incremental revenue generated by paid search."
+        },
+        {
+          "id": 8,
+          "topic": "Value-Based Bidding (VBB) with Conversion Value Rules",
+          "question": "How can an enterprise advertiser use Google Ads Conversion Value Rules to train Smart Bidding algorithms to prioritize high-value customer segments?",
+          "options": [
+            "By creating rules that multiply conversion values by a factor (e.g., 1.5x) based on geographic location, specific audience lists (e.g., past high-LTV buyers), or device types",
+            "By manually clicking on your own ads from those locations",
+            "By blocking all users who use mobile phones",
+            "By doubling the daily budget every Friday afternoon"
+          ],
+          "correctAnswer": 0,
+          "explanation": "Conversion Value Rules allow advertisers to adjust conversion values in real time based on geographic criteria, audience membership, or device, steering Smart Bidding algorithms toward bidding aggressively on high-LTV customer cohorts."
+        },
+        {
+          "id": 9,
+          "topic": "Account Suspension Defense: Circumventing Systems",
+          "question": "Which advertiser action triggers an immediate, severe \"Circumventing Systems\" account suspension in Google Ads?",
+          "options": [
+            "Updating headline copy once per month",
+            "Adding 10 new negative keywords",
+            "Using cloaking to show different landing page content to Google review bots than to real human users, or attempting to recreate new ad accounts to bypass an active suspension",
+            "Switching billing credit cards with bank notification"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Google strictly prohibits \"Circumventing Systems\", which includes cloaking destination URLs, manipulating ad text to evade policy enforcement, and spinning up new ad accounts under fake names to bypass existing suspensions."
+        },
+        {
+          "id": 10,
+          "topic": "Enterprise MCC Hierarchy & Shared Budgets",
+          "question": "In a global multi-brand enterprise with 40 distinct regional entities, what is the best practice for account architecture and billing management?",
+          "options": [
+            "Combine all 40 global entities into a single ad account with 10,000 ad groups",
+            "Create 40 separate consumer Gmail accounts with personal credit cards",
+            "Run all advertising through personal Facebook Ad accounts instead",
+            "A structured Manager Account (MCC) hierarchy with dedicated child accounts per country/brand, consolidated Monthly Invoicing billing profiles, and centralized Shared Libraries for script governance and brand exclusions"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Enterprise MCC architecture isolates brands/geos into modular sub-accounts for clean currency/timezone alignment and security, while leveraging Consolidated Invoicing and centralized script/asset management."
+        },
+        {
+          "id": 11,
+          "topic": "Smart Bidding Volatility Recovery",
+          "question": "Following a major landing page redesign, a campaign with Target CPA experienced a 65% drop in conversion volume and CPCs doubled. What is the immediate recovery protocol?",
+          "options": [
+            "1. Verify conversion tracking tag firing and GTM triggers on the new landing page; 2. Temporarily switch from tCPA to Manual CPC or Maximize Clicks with a bid cap to re-establish baseline traffic; 3. Fix landing page message match and Core Web Vitals",
+            "Delete the campaign and all conversion actions immediately",
+            "Raise Target CPA by 1,000%",
+            "File an immediate lawsuit against Google"
+          ],
+          "correctAnswer": 0,
+          "explanation": "A sudden collapse after landing page changes indicates broken tracking tags or catastrophic drop in conversion rate. Verifying GTM tags, temporarily stabilizing bids with Manual CPC/bid caps, and fixing UX prevents algorithmic death spirals."
+        },
+        {
+          "id": 12,
+          "topic": "Profit-Driven Bidding & POAS",
+          "question": "Why is Profit on Ad Spend (POAS) superior to standard Return on Ad Spend (ROAS) for e-commerce retailers with variable product margins?",
+          "options": [
+            "Because POAS requires no tracking tags",
+            "Because ROAS measures top-line gross revenue, which incentivizes bidding algorithms to push high-revenue but low-margin products that generate net losses; POAS passes exact gross profit margins to optimize for actual net profit",
+            "Because Google guarantees 100% tax deductions on POAS campaigns",
+            "Because POAS automatically eliminates shipping costs"
+          ],
+          "correctAnswer": 1,
+          "explanation": "A 400% ROAS on a 10% margin product results in financial loss, whereas a 250% ROAS on an 80% margin product is highly profitable. Passing profit margin values into Google Ads aligns Smart Bidding with bottom-line profitability."
+        },
+        {
+          "id": 13,
+          "topic": "Google Ads API & Custom App Scripts",
+          "question": "What is the primary technical advantage of using the Google Ads API over the standard web user interface for enterprise agency operations?",
+          "options": [
+            "The API provides free ad spend credits",
+            "The API prevents Google from collecting taxes",
+            "The API allows advertisers to edit competitor ad headlines",
+            "The API enables automated programmatic campaign deployment, custom bidirectional CRM synchronization, real-time bid adjustments via proprietary machine learning models, and automated compliance auditing at scale"
+          ],
+          "correctAnswer": 3,
+          "explanation": "The Google Ads API provides direct programmatic access to create, update, manage, and report on campaigns at enterprise scale, connecting proprietary algorithms and enterprise ERPs with Google auctions."
+        },
+        {
+          "id": 14,
+          "topic": "Campaign Drafts and Experiments",
+          "question": "What is the scientifically rigorous way to test a new Smart Bidding strategy (Target CPA) against an existing Manual CPC campaign in Google Ads?",
+          "options": [
+            "Create a Campaign Experiment with a 50/50 cookie-based or search-split allocation, running concurrently over a 30-day period with statistical significance indicators",
+            "Change the bid strategy on the live campaign on Friday and check results on Monday",
+            "Duplicate the campaign with identical keywords and run both simultaneously with unconstrained budgets",
+            "Run the new strategy in a different country"
+          ],
+          "correctAnswer": 0,
+          "explanation": "Google Ads Campaign Experiments split auction traffic 50/50 in real time against the original control campaign, eliminating time-of-year seasonality and external market bias while calculating statistical significance (p-values)."
+        },
+        {
+          "id": 15,
+          "topic": "Diminishing Marginal Returns in Scaling",
+          "question": "What economic principle explains why increasing a campaign’s daily budget from $1,000 to $5,000 rarely yields 5x the conversion volume at the same CPA?",
+          "options": [
+            "The Second Law of Thermodynamics",
+            "The Law of Diminishing Marginal Returns: Scaling forces algorithms to participate in lower-intent auctions, expand into broader search queries, and pay higher marginal CPCs to win incremental impression share",
+            "Google deliberately charges higher rates to large advertisers",
+            "Search volume decreases as budget increases"
+          ],
+          "correctAnswer": 1,
+          "explanation": "As campaigns exhaust the most efficient top-tier search queries, scaling requires bidding into more competitive auctions, broader match variants, and marginal audiences, naturally lifting average CPA."
+        },
+        {
+          "id": 16,
+          "topic": "Enhanced Conversions for Leads",
+          "question": "How does \"Enhanced Conversions for Leads\" improve conversion tracking accuracy for B2B companies without relying on third-party cookies?",
+          "options": [
+            "It records audio phone calls without consent",
+            "It forces every visitor to log into a Google Account before submitting a form",
+            "It captures first-party user data (such as hashed email address) on the initial web form, securely transmits it to Google, and matches it against Google account profiles when offline CRM deals close weeks later",
+            "It eliminates the need for any CRM software"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Enhanced Conversions for Leads captures and hashes lead information at form submission. When offline CRM milestones are uploaded with that hashed email, Google matches the offline conversion back to the original ad click without needing GCLIDs."
+        },
+        {
+          "id": 17,
+          "topic": "Server-Side Tagging via Google Tag Manager",
+          "question": "What are the core performance and security benefits of deploying Server-Side Google Tag Manager (sGTM) on a custom first-party subdomain (e.g., `metrics.yourdomain.com`)?",
+          "options": [
+            "It eliminates client-side JavaScript execution bloat (faster Core Web Vitals), secures sensitive customer data from browser snooping, bypasses ad-blocker domain filtering, and extends first-party cookie longevity",
+            "It reduces cloud hosting costs to zero",
+            "It gives free access to Google Cloud Platform unlimited servers",
+            "It guarantees a Quality Score of 10 on all keywords"
+          ],
+          "correctAnswer": 0,
+          "explanation": "Server-side GTM routes telemetry through your own first-party server container, shielding user PII, reducing client-side JavaScript overhead for faster page speed, and bypassing client-side cookie expiration limitations."
+        },
+        {
+          "id": 18,
+          "topic": "Customer Match List Hygiene & Match Rates",
+          "question": "What factors directly elevate the \"Match Rate\" when uploading customer email and phone lists into Google Customer Match?",
+          "options": [
+            "Uploading only lowercase text with zero formatting",
+            "Uploading the list 50 times in one hour",
+            "Providing normalized and formatted data (E.164 phone formats, trimmed lowercase emails, first/last name, postal code, and country code) to maximize Google identity graph matching",
+            "Using public Gmail addresses only"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Google identity matching requires standardized data formatting (E.164 international phone formatting, sanitized emails, complete address fields). Providing multiple matching keys lifts match rates from 30% to 65%+."
+        },
+        {
+          "id": 19,
+          "topic": "Attribution Window Calibration",
+          "question": "For a high-end enterprise B2B software with a 90-day sales cycle, what is the impact of leaving the Google Ads conversion window at the default 30 days?",
+          "options": [
+            "Zero impact on reporting",
+            "Under-reporting conversions by 40–60%, because prospects who convert between day 31 and day 90 are completely dropped from attribution, starving Smart Bidding of optimization signals",
+            "Google automatically extends it to 365 days",
+            "Campaign budgets will be reduced by 50%"
+          ],
+          "correctAnswer": 1,
+          "explanation": "When customer consideration cycles exceed 30 days, standard 30-day click-through conversion windows fail to capture downstream conversions, misleading bidding algorithms into believing campaigns are underperforming."
+        },
+        {
+          "id": 20,
+          "topic": "Script-Based Automated Negative Keyword Sculpting",
+          "question": "In a tiered campaign structure (e.g., Exact Match Campaign vs Broad Match Discovery Campaign), how does an automated negative keyword script maintain traffic isolation?",
+          "options": [
+            "By deleting the broad match campaign every night",
+            "By changing all bids to $1.00",
+            "By notifying Google support via chat",
+            "By automatically extracting all active keywords from the Exact Match campaign and adding them as exact match negative keywords in the Broad Match campaign, preventing query cannibalization"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Cross-campaign negative sculpting scripts ensure that search queries matching exact match keywords are exclusively served by high-priority exact ad groups, preventing lower-priority broad discovery campaigns from stealing auction volume."
+        },
+        {
+          "id": 21,
+          "topic": "Lead Quality & Spam Prevention",
+          "question": "A B2B campaign suddenly experiences 100 fake form submissions per day from bot traffic. Which technical implementation effectively cleanses Google Ads conversion data?",
+          "options": [
+            "Implement enterprise reCAPTCHA v3 / Cloudflare Turnstile on landing pages, qualify leads via CRM validation, and switch Google Ads conversion optimization to offline CRM Qualified Lead events rather than raw form submissions",
+            "Turn off conversion tracking permanently",
+            "Double the daily budget",
+            "Change the campaign location to Antarctica"
+          ],
+          "correctAnswer": 0,
+          "explanation": "Preventing bot pollution requires bot protection (reCAPTCHA v3/Turnstile) on forms combined with switching Smart Bidding optimization to verified CRM stages (MQL/SQL), preventing algorithms from optimizing for spam bot submissions."
+        },
+        {
+          "id": 22,
+          "topic": "Performance Max URL Expansion Settings",
+          "question": "What is the risk of leaving \"Final URL Expansion\" enabled in a Performance Max campaign without URL exclusions?",
+          "options": [
+            "Google will delete your domain name",
+            "Google may automatically direct paid traffic to non-commercial pages like your Privacy Policy, Terms of Service, Blog Archives, or Career listings, wasting ad dollars on zero-intent URLs",
+            "The website will crash under server load",
+            "Ads will only be displayed on Google Maps"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Final URL Expansion allows Google to replace your final URL with any relevant page on your domain. Without URL exclusion rules (excluding blog posts, career pages, legal disclaimers), budget is wasted on non-commercial pages."
+        },
+        {
+          "id": 23,
+          "topic": "Seasonality Adjustments for Smart Bidding",
+          "question": "When should an enterprise advertiser use Google Ads \"Seasonality Adjustments\" instead of letting Smart Bidding adapt automatically?",
+          "options": [
+            "For normal month-to-month seasonal shifts lasting 6 months",
+            "Every single weekend",
+            "For short, extreme, predictable conversion rate surges lasting 1 to 7 days (e.g., Black Friday 48-hour flash sale with expected 3x CVR), where machine learning would otherwise lag in reacting to immediate demand spikes",
+            "When launching a brand new website with zero sales history"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Smart Bidding uses historical trends. For short, massive conversion rate spikes (like a 48-hour 50% off Black Friday flash sale), Seasonality Adjustments inform the algorithm in advance of the expected CVR lift, allowing aggressive bidding without post-sale lag."
+        },
+        {
+          "id": 24,
+          "topic": "Trademark Policy and Competitor Bidding",
+          "question": "Under Google Ads trademark policy in the US and most regions, what is legally permissible when bidding on competitor brand keywords?",
+          "options": [
+            "Bidding on competitor brand names is strictly prohibited by Google under penalty of law",
+            "You must pay the competitor a 50% royalty on every click",
+            "Competitor ads are automatically translated into Greek",
+            "You can bid on competitor brand names as keywords, but you cannot use their registered trademark in your ad copy to deceive users or imply authorized reseller status"
+          ],
+          "correctAnswer": 3,
+          "explanation": "In the US and most regions, Google allows advertisers to bid on competitor brand names as keywords in auctions. However, using registered trademark terms in your ad copy (headlines/descriptions) can be restricted if the trademark owner files a formal complaint."
+        },
+        {
+          "id": 25,
+          "topic": "Portfolio Bidding Strategies with Shared Budgets",
+          "question": "What is the strategic advantage of grouping multiple related campaigns under a single Portfolio Bidding Strategy with a Shared Budget?",
+          "options": [
+            "It reduces Google ad billing by 20%",
+            "It pools conversion volume across multiple campaigns into a single machine learning model, accelerating Smart Bidding learning periods while dynamically allocating budget to whichever campaign has the highest live ROI",
+            "It forces all campaigns to use identical ad headlines",
+            "It disables keyword Quality Score calculations"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Portfolio bid strategies aggregate conversion data across multiple campaigns, helping campaigns with moderate volume reach the 30–50 monthly conversion threshold faster, while shared budgets dynamically route spend to the most efficient opportunities in real time."
+        },
+        {
+          "id": 26,
+          "topic": "First-Party Data Strategy in Post-Cookie Marketing",
+          "question": "In an ecosystem dominated by Safari ITP, Firefox tracking protection, and Chrome Privacy Sandbox, what is the foundational requirement for resilient conversion measurement?",
+          "options": [
+            "Relying entirely on third-party tracking pixels",
+            "Stopping all digital advertising and moving to billboard ads",
+            "Deploying a robust First-Party Data pipeline: Server-Side Tagging, Enhanced Conversions with SHA-256 customer data, Consent Mode v2, and Offline CRM Conversion Imports",
+            "Asking users to disable all browser security settings"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Modern measurement resilience requires first-party data architecture: server-side tag routing, enhanced conversions with cryptographic hashing, Consent Mode compliance, and CRM offline conversion feedback loops."
+        },
+        {
+          "id": 27,
+          "topic": "B2B Lead Scoring & Value-Based Smart Bidding",
+          "question": "A B2B enterprise generates 1,000 raw leads/mo. 100 become Sales Qualified Leads ($500 value) and 10 become Won Deals ($10,000 value). How should conversion values be configured in Google Ads?",
+          "options": [
+            "Assign $1 value to all leads regardless of stage",
+            "Only track website visits and ignore sales data",
+            "Manually adjust bids once every 6 months",
+            "Pass weighted values into Google Ads conversion actions: Raw Lead ($10), SQL ($500), Closed Won ($10,000), and switch bidding to Maximize Conversion Value with Target ROAS"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Assigning weighted monetary values to progressive funnel stages (Raw Lead vs SQL vs Won Deal) enables Maximize Conversion Value algorithms to optimize for revenue-generating buyer profiles rather than low-quality lead volume."
+        },
+        {
+          "id": 28,
+          "topic": "Impression Share Diagnostics: Lost IS Rank Analysis",
+          "question": "If an Exact Match Search campaign targeting high-intent keywords has 60% Lost Impression Share due to Rank, which diagnosis is mathematically sound?",
+          "options": [
+            "Either the Max CPC bid / Target CPA is too low relative to auction competition, or keyword Quality Scores (eCTR, ad relevance, landing page experience) are substandard, depressing Ad Rank below the top-of-page threshold",
+            "The daily budget is 10x too high",
+            "The campaign is showing ads in too many countries",
+            "The landing page has too many images"
+          ],
+          "correctAnswer": 0,
+          "explanation": "Lost IS (Rank) is directly caused by low Ad Rank. To recapture lost impressions, the advertiser must either raise bids/CPA targets to compete in higher-tier auctions or elevate Quality Score components to achieve higher rank at current bid levels."
+        },
+        {
+          "id": 29,
+          "topic": "Automated Anomaly Detection with Google Apps Scripts",
+          "question": "Why should enterprise accounts deploy daily automated anomaly detection scripts checking 0-impression or 0-conversion anomalies?",
+          "options": [
+            "Because Google employees require daily script logs",
+            "To increase the daily spending limit on the account",
+            "To detect broken landing page servers, expired payment methods, accidental GTM tag drops, or tracking breakages within hours rather than discovering lost revenue weeks later",
+            "To bypass Google Ads account policies"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Anomaly detection scripts continuously inspect account health, instantly firing alert webhooks when conversion volume, impressions, or spend deviate significantly from historical baselines, preventing silent revenue leakage."
+        },
+        {
+          "id": 30,
+          "topic": "Statistical Significance in Creative Experimentation",
+          "question": "When analyzing a 50/50 RSA creative split test with 500 clicks per variant, Variant A has a 4.2% CVR (21 conversions) and Variant B has a 5.0% CVR (25 conversions). Is this result statistically significant at a 95% confidence level ($p < 0.05$)?",
+          "options": [
+            "Yes, Variant B is definitively the winner and should be scaled immediately",
+            "Conversion rates do not matter in A/B testing",
+            "Variant A won because 4.2 is a lower number",
+            "No, with only 21 vs 25 conversions, the sample size is insufficient and the observed difference is likely due to random chance ($p > 0.05$); the test must run longer until higher conversion volume is reached"
+          ],
+          "correctAnswer": 3,
+          "explanation": "A sample of 21 vs 25 conversions on 500 clicks yields a p-value well above 0.05. Declaring winners prematurely without statistical confidence leads to false conclusions and degraded campaign performance."
+        },
+        {
+          "id": 31,
+          "topic": "Cross-Network Cannibalization Auditing",
+          "question": "When running both Standard Shopping and Performance Max campaigns for the same product inventory, which campaign takes auction priority in Google Ads?",
+          "options": [
+            "Performance Max takes priority over Standard Shopping campaigns containing the same products, unless the Standard Shopping campaign has a significantly higher Ad Rank",
+            "Standard Shopping always wins priority over Performance Max",
+            "Both ads display side-by-side simultaneously for the same user",
+            "Google pauses both campaigns automatically"
+          ],
+          "correctAnswer": 0,
+          "explanation": "In general, Performance Max takes precedence over Standard Shopping campaigns targeting the same product IDs, which is why product catalogs must be segmented cleanly across campaigns to prevent cannibalization."
+        },
+        {
+          "id": 32,
+          "topic": "Ad Schedule Bid Adjustments under Smart Bidding",
+          "question": "How do Ad Schedule (dayparting) percentage bid adjustments interact with fully automated Smart Bidding strategies (e.g., Target CPA / Target ROAS)?",
+          "options": [
+            "They override all machine learning and set fixed bids",
+            "Smart Bidding already models auction-time time-of-day signals dynamically; setting Ad Schedule bid adjustments in tCPA/tROAS modifies the target goal (e.g., a +20% adjustment tells the algorithm to accept a 20% higher CPA for that time window) rather than directly setting CPC bids",
+            "Ad schedule adjustments are completely deleted by Google",
+            "They cause campaigns to spend 10x the daily budget"
+          ],
+          "correctAnswer": 1,
+          "explanation": "In Smart Bidding, bid adjustments do not adjust CPC bids directly. In Target CPA, a +20% bid adjustment raises the Target CPA target itself for that scheduled window, signaling the algorithm to bid more aggressively."
+        },
+        {
+          "id": 33,
+          "topic": "Lead Form Extensions & Webhook Integration",
+          "question": "How can lead form asset submissions captured inside Google search ads be instantly delivered into an enterprise CRM (e.g., HubSpot or Salesforce) in real time?",
+          "options": [
+            "By manually downloading CSV files from Google Ads every 30 days",
+            "By sending a fax to Google headquarters",
+            "By taking a screenshot of the search ad",
+            "By configuring the Google Ads Lead Form Webhook URL and Key to post lead payloads directly to an API endpoint or automation middleware (e.g., Zapier/Make) in real time"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Google Ads Lead Form assets support native Webhooks. When a user submits an in-ad lead form, Google delivers JSON lead data to the configured Webhook endpoint instantly, enabling real-time sales team dispatch."
+        },
+        {
+          "id": 34,
+          "topic": "Negative Keyword Match Conflicts at Scale",
+          "question": "In a large enterprise account with 200,000 keywords, an advertiser notices that a top-converting Exact Match keyword [enterprise cloud backup] has zero impressions. What is the most common technical culprit?",
+          "options": [
+            "A broad or phrase negative keyword (e.g., \"backup\" or \"cloud backup\") in a shared negative list or campaign negative list is conflicting with and blocking the positive keyword",
+            "The keyword was banned by the government",
+            "The landing page URL has too many capital letters",
+            "The ad copy contains a colon"
+          ],
+          "correctAnswer": 0,
+          "explanation": "Negative keyword conflicts are common in large accounts. A broad or phrase negative added to a shared list can inadvertently block high-value positive exact match keywords, dropping impressions to zero until the conflict is resolved."
+        },
+        {
+          "id": 35,
+          "topic": "Google Display Network Viewability (vCPM)",
+          "question": "What constitutes an \"Active View Viewable Impression\" under Google and MRC standards for Display ads?",
+          "options": [
+            "The user clicked on the ad 5 times",
+            "At least 50% of the ad pixels are in view on the screen for a minimum of 1 continuous second for display ads (or 2 seconds for video)",
+            "The ad was loaded somewhere in the hidden bottom footer of the webpage",
+            "The user printed the webpage on paper"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The Media Rating Council (MRC) standard for viewability requires at least 50% of the ad creative pixels to be visible in the user viewport for a continuous duration of at least 1 second for display ads (2 seconds for video)."
+        },
+        {
+          "id": 36,
+          "topic": "Google Ads Auction Insights Interpretation",
+          "question": "In the Auction Insights report for an enterprise Search campaign, Competitor X has an 85% \"Impression Share\" but a 15% \"Outranking Share\" against your account. What does this indicate?",
+          "options": [
+            "Competitor X is outranking you on almost every search auction",
+            "Competitor X has been banned from advertising",
+            "Competitor X is entering 85% of eligible auctions, but your ad ranks higher than Competitor X (or shows when they do not) in 85% of shared auctions (since Outranking Share is the % of times you outranked them or showed when they didn’t)",
+            "Competitor X is bidding on different keywords"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Auction Insights Outranking Share represents how often your ad ranked higher in the auction than the competitor ad, plus how often your ad showed when theirs did not. High Outranking Share proves superior Ad Rank over that competitor."
+        },
+        {
+          "id": 37,
+          "topic": "Target Impression Share Strategy Risks",
+          "question": "What is the primary risk of using \"Target Impression Share: Absolute Top of Page 100%\" on generic, non-brand keywords?",
+          "options": [
+            "The bidding algorithm will bid astronomical CPC amounts to win 100% of top positions regardless of conversion rate or profitability, rapidly draining budget on unprofitable auctions",
+            "The campaign will generate zero impressions",
+            "Google Ads will convert all keywords to phrase match",
+            "Competitors will receive your company emails"
+          ],
+          "correctAnswer": 0,
+          "explanation": "Target Impression Share focuses entirely on ad position rather than conversions or ROI. Applying 100% Absolute Top of Page to broad or non-brand keywords can cause CPCs to spike to $50–$100+ per click as the system tries to win every auction."
+        },
+        {
+          "id": 38,
+          "topic": "Performance Max Search Themes",
+          "question": "What is the function of \"Search Themes\" in Performance Max campaigns?",
+          "options": [
+            "They change the color theme of Google search results",
+            "They replace all Responsive Search Ads in the account",
+            "They provide explicit intent signals and query guidance to Google AI regarding topics and terms your customers search for, steering PMax matching toward relevant search categories without replacing negative keyword exclusions",
+            "They block competitor ads automatically"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Search Themes inform Performance Max algorithms about specific search intents, categories, and terminology relevant to your business, helping machine learning discover relevant search queries faster across Google inventory."
+        },
+        {
+          "id": 39,
+          "topic": "MCC Currency & Timezone Immutability",
+          "question": "Once a Google Ads account is created and billing is established, can the account Timezone and Currency be changed in account settings?",
+          "options": [
+            "Yes, they can be changed anytime in Account Preferences",
+            "No, Currency and Timezone are permanently locked upon account creation; correcting an erroneous timezone or currency requires creating a new account and migrating campaigns",
+            "Only the Currency can be changed, but not Timezone",
+            "Only the Timezone can be changed, but not Currency"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Google Ads accounts permanently lock Currency and Timezone settings upon creation for billing, reporting, and regulatory integrity. To change them, a new account must be created within the MCC."
+        },
+        {
+          "id": 40,
+          "topic": "Enterprise Growth & Scaling Playbook",
+          "question": "Which holistic strategy represents the gold standard for scaling a multi-million dollar annual Google Ads enterprise acquisition program?",
+          "options": [
+            "Increase all campaign budgets by 500% overnight and enable broad match everywhere with no negatives",
+            "Rely exclusively on Google automated recommendations tab and apply all auto-apply recommendations without review",
+            "Pause all search advertising and rely entirely on organic viral social media",
+            "1. High-intent Search STAGs (tCPA/tROAS); 2. PMax with rich creative asset libraries & Brand Exclusions; 3. First-party measurement via sGTM & Enhanced Conversions; 4. CRM Offline Conversion feedback loops; 5. Automated scripting & daily anomaly alerts; 6. Controlled incrementality experiments"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Enterprise excellence combines disciplined search architecture, multi-channel PMax scaling with brand defense, first-party measurement infrastructure (sGTM/Enhanced Conversions), CRM offline revenue feedback, automated scripting, and rigorous incrementality testing."
+        }
+      ]
+    }
+  }
+];

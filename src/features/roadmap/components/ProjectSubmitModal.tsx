@@ -13,6 +13,7 @@ import {
   InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/utils/cn';
+import { sanitizeUrl } from '@/utils/url.utils';
 
 interface ProjectSubmitModalProps {
   task: Task;
@@ -46,14 +47,14 @@ export const ProjectSubmitModal: React.FC<ProjectSubmitModalProps> = ({
     const cleanNotes = description.trim();
 
     if (submissionType === 'link') {
-      const url = repoUrl.trim();
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      const sanitized = sanitizeUrl(repoUrl, ['http:', 'https:']);
+      if (!sanitized) {
         setError(
           'Please provide a valid repository or deployment URL starting with https:// (e.g. https://github.com/username/project)'
         );
         return;
       }
-      cleanUrl = url;
+      cleanUrl = sanitized;
     } else {
       // "I'll describe it instead" mode
       if (cleanNotes.length < 20) {

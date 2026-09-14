@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SkillGap } from '../types/gps.types';
 import { Card } from '@/components/data-display/Card';
 import { Badge } from '@/components/elements/Badge';
@@ -6,6 +7,14 @@ import { ProgressBar } from '@/components/data-display/ProgressBar';
 import { MapPinIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 export const SkillGapCard: React.FC<{ gapData: SkillGap }> = ({ gapData }) => {
+  const navigate = useNavigate();
+
+  const handleSkillClick = (skillName: string) => {
+    if (skillName.toLowerCase().includes('python')) {
+      navigate('/courses/python');
+    }
+  };
+
   return (
     <Card className="relative overflow-hidden">
       <div className="flex items-start justify-between mb-6">
@@ -36,9 +45,19 @@ export const SkillGapCard: React.FC<{ gapData: SkillGap }> = ({ gapData }) => {
             <CheckCircleIcon className="w-5 h-5 text-success" /> You Have
           </h3>
           <div className="flex flex-wrap gap-2">
-            {gapData.currentSkills.map(skill => (
-              <Badge key={skill} label={skill} type="skill" />
-            ))}
+            {gapData.currentSkills.map(skill => {
+              const isPython = skill.toLowerCase().includes('python');
+              return (
+                <span
+                  key={skill}
+                  onClick={() => handleSkillClick(skill)}
+                  className={isPython ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}
+                  title={isPython ? 'Click to open Python Masterclass' : undefined}
+                >
+                  <Badge label={isPython ? `${skill} ↗` : skill} type="skill" />
+                </span>
+              );
+            })}
           </div>
         </div>
 
@@ -48,11 +67,21 @@ export const SkillGapCard: React.FC<{ gapData: SkillGap }> = ({ gapData }) => {
             <XCircleIcon className="w-5 h-5 text-orange-500" /> You Need
           </h3>
           <div className="flex flex-wrap gap-2">
-            {gapData.missingSkills.map(skill => (
-              <span key={skill} className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 font-mono text-xs border border-orange-500/20">
-                {skill}
-              </span>
-            ))}
+            {gapData.missingSkills.map(skill => {
+              const isPython = skill.toLowerCase().includes('python');
+              return (
+                <span
+                  key={skill}
+                  onClick={() => handleSkillClick(skill)}
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 font-mono text-xs border border-orange-500/20 ${
+                    isPython ? 'cursor-pointer hover:bg-orange-500/20 transition-colors' : ''
+                  }`}
+                  title={isPython ? 'Click to open Python Masterclass' : undefined}
+                >
+                  {isPython ? `${skill} (Start Course ↗)` : skill}
+                </span>
+              );
+            })}
           </div>
         </div>
       </div>

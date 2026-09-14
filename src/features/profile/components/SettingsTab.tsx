@@ -5,6 +5,9 @@ import { Input } from '@/components/forms/Input';
 import { Button } from '@/components/elements/Button';
 import { Card } from '@/components/data-display/Card';
 import { useAuthStore } from '@/features/auth/store/auth.store';
+import { AuthService } from '@/features/auth/services/auth.service';
+import { SubscriptionCard } from '@/features/subscription';
+import { AvatarUpload } from './AvatarUpload';
 import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 export interface SettingsTabProps {
@@ -16,10 +19,16 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ profile, onSave }) => 
   const [fullName, setFullName] = useState(profile.fullName);
   const [headline, setHeadline] = useState(profile.headline);
   const [bio, setBio] = useState(profile.bio);
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(profile.avatarUrl);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  
+  // Account Deletion state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const authUser = useAuthStore((state) => state.user);
@@ -29,6 +38,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ profile, onSave }) => 
     setFullName(profile.fullName);
     setHeadline(profile.headline);
     setBio(profile.bio);
+    setAvatarUrl(profile.avatarUrl);
   }, [profile]);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -40,7 +50,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ profile, onSave }) => 
     setShowSuccess(false);
 
     try {
-      await onSave({ fullName, headline, bio });
+      await onSave({ fullName, headline, bio, avatarUrl });
       setShowSuccess(true);
       const timer = setTimeout(() => {
         setShowSuccess(false);
@@ -54,14 +64,39 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ profile, onSave }) => 
     }
   };
 
+  const handleAvatarChange = async (newUrl?: string) => {
+    setAvatarUrl(newUrl);
+    if (onSave) {
+      try {
+        await onSave({ avatarUrl: newUrl });
+      } catch (err) {
+        console.error('[SettingsTab] Error saving updated avatar:', err);
+      }
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate('/auth/login');
   };
 
   const handleConfirmDelete = async () => {
-    await logout();
-    navigate('/auth/login');
+    if (confirmText !== 'DELETE') return;
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      await AuthService.deleteAccount();
+      await logout();
+      navigate('/auth/login', {
+        state: { message: 'Your account and all associated data have been permanently deleted.' },
+      });
+    } catch (err: any) {
+      console.error('[SettingsTab] Account deletion failed:', err);
+      setDeleteError(err.message || 'Failed to delete account. Please try again later.');
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -82,6 +117,16 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ profile, onSave }) => 
             <span className="text-sm font-medium">{saveError}</span>
           </div>
         )}
+
+        {/* Profile Picture Upload Section */}
+        <div className="mb-6 pb-6 border-b border-border">
+          <AvatarUpload
+            userId={profile.id}
+            currentAvatarUrl={avatarUrl}
+            fullName={fullName || 'Learner'}
+            onAvatarChange={handleAvatarChange}
+          />
+        </div>
 
         <form className="space-y-4" onSubmit={handleSave}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -122,6 +167,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ profile, onSave }) => 
         </form>
       </Card>
 
+      {/* Subscription & Billing Section */}
+      <SubscriptionCard />
+
       <Card>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -139,13 +187,17 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ profile, onSave }) => 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-red-500/30 rounded-lg bg-red-500/5">
           <div>
             <h3 className="font-heading font-semibold text-red-500">Delete Account</h3>
-            <p className="text-sm text-[color:var(--text-secondary)]">Permanently delete your data and roadmap progress.</p>
+            <p className="text-sm text-[color:var(--text-secondary)]">Permanently delete your account, roadmap progress, and portfolio.</p>
           </div>
           <Button 
             type="button"
             variant="ghost" 
             className="text-red-500 border border-red-500 hover:bg-red-500 hover:text-white transition-colors flex-shrink-0 cursor-pointer"
-            onClick={() => setShowDeleteModal(true)}
+            onClick={() => {
+              setConfirmText('');
+              setDeleteError(null);
+              setShowDeleteModal(true);
+            }}
           >
             Delete
           </Button>
@@ -154,28 +206,51 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ profile, onSave }) => 
 
       {/* Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[color:var(--color-bg-card)] border border-border rounded-xl p-6 max-w-md w-full shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[color:var(--color-bg-card)] border border-border rounded-xl p-6 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 text-red-500">
               <ExclamationTriangleIcon className="w-6 h-6 flex-shrink-0" />
-              <h3 className="text-lg font-heading font-bold">Delete Account?</h3>
+              <h3 className="text-lg font-heading font-bold">Permanently Delete Account?</h3>
             </div>
-            <p className="text-sm text-[color:var(--text-secondary)]">
-              Are you sure you want to permanently delete your account? This action cannot be undone and will erase all roadmap progress and learning data.
+            
+            <p className="text-sm text-[color:var(--text-secondary)] leading-relaxed">
+              This action is <strong className="text-red-500">irreversible</strong>. All your roadmap milestones, certificates, project submissions, and verified portfolio settings will be permanently erased from the database.
             </p>
+
+            {deleteError && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-500 rounded-lg text-xs font-medium">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label className="text-xs font-heading font-semibold text-[color:var(--text-primary)]">
+                Type <span className="font-mono font-bold text-red-500">DELETE</span> to confirm:
+              </label>
+              <Input
+                placeholder="DELETE"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                disabled={isDeleting}
+              />
+            </div>
+
             <div className="flex justify-end gap-3 pt-2">
               <Button 
                 variant="ghost" 
                 onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
               >
                 Cancel
               </Button>
               <Button 
                 variant="primary" 
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+                disabled={confirmText !== 'DELETE' || isDeleting}
+                isLoading={isDeleting}
                 onClick={handleConfirmDelete}
               >
-                Yes, Delete My Account
+                Permanently Delete
               </Button>
             </div>
           </div>

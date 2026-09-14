@@ -1,18 +1,30 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MarketTrend, SkillGap, RecommendedSkill } from '../types/gps.types';
+import { MarketTrend, SkillGap, RecommendedSkill, AiSkillGapAnalysisResult, NextBestAction } from '../types/gps.types';
 import { CareerGpsService } from '../services/career-gps.service';
 import { SkillGapCard } from './SkillGapCard';
 import { MarketTrendsCard } from './MarketTrendsCard';
 import { RecommendationCard } from './RecommendationCard';
+import { CareerNextBestAction } from './CareerNextBestAction';
+import { AiSkillGapModal } from './AiSkillGapModal';
 import { Button } from '@/components/elements/Button';
 import { useAuthStore } from '@/features/auth/store/auth.store';
-import { CheckCircleIcon, SparklesIcon, ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  SparklesIcon,
+  ExclamationTriangleIcon,
+  ArrowPathIcon,
+} from '@heroicons/react/24/outline';
 
 export const CareerGPSScreen: React.FC = () => {
   const [gapData, setGapData] = useState<SkillGap | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendedSkill[]>([]);
   const [trends, setTrends] = useState<MarketTrend[]>([]);
+  const [nextAction, setNextAction] = useState<NextBestAction | null>(null);
+  const [aiAnalysisResult, setAiAnalysisResult] = useState<AiSkillGapAnalysisResult | null>(null);
+  const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addingSkillId, setAddingSkillId] = useState<string | null>(null);
@@ -25,10 +37,14 @@ export const CareerGPSScreen: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await CareerGpsService.fetchCareerGpsData(authUser?.id);
+      const [data, action] = await Promise.all([
+        CareerGpsService.fetchCareerGpsData(authUser?.id),
+        CareerGpsService.computeNextBestAction(authUser?.id),
+      ]);
       setGapData(data.skillGap);
       setRecommendations(data.recommendations);
       setTrends(data.trends);
+      setNextAction(action);
     } catch (err: any) {
       console.error('[CareerGPSScreen] Failed to load Career GPS data:', err);
       setError(err?.message || 'Unable to connect to labor market and skills benchmark data. Please verify your connection.');
@@ -40,6 +56,21 @@ export const CareerGPSScreen: React.FC = () => {
   useEffect(() => {
     loadCareerGpsData();
   }, [loadCareerGpsData]);
+
+  const handleRunAiAnalysis = async () => {
+    setIsAiModalOpen(true);
+    if (!aiAnalysisResult) {
+      setIsAiAnalyzing(true);
+      try {
+        const result = await CareerGpsService.triggerAiSkillGapAnalysis(authUser?.id);
+        setAiAnalysisResult(result);
+      } catch (err) {
+        console.error('[CareerGPSScreen] AI Analysis failed:', err);
+      } finally {
+        setIsAiAnalyzing(false);
+      }
+    }
+  };
 
   const handleAddToRoadmap = async (rec: RecommendedSkill) => {
     setAddingSkillId(rec.id);
@@ -119,20 +150,38 @@ export const CareerGPSScreen: React.FC = () => {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <header className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* AI Skill Gap Modal */}
+      <AiSkillGapModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        result={aiAnalysisResult}
+        isLoading={isAiAnalyzing}
+      />
+
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-heading font-bold text-[color:var(--text-primary)]">
-              Career GPS
+              Career GPS & Intelligence
             </h1>
             <p className="text-[color:var(--text-secondary)] mt-1 font-body">
-              Aligning your verified skills with real-time labor market demand.
+              Aligning your verified competencies with real-time labor market demand.
             </p>
           </div>
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-xs font-mono">
-            <SparklesIcon className="w-4 h-4" /> Live AI Skill Matcher
+          <div className="flex items-center gap-3">
+            <Button
+              variant="primary"
+              onClick={handleRunAiAnalysis}
+              className="flex items-center gap-2 shadow-lg shadow-indigo-600/25 cursor-pointer text-xs sm:text-sm py-2 px-4"
+            >
+              <SparklesIcon className="w-4 h-4 text-indigo-200 animate-pulse" />
+              AI Skill Gap Analysis
+            </Button>
           </div>
         </header>
+
+        {/* Personalized Next Best Action */}
+        {nextAction && <CareerNextBestAction action={nextAction} />}
 
         <div className="flex flex-col xl:flex-row gap-6 lg:gap-8">
           {/* Left Column: Gap Analysis & Actions */}
@@ -165,4 +214,3 @@ export const CareerGPSScreen: React.FC = () => {
     </div>
   );
 };
-

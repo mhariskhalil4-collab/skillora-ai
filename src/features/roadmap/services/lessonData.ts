@@ -1,10 +1,32 @@
-import { LessonContent, QuizQuestion } from '../types/roadmap.types';
+import { LessonContent, QuizQuestion, Task } from '../types/roadmap.types';
+import { PYTHON_BEGINNER_TASKS, PYTHON_INTERMEDIATE_TASKS, PYTHON_ADVANCED_TASKS } from '../data/python';
+
+const ALL_PYTHON_TASKS: Task[] = [
+  ...PYTHON_BEGINNER_TASKS,
+  ...PYTHON_INTERMEDIATE_TASKS,
+  ...PYTHON_ADVANCED_TASKS
+];
 
 export const getLessonContentForTask = (taskTitle: string, taskDescription?: string): LessonContent => {
   const lower = taskTitle.toLowerCase();
+  const descLower = (taskDescription || '').toLowerCase();
+
+  // 0. Search curated Python tasks
+  const matchedTask = ALL_PYTHON_TASKS.find(t => 
+    t.title.toLowerCase() === lower || 
+    lower.includes(t.title.toLowerCase()) || 
+    t.title.toLowerCase().includes(lower) ||
+    (descLower.includes('python') && t.orderIndex === 1)
+  );
+  if (matchedTask && matchedTask.lessonContent) {
+    return matchedTask.lessonContent;
+  }
 
   // --- 1. PYTHON / PROGRAMMING FUNDAMENTALS ---
-  if (lower.includes('python') || lower.includes('programming')) {
+  if (lower.includes('python') || descLower.includes('python') || lower.includes('programming')) {
+    if (PYTHON_BEGINNER_TASKS[0]?.lessonContent) {
+      return PYTHON_BEGINNER_TASKS[0].lessonContent;
+    }
     return {
       overview: "Welcome to Python! Think of Python not as complicated math, but simply as a way to give clear, step-by-step instructions to a very fast computer assistant. It's designed to read just like everyday English.",
       analogyHero: "Imagine cooking from a recipe book: each line in your recipe tells you what ingredients to grab and what action to take next. That's exactly how Python code runs!",

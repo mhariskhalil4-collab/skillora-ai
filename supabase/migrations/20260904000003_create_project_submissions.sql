@@ -22,6 +22,11 @@ create index if not exists idx_project_submissions_task_id on public.project_sub
 -- Enable Row Level Security (RLS)
 alter table public.project_submissions enable row level security;
 
+-- Drop existing policies if re-running
+drop policy if exists "Users can view own project submissions" on public.project_submissions;
+drop policy if exists "Users can insert own project submissions" on public.project_submissions;
+drop policy if exists "Users can update own project submissions" on public.project_submissions;
+
 -- Policy: Users can view their own submissions
 create policy "Users can view own project submissions"
   on public.project_submissions for select

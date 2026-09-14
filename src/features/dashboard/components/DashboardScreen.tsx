@@ -7,6 +7,7 @@ import { Input } from '@/components/forms/Input';
 import { Badge } from '@/components/elements/Badge';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { DashboardService, DashboardData } from '../services/dashboard.service';
+import { WeeklyLearningActivity } from './WeeklyLearningActivity';
 import { 
   FireIcon, 
   SparklesIcon, 
@@ -14,6 +15,7 @@ import {
   ChartBarIcon, 
   BoltIcon,
   MapIcon,
+  AcademicCapIcon,
   ExclamationTriangleIcon,
   ArrowPathIcon,
   CheckCircleIcon as OutlineCheck 
@@ -252,6 +254,66 @@ export const DashboardScreen: React.FC = () => {
                     ))}
                   </div>
                 </section>
+
+                {/* 3. Structured Skill Courses Feature Card */}
+                <Card className="border-brand/30 bg-gradient-to-br from-[color:var(--color-bg-card)] via-[color:var(--color-bg-card)] to-brand/5 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <AcademicCapIcon className="w-5 h-5 text-brand" />
+                      <h3 className="text-base font-heading font-bold text-[color:var(--text-primary)]">
+                        Structured Skill Masterclasses
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => navigate('/courses')}
+                      className="text-xs font-mono text-brand hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      Browse All Courses →
+                    </button>
+                  </div>
+
+                  <div
+                    onClick={() => navigate('/courses/python')}
+                    className="p-4 rounded-xl border border-border bg-[color:var(--color-bg-base)] hover:border-brand/60 hover:shadow-sm transition-all cursor-pointer group"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-brand/10 text-brand font-mono text-[10px] font-bold uppercase">
+                            Approved Course
+                          </span>
+                          <span className="text-xs font-mono text-[color:var(--text-secondary)]">3 Levels • 43 Modules</span>
+                        </div>
+                        <h4 className="text-base font-heading font-bold text-[color:var(--text-primary)] group-hover:text-brand transition-colors">
+                          Python Masterclass (Beginner to Advanced)
+                        </h4>
+                        <p className="text-xs text-[color:var(--text-secondary)]">
+                          Full 3-level progression with syntax, OOP, concurrency, FastAPI, databases, Docker, and Master Certification.
+                        </p>
+                      </div>
+
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        className="self-start sm:self-auto shrink-0 flex items-center gap-1.5 cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate('/courses/python');
+                        }}
+                      >
+                        <span>Open Course</span>
+                        <ArrowRightIcon className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* 4. Weekly Learning Activity & Progress Analytics */}
+                <WeeklyLearningActivity
+                  streakDays={data.user.streak}
+                  xpTotal={data.user.xpTotal}
+                  tasksCompleted={data.tasks.filter((t) => t.completed).length}
+                />
               </>
             ) : (
               /* Ready to start a new roadmap state */

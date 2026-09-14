@@ -37,7 +37,8 @@ export const StudyBuddyService = {
           .from('chat_messages')
           .select('id, sender, content, task_id, created_at')
           .eq('user_id', effectiveUserId)
-          .order('created_at', { ascending: true });
+          .order('created_at', { ascending: true })
+          .limit(50);
 
         if (taskId) {
           query = query.eq('task_id', taskId);
@@ -130,32 +131,18 @@ export const StudyBuddyService = {
         console.log('[StudyBuddy] ✓ Edge Function returned response successfully.');
         replyText = data.reply;
       } else {
-        throw new Error('Edge function response did not contain reply field.');
+        throw new Error('AI service returned an empty response. Please retry.');
       }
     } catch (edgeError: any) {
-      console.warn('[StudyBuddy] Edge Function unavailable:', edgeError);
-
-      // NOTE: We intentionally do NOT fall back to calling Gemini directly from
-      // the browser — that would require shipping the API key in client-side
-      // code, which exposes it to anyone who inspects the page. If you see this
-      // message, the Edge Function needs to be deployed/fixed instead.
-      replyText = [
-        '### Study Buddy is temporarily unavailable ⚡',
-        '',
-        `I received your question: **"${message}"**, but the AI service isn't reachable right now.`,
-        '',
-        'This usually means the Supabase Edge Function needs to be deployed. If you are the developer, run:',
-        '```bash',
-        'supabase secrets set GEMINI_API_KEY=your_key_here',
-        'supabase functions deploy study-buddy',
-        '```',
-      ].join('\n');
+      console.warn('[StudyBuddy] AI service unavailable:', edgeError);
+      // Re-throw so the UI catches and displays the retry state without saving a fake message
+      throw new Error(edgeError.message || 'AI service is currently unavailable. Please click retry.');
     }
 
     console.log('===========================================================');
 
-    // Persist to Supabase chat_messages table if authenticated
-    if (effectiveUserId) {
+    // Persist real conversation turn to Supabase chat_messages table if authenticated
+    if (effectiveUserId && replyText) {
       try {
         await supabase.from('chat_messages').insert([
           {

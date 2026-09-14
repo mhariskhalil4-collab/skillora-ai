@@ -17,7 +17,12 @@ import {
   QuestionMarkCircleIcon,
   CheckIcon,
   ChevronDownIcon,
-  ChevronUpIcon
+  ChevronUpIcon,
+  ExclamationTriangleIcon,
+  CommandLineIcon,
+  CodeBracketIcon,
+  EyeIcon,
+  EyeSlashIcon
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as SolidCheckCircleIcon } from '@heroicons/react/24/solid';
 
@@ -27,6 +32,131 @@ interface LessonContentScreenProps {
   onClose: () => void;
   onProceedToAssessment: () => void;
 }
+
+// Inline text formatter for **bold** and `code`
+const formatInlineText = (text: string): React.ReactNode => {
+  const parts: React.ReactNode[] = [];
+  let keyIndex = 0;
+
+  // Regex to match **bold** or `code`
+  const regex = /(\*\*[^*]+\*\*|`[^`]+`)/g;
+  let match: RegExpExecArray | null;
+  let lastIndex = 0;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+    const token = match[0];
+    if (token.startsWith('**') && token.endsWith('**')) {
+      parts.push(
+        <strong key={`b-${keyIndex++}`} className="font-semibold text-[color:var(--text-primary)]">
+          {token.slice(2, -2)}
+        </strong>
+      );
+    } else if (token.startsWith('`') && token.endsWith('`')) {
+      parts.push(
+        <code key={`c-${keyIndex++}`} className="px-1.5 py-0.5 rounded bg-brand/10 text-brand font-mono text-xs font-medium">
+          {token.slice(1, -1)}
+        </code>
+      );
+    }
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : text;
+};
+
+// Rich Structured Content Renderer for Theory, Headings, Lists, and Paragraphs
+const StructuredContentRenderer: React.FC<{ content: string }> = ({ content }) => {
+  if (!content) return null;
+
+  const paragraphs = content.split('\n\n');
+
+  return (
+    <div className="space-y-4 text-sm sm:text-base text-[color:var(--text-secondary)] font-body leading-relaxed">
+      {paragraphs.map((para, pIdx) => {
+        const trimmed = para.trim();
+        if (!trimmed) return null;
+
+        // Subheading (### )
+        if (trimmed.startsWith('### ')) {
+          return (
+            <h4 key={pIdx} className="text-base sm:text-lg font-heading font-bold text-[color:var(--text-primary)] mt-5 mb-2 pt-2 flex items-center gap-2 border-b border-border/50 pb-1.5">
+              <span className="w-2 h-2 rounded-full bg-brand" />
+              {formatInlineText(trimmed.replace('### ', ''))}
+            </h4>
+          );
+        }
+
+        // Sub-subheading (#### )
+        if (trimmed.startsWith('#### ')) {
+          return (
+            <h5 key={pIdx} className="text-sm sm:text-base font-heading font-semibold text-brand mt-4 mb-1.5">
+              {formatInlineText(trimmed.replace('#### ', ''))}
+            </h5>
+          );
+        }
+
+        // Check if paragraph is a list of lines
+        const lines = trimmed.split('\n');
+        const isNumberedList = lines.every(l => /^\d+\.\s/.test(l.trim()));
+        const isBulletList = lines.every(l => /^[-•*]\s/.test(l.trim()));
+
+        if (isNumberedList) {
+          return (
+            <div key={pIdx} className="space-y-2.5 my-3 pl-1">
+              {lines.map((line, lIdx) => {
+                const numMatch = line.trim().match(/^(\d+)\.\s*(.*)/);
+                const num = numMatch ? numMatch[1] : `${lIdx + 1}`;
+                const text = numMatch ? numMatch[2] : line;
+                return (
+                  <div key={lIdx} className="flex items-start gap-3">
+                    <span className="w-5 h-5 rounded-full bg-brand/15 text-brand font-mono text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {num}
+                    </span>
+                    <span className="flex-1 text-sm sm:text-base text-[color:var(--text-secondary)]">
+                      {formatInlineText(text)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+
+        if (isBulletList) {
+          return (
+            <ul key={pIdx} className="space-y-2 my-3 pl-1">
+              {lines.map((line, lIdx) => {
+                const text = line.trim().replace(/^[-•*]\s*/, '');
+                return (
+                  <li key={lIdx} className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand flex-shrink-0 mt-2.5" />
+                    <span className="flex-1 text-sm sm:text-base text-[color:var(--text-secondary)]">
+                      {formatInlineText(text)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          );
+        }
+
+        // Standard Paragraph
+        return (
+          <p key={pIdx} className="text-sm sm:text-base leading-relaxed text-[color:var(--text-secondary)]">
+            {formatInlineText(trimmed)}
+          </p>
+        );
+      })}
+    </div>
+  );
+};
 
 // Sub-component for interactive in-lesson mini check (Khan Academy / Duolingo style)
 const MiniPracticeCard: React.FC<{ practice: MiniPractice; practiceId: string }> = ({ practice }) => {
@@ -102,6 +232,8 @@ export const LessonContentScreen: React.FC<LessonContentScreenProps> = ({
   const [isCompleted, setIsCompleted] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
   const [expandedBreakdowns, setExpandedBreakdowns] = useState<{ [key: string]: boolean }>({});
+  const [expandedSolutions, setExpandedSolutions] = useState<{ [key: number]: boolean }>({});
+  const [showSyntaxGuide, setShowSyntaxGuide] = useState(true);
   const navigate = useNavigate();
 
   if (!isOpen) return null;
@@ -110,18 +242,27 @@ export const LessonContentScreen: React.FC<LessonContentScreenProps> = ({
 
   const handleCopyCode = async (code: string, id: string) => {
     try {
-      await navigator.clipboard.writeText(code);
-      setCopiedIndex(id);
-      setTimeout(() => setCopiedIndex(null), 2000);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(code);
+      }
     } catch (err) {
-      console.error('Failed to copy code snippet:', err);
+      console.warn('Clipboard write note:', err);
     }
+    setCopiedIndex(id);
+    setTimeout(() => setCopiedIndex(null), 2000);
   };
 
   const toggleBreakdown = (snippetId: string) => {
     setExpandedBreakdowns(prev => ({
       ...prev,
       [snippetId]: !prev[snippetId]
+    }));
+  };
+
+  const toggleSolution = (idx: number) => {
+    setExpandedSolutions(prev => ({
+      ...prev,
+      [idx]: !prev[idx]
     }));
   };
 
@@ -185,21 +326,43 @@ export const LessonContentScreen: React.FC<LessonContentScreenProps> = ({
               <h2 className="text-xs font-mono uppercase tracking-wider font-bold text-brand mb-1.5 flex items-center gap-2">
                 <LightBulbIcon className="w-4 h-4" /> Welcome & Overview
               </h2>
-              <p className="text-sm sm:text-base text-[color:var(--text-primary)] font-body leading-relaxed">
-                {lesson.overview}
-              </p>
+              <StructuredContentRenderer content={lesson.overview} />
             </div>
 
             {lesson.analogyHero && (
               <div className="p-4 rounded-xl bg-[color:var(--color-bg-card)]/80 border border-brand/20 backdrop-blur-sm flex items-start gap-3">
                 <SparklesIcon className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" />
                 <div className="text-xs sm:text-sm text-[color:var(--text-primary)] font-body">
-                  <span className="font-bold text-brand">Think of it like this: </span>
+                  <span className="font-bold text-brand">Core Analogy: </span>
                   {lesson.analogyHero}
                 </div>
               </div>
             )}
           </section>
+
+          {/* Syntax Guide & Quick Command Reference (if provided) */}
+          {lesson.syntaxGuide && (
+            <section className="rounded-2xl border border-brand/20 bg-brand/5 p-4 sm:p-5 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-brand">
+                  <CommandLineIcon className="w-4 h-4" /> Quick Syntax & Command Reference
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowSyntaxGuide(!showSyntaxGuide)}
+                  className="text-xs font-mono text-brand hover:underline cursor-pointer flex items-center gap-1"
+                >
+                  {showSyntaxGuide ? 'Collapse' : 'Expand'}
+                  {showSyntaxGuide ? <ChevronUpIcon className="w-3.5 h-3.5" /> : <ChevronDownIcon className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+              {showSyntaxGuide && (
+                <div className="p-3 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-mono text-xs overflow-x-auto whitespace-pre">
+                  {lesson.syntaxGuide}
+                </div>
+              )}
+            </section>
+          )}
 
           {/* What You'll Learn (Objectives) */}
           <section className="space-y-3">
@@ -249,10 +412,8 @@ export const LessonContentScreen: React.FC<LessonContentScreenProps> = ({
                   </div>
                 )}
 
-                {/* Section Plain-English Content */}
-                <p className="text-sm sm:text-base text-[color:var(--text-secondary)] font-body leading-relaxed">
-                  {section.content}
-                </p>
+                {/* Section Plain-English Content (Structured Rendering) */}
+                <StructuredContentRenderer content={section.content || section.explanation || ''} />
 
                 {/* Code Snippets with Line-by-Line Breakdown */}
                 {section.codeSnippets && section.codeSnippets.map((snippet, sIdx) => {
@@ -325,6 +486,23 @@ export const LessonContentScreen: React.FC<LessonContentScreenProps> = ({
                   );
                 })}
 
+                {/* Common Mistakes & Anti-Patterns */}
+                {section.commonMistakes && section.commonMistakes.length > 0 && (
+                  <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs sm:text-sm space-y-2 text-[color:var(--text-primary)]">
+                    <div className="flex items-center gap-2 font-heading font-bold text-amber-600 dark:text-amber-400">
+                      <ExclamationTriangleIcon className="w-4 h-4" /> Common Pitfalls & Anti-Patterns to Avoid
+                    </div>
+                    <ul className="space-y-1.5 pl-1">
+                      {section.commonMistakes.map((mistake, mIdx) => (
+                        <li key={mIdx} className="flex items-start gap-2">
+                          <span className="text-amber-500 font-bold">•</span>
+                          <span>{formatInlineText(mistake)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 {/* Section Mini Practice Checkpoint */}
                 {section.miniPractice && (
                   <MiniPracticeCard 
@@ -339,13 +517,69 @@ export const LessonContentScreen: React.FC<LessonContentScreenProps> = ({
                     <SparklesIcon className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" />
                     <div>
                       <span className="font-bold text-brand">Helpful Pro-Tip: </span>
-                      {section.proTip}
+                      {formatInlineText(section.proTip)}
                     </div>
                   </div>
                 )}
               </div>
             ))}
           </section>
+
+          {/* Hands-On Practice Coding Challenges (if available) */}
+          {lesson.practiceExercises && lesson.practiceExercises.length > 0 && (
+            <section className="space-y-4 pt-4 border-t border-border">
+              <h3 className="text-base sm:text-lg font-heading font-bold text-[color:var(--text-primary)] flex items-center gap-2">
+                <CodeBracketIcon className="w-5 h-5 text-brand" /> 🛠️ Hands-On Coding Challenges
+              </h3>
+              <div className="space-y-4">
+                {lesson.practiceExercises.map((exercise, eIdx) => (
+                  <div key={eIdx} className="p-5 rounded-2xl bg-[color:var(--color-bg-card)] border border-border space-y-3 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-heading font-semibold text-sm sm:text-base text-[color:var(--text-primary)]">
+                        Challenge {eIdx + 1}: {exercise.title}
+                      </h4>
+                    </div>
+                    <p className="text-xs sm:text-sm text-[color:var(--text-secondary)] font-body leading-relaxed">
+                      {exercise.instructions}
+                    </p>
+                    
+                    {exercise.starterCode && (
+                      <div className="rounded-xl overflow-hidden border border-slate-700 bg-slate-900 text-slate-100 p-3 font-mono text-xs">
+                        <div className="text-[10px] text-slate-400 mb-1 font-semibold uppercase">Starter Code:</div>
+                        <pre><code>{exercise.starterCode}</code></pre>
+                      </div>
+                    )}
+
+                    {exercise.solutionCode && (
+                      <div className="pt-2">
+                        <button
+                          type="button"
+                          onClick={() => toggleSolution(eIdx)}
+                          className="flex items-center gap-1.5 text-xs font-mono font-semibold text-brand hover:underline cursor-pointer"
+                        >
+                          {expandedSolutions[eIdx] ? (
+                            <>
+                              <EyeSlashIcon className="w-4 h-4" /> Hide Solution Code
+                            </>
+                          ) : (
+                            <>
+                              <EyeIcon className="w-4 h-4" /> Reveal Reference Solution
+                            </>
+                          )}
+                        </button>
+                        {expandedSolutions[eIdx] && (
+                          <div className="mt-2 rounded-xl overflow-hidden border border-emerald-600/50 bg-slate-900 text-slate-100 p-3 font-mono text-xs animate-in fade-in duration-150">
+                            <div className="text-[10px] text-emerald-400 mb-1 font-semibold uppercase">Reference Solution:</div>
+                            <pre><code>{exercise.solutionCode}</code></pre>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Key Takeaways & Summary */}
           <section className="bg-[color:var(--color-bg-card)] border border-border p-6 rounded-2xl space-y-4 shadow-sm">
@@ -356,13 +590,15 @@ export const LessonContentScreen: React.FC<LessonContentScreenProps> = ({
               {lesson.keyTakeaways.map((takeaway, idx) => (
                 <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-[color:var(--text-secondary)] font-body">
                   <span className="w-1.5 h-1.5 rounded-full bg-brand flex-shrink-0 mt-2" />
-                  <span>{takeaway}</span>
+                  <span>{formatInlineText(takeaway)}</span>
                 </li>
               ))}
             </ul>
-            <p className="text-xs sm:text-sm font-body text-[color:var(--text-primary)] pt-3 border-t border-border font-medium leading-relaxed">
-              {lesson.summary}
-            </p>
+            {lesson.summary && (
+              <div className="text-xs sm:text-sm font-body text-[color:var(--text-primary)] pt-3 border-t border-border font-medium leading-relaxed">
+                <StructuredContentRenderer content={lesson.summary} />
+              </div>
+            )}
           </section>
 
           {/* Interactive Lesson Verification Toggle */}
@@ -372,7 +608,7 @@ export const LessonContentScreen: React.FC<LessonContentScreenProps> = ({
                 Ready to Test Your Knowledge?
               </h4>
               <p className="text-xs sm:text-sm text-[color:var(--text-secondary)] font-body">
-                Mark this lesson complete once you've reviewed the analogies, examples, and mini checks to unlock your quiz.
+                Mark this lesson complete once you've reviewed the analogies, theoretical foundations, examples, and mini checks to unlock your quiz.
               </p>
             </div>
 
@@ -439,3 +675,4 @@ export const LessonContentScreen: React.FC<LessonContentScreenProps> = ({
     </div>
   );
 };
+
