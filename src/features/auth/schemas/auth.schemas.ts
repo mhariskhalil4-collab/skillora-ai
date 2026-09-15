@@ -1,19 +1,31 @@
 import { z } from 'zod';
 
+/**
+ * Standardized email schema:
+ * Trims leading/trailing whitespace, converts to lowercase, and validates RFC-compliant email structure.
+ * Fully supports numbers, dots, hyphens, plus-addressing, and custom subdomains (e.g. friend246@gmail.com).
+ */
+export const emailSchema = z
+  .string({ required_error: "Email is required." })
+  .trim()
+  .toLowerCase()
+  .min(1, { message: "Email is required." })
+  .email({ message: "Please enter a valid email address." });
+
 export const loginSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  email: emailSchema,
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
 });
 
 export const registerSchema = z.object({
-  firstName: z.string().min(2, { message: "First name is required." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  firstName: z.string().trim().min(2, { message: "First name is required." }),
+  email: emailSchema,
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
   role: z.enum(['university_student', 'freelancer', 'career_changer']),
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  email: emailSchema,
 });
 
 export const resetPasswordSchema = z.object({

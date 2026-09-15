@@ -54,8 +54,15 @@ export const RegisterForm: React.FC = () => {
         )}
 
         {infoMessage && (
-          <div className="p-3 bg-brand/10 border border-brand/50 text-brand rounded-md text-sm font-medium">
-            {infoMessage}
+          <div className="p-3.5 bg-brand/10 border border-brand/40 text-brand rounded-xl text-sm font-medium space-y-2">
+            <p>{infoMessage}</p>
+            <button
+              type="button"
+              onClick={() => navigate('/auth/login')}
+              className="inline-flex items-center text-xs font-semibold text-brand underline hover:text-brand/80"
+            >
+              Go to Sign In &rarr;
+            </button>
           </div>
         )}
         
