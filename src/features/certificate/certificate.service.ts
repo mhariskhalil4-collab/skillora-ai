@@ -14,17 +14,65 @@ export interface Certificate {
 }
 
 /**
- * Strict production verification URL:
- * Under no circumstances should localhost or dev URLs be embedded into certificates.
+ * Strict production verification base URL:
+ * Under NO circumstances should localhost, 127.0.0.1, or dev origins ever be used.
  */
-export const PRODUCTION_VERIFY_BASE_URL = 'https://skillora-ai-eta.vercel.app/verify-certificate';
+export const PRODUCTION_DOMAIN = 'https://skillora-ai-eta.vercel.app';
+export const PRODUCTION_VERIFY_BASE_URL = `${PRODUCTION_DOMAIN}/verify-certificate`;
 
 /**
- * Builds the canonical public verification URL for a given certificate ID.
+ * Extracts a clean certificate ID from any input string, path, or URL.
  */
-export function buildVerificationUrl(certificateId: string): string {
-  const cleanId = (certificateId || '').trim();
-  return `${PRODUCTION_VERIFY_BASE_URL}/${encodeURIComponent(cleanId)}`;
+export function extractCertificateId(inputUrlOrId: string | null | undefined): string | null {
+  if (!inputUrlOrId || typeof inputUrlOrId !== 'string') return null;
+  const trimmed = inputUrlOrId.trim();
+  if (!trimmed || trimmed === '#' || trimmed === '/') return null;
+
+  // If input is directly an alphanumeric ID (e.g., SKL-2026-X8K9M2 or UUID)
+  if (!trimmed.includes('/') && !trimmed.includes(':') && trimmed.length >= 3) {
+    return trimmed;
+  }
+
+  // Parse path or URL to extract the last meaningful slug
+  try {
+    const urlObj = trimmed.includes('://') ? new URL(trimmed) : new URL(trimmed, PRODUCTION_DOMAIN);
+    const segments = urlObj.pathname.split('/').filter(Boolean);
+    if (segments.length > 0) {
+      const last = segments[segments.length - 1];
+      if (last && last !== 'verify' && last !== 'verify-certificate' && !last.includes(':')) {
+        return decodeURIComponent(last);
+      }
+    }
+  } catch {
+    const segments = trimmed.split(/[/\\?#]/).filter(Boolean);
+    if (segments.length > 0) {
+      const last = segments[segments.length - 1];
+      if (last && last !== 'verify' && last !== 'verify-certificate' && !last.includes(':')) {
+        return decodeURIComponent(last);
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Transforms ANY certificate ID, legacy URL, localhost URL, or relative path into
+ * the strict canonical production verification URL:
+ * https://skillora-ai-eta.vercel.app/verify-certificate/:certificateId
+ */
+export function formatCanonicalVerifyUrl(inputUrlOrId: string | null | undefined): string {
+  const id = extractCertificateId(inputUrlOrId);
+  if (id) {
+    return `${PRODUCTION_VERIFY_BASE_URL}/${encodeURIComponent(id)}`;
+  }
+  return PRODUCTION_VERIFY_BASE_URL;
+}
+
+/**
+ * Alias for formatCanonicalVerifyUrl to ensure backward compatibility across all imports.
+ */
+export function buildVerificationUrl(certificateId: string | null | undefined): string {
+  return formatCanonicalVerifyUrl(certificateId);
 }
 
 /**
@@ -66,7 +114,7 @@ export const CertificateService = {
     }
 
     if (existing) {
-      const canonicalUrl = buildVerificationUrl(existing.id);
+      const canonicalUrl = formatCanonicalVerifyUrl(existing.id);
       const existingName = existing.student_name || existing.recipient_name;
       
       // If the certificate is missing student_name or has an outdated/localhost URL, update it
@@ -94,10 +142,13 @@ export const CertificateService = {
             .single();
 
           if (updated) {
-            return updated as Certificate;
+            return {
+              ...updated,
+              certificate_url: canonicalUrl,
+            } as Certificate;
           }
         } catch {
-          // If column doesn't exist yet or update fails, return patched existing record
+          // If update fails due to RLS or columns, return normalized certificate object
         }
       }
 
@@ -122,7 +173,7 @@ export const CertificateService = {
 
     // 3. Generate unique certificate ID and canonical URL
     const newCertId = generateCertificateId();
-    const canonicalUrl = buildVerificationUrl(newCertId);
+    const canonicalUrl = formatCanonicalVerifyUrl(newCertId);
     const currentDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
     // 4. Create new certificate row with student name and canonical URL
@@ -182,11 +233,11 @@ export const CertificateService = {
 
   /**
    * Fetch a single certificate by its unique ID for public unauthenticated verification.
-   * Normalizes the verification URL to production domain.
+   * Normalizes the verification URL strictly to production domain.
    */
   getCertificateById: async (certificateId: string): Promise<Certificate | null> => {
     if (!certificateId) return null;
-    const cleanId = certificateId.trim();
+    const cleanId = (extractCertificateId(certificateId) || certificateId).trim();
 
     const { data, error } = await supabase
       .from('certificates')
@@ -205,7 +256,7 @@ export const CertificateService = {
       ...data,
       student_name: data.student_name || data.recipient_name || null,
       recipient_name: data.recipient_name || data.student_name || null,
-      certificate_url: buildVerificationUrl(data.id),
+      certificate_url: formatCanonicalVerifyUrl(data.id),
     } as Certificate;
   },
 
@@ -228,7 +279,7 @@ export const CertificateService = {
       ...c,
       student_name: c.student_name || c.recipient_name || null,
       recipient_name: c.recipient_name || c.student_name || null,
-      certificate_url: buildVerificationUrl(c.id),
+      certificate_url: formatCanonicalVerifyUrl(c.id),
     }));
   },
 };

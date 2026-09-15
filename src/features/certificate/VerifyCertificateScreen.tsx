@@ -338,6 +338,7 @@ export const VerifyCertificateScreen: React.FC = () => {
                 recipientName={recipientName}
                 courseTitle={certificate.title}
                 issuedDate={certificate.date}
+                certificateId={certificate.id}
                 verifyUrl={canonicalUrl}
               />
             </div>

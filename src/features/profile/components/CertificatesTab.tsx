@@ -149,7 +149,8 @@ export const CertificatesTab: React.FC<CertificatesTabProps> = ({ profile, certi
                   recipientName={selectedCert.student_name || selectedCert.recipient_name || recipientName}
                   courseTitle={selectedCert.title}
                   issuedDate={selectedCert.date}
-                  verifyUrl={selectedCert.certificate_url || buildVerificationUrl(selectedCert.id)}
+                  certificateId={selectedCert.id}
+                  verifyUrl={buildVerificationUrl(selectedCert.id)}
                 />
               </div>
             </Modal>

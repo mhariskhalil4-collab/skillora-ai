@@ -4,13 +4,14 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import signatureImage from '@/assets/signature.png';
 import { ExclamationTriangleIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
-import { PRODUCTION_VERIFY_BASE_URL } from './certificate.service';
+import { formatCanonicalVerifyUrl } from './certificate.service';
 
 interface CertificateViewProps {
   recipientName: string;
   courseTitle: string;
   issuedDate: string;
-  verifyUrl: string;
+  verifyUrl?: string;
+  certificateId?: string;
 }
 
 export default function CertificateView({
@@ -18,36 +19,24 @@ export default function CertificateView({
   courseTitle,
   issuedDate,
   verifyUrl,
+  certificateId,
 }: CertificateViewProps) {
   const certificateRef = useRef<HTMLDivElement>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
-  // Normalize verifyUrl to ensure it always uses the canonical production endpoint
-  const canonicalVerifyUrl = (() => {
-    if (!verifyUrl) return PRODUCTION_VERIFY_BASE_URL;
-    if (verifyUrl.includes('localhost') || verifyUrl.includes('127.0.0.1')) {
-      const parts = verifyUrl.split('/');
-      const id = parts[parts.length - 1];
-      return `${PRODUCTION_VERIFY_BASE_URL}/${id}`;
-    }
-    if (verifyUrl.startsWith('/verify-certificate/') || verifyUrl.startsWith('/verify/')) {
-      const parts = verifyUrl.split('/');
-      const id = parts[parts.length - 1];
-      return `${PRODUCTION_VERIFY_BASE_URL}/${id}`;
-    }
-    return verifyUrl;
-  })();
+  // Normalize to absolute canonical production URL (strictly free of localhost/dev origins)
+  const canonicalVerifyUrl = formatCanonicalVerifyUrl(certificateId || verifyUrl);
 
   useEffect(() => {
-    // Generate high-contrast, high-resolution QR Code for reliable phone scanning
+    // Generate high-contrast, high-resolution QR Code pointing strictly to the production verification page
     QRCode.toDataURL(canonicalVerifyUrl, {
       width: 260,
       margin: 1,
       errorCorrectionLevel: 'M',
       color: {
-        dark: '#1E1B4B', // High contrast deep indigo-black
+        dark: '#1E1B4B', // High contrast deep indigo-black for instant mobile camera detection
         light: '#FFFFFF', // Clean white background
       },
     })

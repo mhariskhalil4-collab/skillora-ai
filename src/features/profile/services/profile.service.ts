@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { UserProfile, Project, Certificate } from '../types/profile.types';
 import { useAuthStore } from '@/features/auth/store/auth.store';
+import { formatCanonicalVerifyUrl } from '@/features/certificate/certificate.service';
 
 const LOCAL_STORAGE_PROFILE_KEY = 'skillora_user_profile';
 
@@ -125,7 +126,7 @@ export const ProfileService = {
               issuer: c.issuer || 'Skillora AI',
               date: c.date || c.issued_date || new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
               badgeType: c.badge_type || '3d-gold',
-              certificateUrl: c.certificate_url || '#',
+              certificateUrl: formatCanonicalVerifyUrl(c.id),
             }));
           }
         } catch (e) {
