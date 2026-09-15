@@ -188,9 +188,13 @@ export const VerifyCertificateScreen: React.FC = () => {
         
         {/* Top Navbar / Brand Bar */}
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-brand flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-              <span className="font-heading font-extrabold text-white text-base">S</span>
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 rounded-xl bg-[color:var(--color-bg-card)] border border-border p-1.5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+              <img
+                src="/skillora-logo.png"
+                alt="Skillora AI"
+                className="w-full h-full object-contain"
+              />
             </div>
             <div>
               <span className="font-heading font-bold text-base text-[color:var(--text-primary)]">Skillora AI</span>

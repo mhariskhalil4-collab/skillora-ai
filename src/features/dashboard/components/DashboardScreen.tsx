@@ -123,17 +123,26 @@ export const DashboardScreen: React.FC = () => {
         
         {/* --- HEADER (Welcome, Streak & XP Badges) --- */}
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-heading font-bold text-[color:var(--text-primary)]">
-              {hasActiveRoadmap ? `Welcome back, ${data.user.firstName}.` : `Welcome, ${data.user.firstName}.`}
-            </h1>
-            <p className="text-[color:var(--text-secondary)] mt-1 font-body">
-              {hasActiveRoadmap
-                ? "Let's pick up where you left off."
-                : (data.user.xpTotal > 0
-                    ? "Ready to take on your next skill milestone?"
-                    : "Your intelligent career acceleration & AI-guided learning platform.")}
-            </p>
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-[color:var(--color-bg-card)] border border-border p-1.5 flex items-center justify-center shadow-sm shrink-0">
+              <img
+                src="/skillora-logo.png"
+                alt="Skillora AI"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-[color:var(--text-primary)]">
+                {hasActiveRoadmap ? `Welcome back, ${data.user.firstName}.` : `Welcome, ${data.user.firstName}.`}
+              </h1>
+              <p className="text-[color:var(--text-secondary)] mt-0.5 font-body text-sm sm:text-base">
+                {hasActiveRoadmap
+                  ? "Let's pick up where you left off."
+                  : (data.user.xpTotal > 0
+                      ? "Ready to take on your next skill milestone?"
+                      : "Your intelligent career acceleration & AI-guided learning platform.")}
+              </p>
+            </div>
           </div>
           
           {/* Gamified Stats (Streak + Total XP) */}

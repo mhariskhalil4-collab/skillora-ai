@@ -1,5 +1,4 @@
 import React from 'react';
-import { SparklesIcon } from '@heroicons/react/24/solid';
 import { useTheme } from '@/hooks/useTheme';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import { NotificationBell } from '@/features/notifications';
@@ -16,9 +15,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenSearch }) => {
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8 border-b border-border bg-[color:var(--color-bg-card)]/95 backdrop-blur-md">
       {/* Mobile Brand (hidden on large screens where Sidebar shows brand) */}
-      <div className="flex items-center gap-2 lg:hidden">
-        <SparklesIcon className="w-5 h-5 text-brand" />
-        <span className="text-base font-heading font-bold text-[color:var(--text-primary)]">
+      <div className="flex items-center gap-2.5 lg:hidden">
+        <img
+          src="/skillora-logo.png"
+          alt="Skillora AI Logo"
+          className="w-7 h-7 rounded-lg object-contain"
+        />
+        <span className="text-base font-heading font-bold text-[color:var(--text-primary)] tracking-tight">
           Skillora <span className="text-brand">AI</span>
         </span>
         {EARLY_ACCESS_FREE && (

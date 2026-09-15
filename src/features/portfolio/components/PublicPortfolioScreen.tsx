@@ -449,9 +449,13 @@ export const PublicPortfolioScreen: React.FC = () => {
 
       {/* Public Footer */}
       <footer className="mt-20 border-t border-white/10 pt-8 pb-12 text-center space-y-3">
-        <div className="flex items-center justify-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-[#635BFF]/20 border border-[#635BFF]/40 flex items-center justify-center text-[#635BFF] font-heading font-bold text-xs">
-            S
+        <div className="flex items-center justify-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 p-1 flex items-center justify-center">
+            <img
+              src="/skillora-logo.png"
+              alt="Skillora AI"
+              className="w-full h-full object-contain"
+            />
           </div>
           <span className="font-heading font-semibold text-sm text-white">
             Skillora AI

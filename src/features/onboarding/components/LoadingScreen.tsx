@@ -12,7 +12,13 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ targetGoal, skills
         {/* Animated AI Core Rings */}
         <div className="absolute inset-0 border-4 border-ai-glow border-t-transparent rounded-full animate-spin"></div>
         <div className="absolute inset-4 border-4 border-brand border-b-transparent rounded-full animate-[spin_reverse_1.5s_linear_infinite]"></div>
-        <span className="text-3xl animate-pulse">✨</span>
+        <div className="relative z-10 w-14 h-14 rounded-xl bg-[color:var(--color-bg-card)] border border-border p-1.5 flex items-center justify-center shadow-lg">
+          <img
+            src="/skillora-logo.png"
+            alt="Skillora AI"
+            className="w-full h-full object-contain"
+          />
+        </div>
       </div>
       
       <h2 className="text-2xl sm:text-3xl font-heading font-bold mb-3 text-[color:var(--text-primary)]">

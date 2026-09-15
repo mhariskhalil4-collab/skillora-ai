@@ -12,7 +12,6 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import {
-  SparklesIcon,
   HomeIcon as HomeIconSolid,
   AcademicCapIcon as AcademicCapIconSolid,
   MapIcon as MapIconSolid,
@@ -49,12 +48,16 @@ export const Sidebar: React.FC = () => {
     <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:flex-shrink-0 h-screen sticky top-0 border-r border-border bg-[color:var(--color-bg-card)]">
       {/* Brand */}
       <div className="flex items-center justify-between px-6 h-16 border-b border-border">
-        <div className="flex items-center gap-2">
-          <SparklesIcon className="w-6 h-6 text-brand" />
+        <NavLink to="/dashboard" className="flex items-center gap-3 group">
+          <img
+            src="/skillora-logo.png"
+            alt="Skillora AI Logo"
+            className="w-8 h-8 rounded-lg object-contain transition-transform group-hover:scale-105"
+          />
           <span className="text-lg font-heading font-bold text-[color:var(--text-primary)]">
             Skillora <span className="text-brand">AI</span>
           </span>
-        </div>
+        </NavLink>
         {EARLY_ACCESS_FREE && (
           <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-brand/15 text-brand border border-brand/30">
             Early Access

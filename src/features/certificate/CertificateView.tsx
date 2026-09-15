@@ -164,6 +164,7 @@ export default function CertificateView({
               alignItems: 'center',
               justifyContent: 'center',
               background: '#FFFFFF',
+              boxShadow: '0 2px 8px rgba(99,91,255,0.2)',
             }}
           >
             <div
@@ -173,19 +174,16 @@ export default function CertificateView({
                 borderRadius: '50%',
                 border: '1px solid #635BFF',
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-                fontWeight: 700,
-                fontSize: 12,
-                color: '#3C3489',
-                textAlign: 'center',
+                padding: 6,
               }}
             >
-              SKILLORA
-              <br />
-              AI
+              <img
+                src="/skillora-logo.png"
+                alt="Skillora AI Official Seal"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
             </div>
           </div>
         </div>
