@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ChatMessage, ChatContext } from '../types/chat.types';
 import { StudyBuddyService } from '../services/study-buddy.service';
 import { RoadmapService } from '@/features/roadmap/services/roadmap.service';
+import { resolveCourseFromRoadmap } from '@/features/roadmap/services/courseRegistry';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { ContextBanner } from './ContextBanner';
 import { ChatBubble } from './ChatBubble';
@@ -39,9 +40,10 @@ export const StudyBuddyScreen: React.FC = () => {
     scrollToBottom();
   }, [messages, isLoading]);
 
-  // 1. Initialize context from Roadmap and load Chat History
+  // 1. Initialize context from Active Roadmap and load Chat History
   const initializeStudyBuddy = useCallback(async () => {
     setIsInitializing(true);
+    setError(null);
     try {
       // Fetch active roadmap to set dynamic learning context
       const roadmap = await RoadmapService.fetchActiveRoadmap(authUser?.id);
@@ -55,8 +57,12 @@ export const StudyBuddyScreen: React.FC = () => {
         activeTask = roadmap.tasks[0];
       }
 
+      const resolvedCourse = roadmap ? resolveCourseFromRoadmap(roadmap) : null;
+
       const dynamicContext: ChatContext | null = roadmap ? {
         roadmapId: roadmap.id,
+        courseId: resolvedCourse?.id,
+        courseTitle: resolvedCourse?.title || roadmap.title,
         taskId: activeTask?.id,
         taskTitle: activeTask?.title || roadmap.title,
         taskDescription: activeTask?.description,
@@ -65,13 +71,17 @@ export const StudyBuddyScreen: React.FC = () => {
 
       setContext(dynamicContext);
 
-      // Fetch saved conversation history from Supabase
-      const history = await StudyBuddyService.fetchChatHistory(authUser?.id, activeTask?.id);
+      // Fetch saved conversation history specific to this active course/task
+      const history = await StudyBuddyService.fetchChatHistory(
+        authUser?.id,
+        activeTask?.id,
+        dynamicContext
+      );
 
       if (history.length > 0) {
         setMessages(history);
       } else {
-        // Generate dynamic welcome greeting
+        // Generate dynamic welcome greeting grounded in current course
         const greeting = StudyBuddyService.generateInitialGreeting(
           dynamicContext,
           authUser?.firstName
@@ -97,18 +107,26 @@ export const StudyBuddyScreen: React.FC = () => {
   // 2. Handle Message Sending to Supabase Edge Function
   const handleSendMessage = React.useCallback(
     async (content: string) => {
-      if (!content.trim() || isLoading) return;
-
       const userMessageText = content.trim();
+      if (!userMessageText || isLoading) return;
+
       const newUserMsg: ChatMessage = {
         id: `msg_u_${Date.now()}`,
         role: 'user',
         content: userMessageText,
         timestamp: new Date(),
         taskId: context?.taskId,
+        roadmapId: context?.roadmapId,
+        courseId: context?.courseId,
       };
 
-      setMessages((prev) => [...prev, newUserMsg]);
+      setMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last && last.role === 'user' && last.content === userMessageText) {
+          return prev;
+        }
+        return [...prev, newUserMsg];
+      });
       setIsLoading(true);
       setError(null);
       setLastFailedMessage(null);
@@ -127,12 +145,14 @@ export const StudyBuddyScreen: React.FC = () => {
           content: reply,
           timestamp: new Date(),
           taskId: context?.taskId,
+          roadmapId: context?.roadmapId,
+          courseId: context?.courseId,
         };
 
         setMessages((prev) => [...prev, newAiMsg]);
       } catch (err: any) {
         console.error('[StudyBuddyScreen] Send message failed:', err);
-        setError('Unable to receive response from AI. Please verify your connection or click retry.');
+        setError(err.message || 'Unable to receive response from AI. Please try again.');
         setLastFailedMessage(userMessageText);
       } finally {
         setIsLoading(false);
@@ -151,22 +171,30 @@ export const StudyBuddyScreen: React.FC = () => {
 
   const handleClearChat = async () => {
     if (window.confirm('Clear your conversation history for this topic?')) {
-      await StudyBuddyService.clearHistory(authUser?.id);
+      await StudyBuddyService.clearHistory(authUser?.id, context);
       const freshGreeting = StudyBuddyService.generateInitialGreeting(
         context,
         authUser?.firstName
       );
       setMessages([freshGreeting]);
+      setError(null);
+      setLastFailedMessage(null);
     }
+  };
+
+  const handleClearContext = () => {
+    setContext(null);
+    const generalGreeting = StudyBuddyService.generateInitialGreeting(null, authUser?.firstName);
+    setMessages([generalGreeting]);
   };
 
   return (
     <div className="flex flex-col h-screen bg-[color:var(--color-bg-base)] pb-16 lg:pb-0 overflow-hidden">
       {/* Context Banner */}
-      {context && (
+      {context ? (
         <div className="flex items-center justify-between border-b border-border bg-[color:var(--color-bg-card)]/90 backdrop-blur-md">
           <div className="flex-1">
-            <ContextBanner context={context} onClear={() => setContext(null)} />
+            <ContextBanner context={context} onClear={handleClearContext} />
           </div>
           <button
             onClick={handleClearChat}
@@ -174,6 +202,19 @@ export const StudyBuddyScreen: React.FC = () => {
             className="mr-4 p-2 text-[color:var(--text-secondary)] hover:text-red-500 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
           >
             <TrashIcon className="w-5 h-5" />
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-[color:var(--color-bg-card)]/70 backdrop-blur-sm text-xs text-[color:var(--text-secondary)] font-mono">
+          <span className="flex items-center gap-1.5">
+            <SparklesIcon className="w-4 h-4 text-brand" /> General Tech & AI Learning Mode
+          </span>
+          <button
+            onClick={handleClearChat}
+            title="Clear Chat History"
+            className="p-1.5 hover:text-red-500 transition-colors"
+          >
+            <TrashIcon className="w-4 h-4" />
           </button>
         </div>
       )}
@@ -206,7 +247,7 @@ export const StudyBuddyScreen: React.FC = () => {
                     <span className="text-xs font-mono font-medium ml-2 text-ai-glow">Thinking...</span>
                   </div>
                   <span className="text-[11px] text-[color:var(--text-secondary)]">
-                    Formulating a beginner-friendly analogy & walkthrough
+                    Formulating an intuitive explanation & walkthrough
                   </span>
                 </div>
               </div>
@@ -218,15 +259,15 @@ export const StudyBuddyScreen: React.FC = () => {
 
       {/* Error / Retry Banner */}
       {error && (
-        <div className="mx-4 mb-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center justify-between gap-3 text-red-500">
-          <div className="flex items-center gap-2 text-sm">
+        <div className="mx-4 mb-2 p-3.5 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center justify-between gap-3 text-red-500 shadow-sm">
+          <div className="flex items-center gap-2.5 text-xs sm:text-sm">
             <ExclamationTriangleIcon className="w-5 h-5 flex-shrink-0" />
-            <span>{error}</span>
+            <span className="leading-snug">{error}</span>
           </div>
           {lastFailedMessage && (
             <button
               onClick={() => handleSendMessage(lastFailedMessage)}
-              className="flex items-center gap-1 text-xs font-heading font-bold bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-xs font-heading font-bold bg-red-500 hover:bg-red-600 text-white px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer flex-shrink-0 shadow-sm active:scale-95"
             >
               <ArrowPathIcon className="w-3.5 h-3.5" /> Retry
             </button>

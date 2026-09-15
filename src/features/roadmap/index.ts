@@ -21,5 +21,10 @@ export * from './services/shopifyDeveloperCourse.service';
 export * from './data/shopify-developer';
 export * from './components/ShopifyDeveloperCourseScreen';
 export * from './services/englishEmailWritingCourse.service';
-export * from './data/english-email-writing';
 export * from './components/EnglishEmailWritingCourseScreen';
+export * from './components/RoadmapListScreen';
+export * from './components/DeleteRoadmapModal';
+export * from './components/RenameRoadmapModal';
+export * from './components/CourseSwitcherNav';
+
+

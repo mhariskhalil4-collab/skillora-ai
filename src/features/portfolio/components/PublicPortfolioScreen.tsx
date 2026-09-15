@@ -434,7 +434,7 @@ export const PublicPortfolioScreen: React.FC = () => {
 
                   <div className="mt-6 w-full pt-4 border-t border-white/5">
                     <Link
-                      to={`/verify/${cert.id}`}
+                      to={`/verify-certificate/${cert.id}`}
                       className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#635BFF]/10 hover:bg-[#635BFF]/25 border border-[#635BFF]/30 text-[#635BFF] hover:text-white font-heading text-xs font-semibold transition-all"
                     >
                       <CheckBadgeIcon className="w-4 h-4" /> Verify Credential

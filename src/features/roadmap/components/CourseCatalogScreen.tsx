@@ -368,6 +368,8 @@ export const CourseCatalogScreen: React.FC = () => {
     },
   ];
 
+  const inProgressCourses = courses.filter((c) => c.progress > 0);
+
   return (
     <div className="min-h-screen bg-[color:var(--color-bg-base)] pb-24 lg:pb-8">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
@@ -386,14 +388,96 @@ export const CourseCatalogScreen: React.FC = () => {
             </p>
           </div>
 
-          <Button
-            variant="outline"
-            onClick={() => navigate('/roadmap')}
-            className="self-start sm:self-auto flex items-center gap-2 text-xs sm:text-sm cursor-pointer"
-          >
-            <SparklesIcon className="w-4 h-4 text-brand" /> View Personalized Roadmap
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/roadmaps')}
+              className="flex items-center gap-2 text-xs sm:text-sm cursor-pointer"
+            >
+              <SparklesIcon className="w-4 h-4 text-brand" /> My Roadmaps
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => navigate('/roadmap')}
+              className="flex items-center gap-2 text-xs sm:text-sm cursor-pointer shadow-ai-glow"
+            >
+              <span>Active Roadmap</span>
+              <ArrowRightIcon className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         </header>
+
+        {/* Multi-Course Reassurance Banner */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-brand/10 via-[color:var(--color-bg-card)] to-brand/5 border border-brand/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-brand/15 text-brand flex items-center justify-center shrink-0">
+              <SparklesIcon className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-heading font-bold text-[color:var(--text-primary)]">
+                Learn Multiple Skills in Parallel
+              </h4>
+              <p className="text-xs text-[color:var(--text-secondary)]">
+                You can switch between any course at any time. Your progress, module checkpoints, and exam records are preserved independently for every course.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* In-Progress Courses Section if user has active course progress */}
+        {inProgressCourses.length > 0 && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-heading font-bold text-[color:var(--text-primary)] flex items-center gap-2">
+                <BookOpenIcon className="w-5 h-5 text-brand" />
+                In-Progress Courses ({inProgressCourses.length})
+              </h3>
+              <span className="text-xs font-mono text-[color:var(--text-secondary)]">
+                Switch or continue anytime
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {inProgressCourses.map((c) => {
+                const CourseIcon = c.icon;
+                return (
+                  <Card
+                    key={c.id}
+                    onClick={() => navigate(c.route)}
+                    className="p-5 rounded-2xl border border-brand/30 bg-gradient-to-br from-[color:var(--color-bg-card)] to-brand/5 hover:border-brand hover:shadow-ai-glow transition-all cursor-pointer group flex flex-col justify-between"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="w-10 h-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center">
+                          <CourseIcon className="w-5 h-5" />
+                        </div>
+                        <span className="text-xs font-mono font-bold text-brand">
+                          {c.progress}% Complete
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 className="font-heading font-bold text-base text-[color:var(--text-primary)] group-hover:text-brand transition-colors">
+                          {c.title}
+                        </h4>
+                        <p className="text-xs text-[color:var(--text-secondary)] mt-1 font-mono">
+                          {c.modulesCount} Modules • {c.levelsCount} Levels
+                        </p>
+                      </div>
+
+                      <ProgressBar progress={c.progress} />
+                    </div>
+
+                    <div className="pt-4 mt-2 flex items-center justify-between text-xs font-heading font-semibold text-brand group-hover:translate-x-1 transition-transform">
+                      <span>Resume Course</span>
+                      <ArrowRightIcon className="w-3.5 h-3.5" />
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Featured Hero Card: Python Masterclass */}
         <Card className="relative overflow-hidden group border-brand/40 bg-gradient-to-br from-[color:var(--color-bg-card)] via-[color:var(--color-bg-card)] to-brand/10 shadow-xl">

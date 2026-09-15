@@ -1,8 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Roadmap, Task, CourseLevel, CourseProgressState } from '../types/roadmap.types';
 import { RoadmapService } from '../services/roadmap.service';
-import { PythonCourseService } from '../services/pythonCourse.service';
+import {
+  resolveCourseFromRoadmap,
+  CourseMappingInfo,
+} from '../services/courseRegistry';
 import { RoadmapTimeline } from './RoadmapTimeline';
 import { TaskDetailDrawer } from './TaskDetailDrawer';
 import { CourseLevelSwitcher } from './CourseLevelSwitcher';
@@ -10,21 +13,41 @@ import { PrerequisiteModal } from './PrerequisiteModal';
 import { ProgressBar } from '@/components/data-display/ProgressBar';
 import { Button } from '@/components/elements/Button';
 import { useAuthStore } from '@/features/auth/store/auth.store';
-import { MapIcon, SparklesIcon, AcademicCapIcon, ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import {
+  MapIcon,
+  SparklesIcon,
+  AcademicCapIcon,
+  ExclamationTriangleIcon,
+  ArrowPathIcon,
+  ChevronDownIcon,
+  CheckCircleIcon,
+  RectangleStackIcon,
+  PlusIcon,
+  ArrowTopRightOnSquareIcon,
+} from '@heroicons/react/24/outline';
 
 export const RoadmapScreen: React.FC = () => {
+  const { roadmapId: routeRoadmapId } = useParams<{ roadmapId?: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedRoadmapId = routeRoadmapId || searchParams.get('id');
+
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
+  const [allRoadmaps, setAllRoadmaps] = useState<Roadmap[]>([]);
+  const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
+  const switcherRef = useRef<HTMLDivElement>(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
-  
-  // Track Mode: 'python' or 'personalized'
-  const [activeTrack, setActiveTrack] = useState<'python' | 'personalized'>('python');
-  
-  // Python Multi-Level Course State
-  const [pythonCourseState, setPythonCourseState] = useState<CourseProgressState>(() => PythonCourseService.getCourseState());
+  const [activeToast, setActiveToast] = useState<string | null>(null);
+
+  // Dynamic Course Integration
+  const [courseInfo, setCourseInfo] = useState<CourseMappingInfo | null>(null);
+  const [courseProgressState, setCourseProgressState] = useState<CourseProgressState | null>(null);
   const [activeLevel, setActiveLevel] = useState<CourseLevel>('beginner');
+
+  // Prerequisite Modal State
   const [prereqModalOpen, setPrereqModalOpen] = useState(false);
   const [prereqTargetLevel, setPrereqTargetLevel] = useState<CourseLevel | null>(null);
   const [prereqMessage, setPrereqMessage] = useState('');
@@ -32,49 +55,109 @@ export const RoadmapScreen: React.FC = () => {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
 
-  const isPythonCourse = activeTrack === 'python' || Boolean(
-    roadmap?.title?.toLowerCase().includes('python') || 
-    roadmap?.id?.includes('python')
-  );
+  // Close switcher dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
+        setIsSwitcherOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const loadRoadmap = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setSelectedTaskId(null);
+
     try {
-      const data = await RoadmapService.fetchActiveRoadmap(user?.id);
+      // 1. Fetch all roadmaps to populate switcher
+      const list = await RoadmapService.fetchAllRoadmaps(user?.id);
+      setAllRoadmaps(list);
+
+      // 2. Fetch target roadmap (by exact ID if specified, or active fallback)
+      let data: Roadmap | null = null;
+      if (requestedRoadmapId) {
+        data = await RoadmapService.fetchRoadmapById(requestedRoadmapId, user?.id);
+      }
+      if (!data) {
+        data = await RoadmapService.fetchActiveRoadmap(user?.id);
+      }
+
       setRoadmap(data);
 
-      const pState = PythonCourseService.getCourseState();
-      setPythonCourseState(pState);
-      setActiveLevel(pState.currentLevel);
+      if (data) {
+        // Resolve mapped masterclass course dynamically (e.g. Facebook Ads, Python, SEO, Meta Ads, etc.)
+        const resolvedCourse = resolveCourseFromRoadmap(data);
+        setCourseInfo(resolvedCourse);
 
-      // Default track based on roadmap title
-      if (data && (data.title?.toLowerCase().includes('python') || data.id?.includes('python'))) {
-        setActiveTrack('python');
-      } else if (data) {
-        // If user has a personalized non-python roadmap, default to personalized but allow instant switch
-        setActiveTrack('personalized');
+        if (resolvedCourse) {
+          const cState = resolvedCourse.service.getCourseState();
+          setCourseProgressState(cState);
+          setActiveLevel(cState.currentLevel || 'beginner');
+        } else {
+          setCourseProgressState(null);
+        }
+      } else {
+        setCourseInfo(null);
+        setCourseProgressState(null);
       }
     } catch (err: any) {
-      console.error('[RoadmapScreen] Failed to load roadmap from Supabase:', err);
+      console.error('[RoadmapScreen] Failed to load roadmap:', err);
       setError(err?.message || 'Unable to retrieve your learning roadmap. Please check your connection.');
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, requestedRoadmapId]);
 
   useEffect(() => {
     loadRoadmap();
   }, [loadRoadmap]);
 
-  // Determine current active tasks list
-  const currentTasks: Task[] = React.useMemo(() => {
-    if (isPythonCourse && pythonCourseState) {
-      const lvlData = pythonCourseState.levels[activeLevel];
-      return lvlData?.tasks || [];
+  const handleSelectRoadmap = async (targetRoadmap: Roadmap) => {
+    setIsSwitcherOpen(false);
+    setIsLoading(true);
+    setSelectedTaskId(null);
+
+    try {
+      await RoadmapService.setActiveRoadmap(targetRoadmap.id, user?.id);
+      setSearchParams({ id: targetRoadmap.id });
+      setRoadmap(targetRoadmap);
+
+      // Resolve course info for the newly selected roadmap
+      const resolved = resolveCourseFromRoadmap(targetRoadmap);
+      setCourseInfo(resolved);
+
+      if (resolved) {
+        const cState = resolved.service.getCourseState();
+        setCourseProgressState(cState);
+        setActiveLevel(cState.currentLevel || 'beginner');
+      } else {
+        setCourseProgressState(null);
+      }
+
+      setAllRoadmaps((prev) =>
+        prev.map((r) => ({ ...r, isActive: r.id === targetRoadmap.id }))
+      );
+
+      setActiveToast(`Switched to "${targetRoadmap.title}"`);
+      setTimeout(() => setActiveToast(null), 3000);
+    } catch (err) {
+      console.error('Failed to switch roadmap:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Current active tasks list: uses course tasks if masterclass available, else roadmap tasks
+  const currentTasks: Task[] = useMemo(() => {
+    if (courseInfo && courseProgressState && courseProgressState.levels[activeLevel]) {
+      const lvlData = courseProgressState.levels[activeLevel];
+      return lvlData.tasks || [];
     }
     return roadmap?.tasks || [];
-  }, [isPythonCourse, pythonCourseState, activeLevel, roadmap?.tasks]);
+  }, [courseInfo, courseProgressState, activeLevel, roadmap?.tasks]);
 
   const selectedTask = currentTasks.find((t) => t.id === selectedTaskId) || null;
 
@@ -87,13 +170,15 @@ export const RoadmapScreen: React.FC = () => {
   };
 
   const handleLevelSelect = (level: CourseLevel) => {
-    const res = PythonCourseService.switchLevel(level);
+    if (!courseInfo) return;
+
+    const res = courseInfo.service.switchLevel(level);
     if (res.success) {
-      setPythonCourseState(res.state);
+      setCourseProgressState(res.state);
       setActiveLevel(level);
     } else {
       setPrereqTargetLevel(level);
-      setPrereqMessage(res.message || 'Complete the prerequisite level assessment first.');
+      setPrereqMessage(res.message || 'Complete the prerequisite level assessment and all required modules first.');
       setPrereqModalOpen(true);
     }
   };
@@ -113,23 +198,21 @@ export const RoadmapScreen: React.FC = () => {
   };
 
   const handleTaskCompleted = async (taskId: string) => {
-    if (isPythonCourse && pythonCourseState) {
-      // Complete in Python service
-      const updatedState = PythonCourseService.completeTask(activeLevel, taskId);
-      setPythonCourseState(updatedState);
+    if (courseInfo && courseProgressState) {
+      const updatedState = courseInfo.service.completeTask(activeLevel, taskId);
+      setCourseProgressState(updatedState);
 
-      // Persist to Supabase if connected
       try {
         await RoadmapService.completeTask(taskId, user?.id);
       } catch (e) {
-        console.warn('Note on Supabase task completion:', e);
+        console.warn('[RoadmapScreen] Supabase task completion sync note:', e);
       }
       return;
     }
 
     if (!roadmap) return;
 
-    // 1. Optimistic UI update
+    // Optimistic UI update for custom roadmap
     setRoadmap((prev) => {
       if (!prev) return null;
       const sorted = [...prev.tasks].sort((a, b) => a.orderIndex - b.orderIndex);
@@ -142,9 +225,9 @@ export const RoadmapScreen: React.FC = () => {
         return task;
       });
 
-      // Unlock next uncompleted task
-      const nextTask = updatedTasks.find((t, idx) => idx > currentIdx && t.status !== 'completed') ||
-                       updatedTasks.find((t) => t.status === 'locked');
+      const nextTask =
+        updatedTasks.find((t, idx) => idx > currentIdx && t.status !== 'completed') ||
+        updatedTasks.find((t) => t.status === 'locked');
       if (nextTask) {
         nextTask.status = 'in_progress';
       }
@@ -159,16 +242,14 @@ export const RoadmapScreen: React.FC = () => {
       };
     });
 
-    // 2. Persist to Supabase in the background
     try {
       await RoadmapService.completeTask(taskId, user?.id);
-      // Refresh to ensure exact sync with database triggers
-      const syncedRoadmap = await RoadmapService.fetchActiveRoadmap(user?.id);
+      const syncedRoadmap = await RoadmapService.fetchRoadmapById(roadmap.id, user?.id);
       if (syncedRoadmap) {
         setRoadmap(syncedRoadmap);
       }
-    } catch (error) {
-      console.error('Failed to persist completed task to Supabase:', error);
+    } catch (err) {
+      console.error('Failed to persist completed task:', err);
       await loadRoadmap();
     }
   };
@@ -213,7 +294,7 @@ export const RoadmapScreen: React.FC = () => {
     );
   }
 
-  if (!roadmap || (roadmap.tasks.length === 0 && !isPythonCourse)) {
+  if (!roadmap || (roadmap.tasks.length === 0 && !courseInfo)) {
     return (
       <div className="min-h-screen bg-[color:var(--color-bg-base)] flex items-center justify-center p-6 pb-24 lg:pb-8">
         <div className="max-w-md w-full text-center bg-[color:var(--color-bg-card)] border border-border rounded-2xl p-8 shadow-xl space-y-6">
@@ -222,10 +303,10 @@ export const RoadmapScreen: React.FC = () => {
           </div>
           <div>
             <h2 className="text-2xl font-heading font-bold text-[color:var(--text-primary)]">
-              Ready to Start a New Roadmap?
+              Ready to Start a Roadmap?
             </h2>
             <p className="text-sm text-[color:var(--text-secondary)] mt-2 leading-relaxed">
-              You don't currently have an in-progress roadmap. Generate a new tailored AI curriculum to advance your skills.
+              You don't currently have an active roadmap. Generate a new custom AI curriculum to accelerate your skills.
             </p>
           </div>
           <div className="space-y-3">
@@ -239,9 +320,9 @@ export const RoadmapScreen: React.FC = () => {
             <Button
               variant="outline"
               className="w-full flex items-center justify-center gap-2 cursor-pointer"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/courses')}
             >
-              Return to Dashboard
+              <AcademicCapIcon className="w-4 h-4" /> Browse Courses
             </Button>
           </div>
         </div>
@@ -249,14 +330,18 @@ export const RoadmapScreen: React.FC = () => {
     );
   }
 
-  const currentLevelData = isPythonCourse && pythonCourseState ? pythonCourseState.levels[activeLevel] : null;
-  const displayProgress = isPythonCourse && currentLevelData 
-    ? currentLevelData.progressPercentage 
-    : roadmap.progressPercentage;
+  const currentLevelData = courseInfo && courseProgressState ? courseProgressState.levels[activeLevel] : null;
+  const displayProgress =
+    currentLevelData
+      ? currentLevelData.progressPercentage
+      : roadmap.progressPercentage;
+
+  const displayTitle = courseInfo ? courseInfo.title : roadmap.title;
+  const displayDescription = courseInfo ? courseInfo.description : (roadmap.description || 'Personalized AI Learning Track');
 
   return (
     <div className="relative min-h-screen bg-[color:var(--color-bg-base)] pb-24 lg:pb-8 overflow-hidden">
-      {/* Toast Alert for Locked Step Click */}
+      {/* Toast Alert for Locked Step */}
       {lockedToast && (
         <div className="fixed top-5 right-5 z-50 flex items-center gap-3 bg-[color:var(--color-bg-card)] border border-brand/40 text-[color:var(--text-primary)] px-5 py-3.5 rounded-xl shadow-2xl font-heading text-sm font-medium animate-in fade-in slide-in-from-top-4 duration-300">
           <span className="text-lg">🔒</span>
@@ -264,81 +349,153 @@ export const RoadmapScreen: React.FC = () => {
         </div>
       )}
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      {/* Toast Alert for Roadmap Switched */}
+      {activeToast && (
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 bg-[color:var(--color-bg-card)] border border-brand text-[color:var(--text-primary)] px-5 py-3.5 rounded-xl shadow-2xl font-heading text-sm font-medium animate-in fade-in slide-in-from-top-4 duration-300">
+          <CheckCircleIcon className="w-5 h-5 text-brand flex-shrink-0" />
+          <span>{activeToast}</span>
+        </div>
+      )}
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        
+        {/* Navigation & Multi-Roadmap Switcher Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6 p-3 rounded-2xl bg-[color:var(--color-bg-card)] border border-border">
+          {/* Quick Switcher Dropdown */}
+          <div className="relative" ref={switcherRef}>
+            <button
+              type="button"
+              onClick={() => setIsSwitcherOpen((prev) => !prev)}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[color:var(--color-bg-base)] border border-border hover:border-brand text-xs font-heading font-semibold text-[color:var(--text-primary)] transition-all cursor-pointer shadow-sm"
+            >
+              <RectangleStackIcon className="w-4 h-4 text-brand" />
+              <span>Switch Roadmap ({allRoadmaps.length || 1})</span>
+              <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform ${isSwitcherOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isSwitcherOpen && (
+              <div className="absolute left-0 top-full mt-2 w-72 sm:w-80 rounded-2xl bg-[color:var(--color-bg-card)] border border-border shadow-2xl z-40 p-2 space-y-1 animate-in fade-in zoom-in-95 duration-200">
+                <div className="px-3 py-2 text-[10px] font-mono font-bold uppercase tracking-wider text-[color:var(--text-secondary)] border-b border-border">
+                  Your Saved Roadmaps
+                </div>
+
+                <div className="max-h-60 overflow-y-auto space-y-1 py-1">
+                  {allRoadmaps.map((item) => {
+                    const isSelected = item.id === roadmap.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleSelectRoadmap(item)}
+                        className={`w-full text-left p-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-2 cursor-pointer ${
+                          isSelected
+                            ? 'bg-brand/10 text-brand font-bold border border-brand/30'
+                            : 'text-[color:var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 border border-transparent'
+                        }`}
+                      >
+                        <div className="truncate pr-2">
+                          <p className="truncate font-semibold">{item.title}</p>
+                          <p className="text-[10px] text-[color:var(--text-secondary)] font-mono font-normal">
+                            {item.progressPercentage}% complete
+                          </p>
+                        </div>
+                        {isSelected && <CheckCircleIcon className="w-4 h-4 text-brand shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="pt-2 border-t border-border flex items-center justify-between gap-2 px-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSwitcherOpen(false);
+                      navigate('/roadmaps');
+                    }}
+                    className="text-xs font-mono text-brand hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    Manage All Roadmaps →
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSwitcherOpen(false);
+                      navigate('/onboarding');
+                    }}
+                    className="text-xs font-mono text-[color:var(--text-secondary)] hover:text-brand flex items-center gap-0.5 cursor-pointer"
+                  >
+                    <PlusIcon className="w-3.5 h-3.5" /> New
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/roadmaps')}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border text-xs font-heading font-medium text-[color:var(--text-secondary)] hover:text-brand hover:border-brand/40 transition-colors cursor-pointer"
+            >
+              <RectangleStackIcon className="w-3.5 h-3.5" /> All Roadmaps
+            </button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => navigate('/onboarding')}
+              className="flex items-center gap-1 cursor-pointer shadow-ai-glow"
+            >
+              <SparklesIcon className="w-3.5 h-3.5" /> + New Roadmap
+            </Button>
+          </div>
+        </div>
+
         {/* Header */}
         <header className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-3xl font-heading font-bold text-[color:var(--text-primary)]">
-                {isPythonCourse ? 'Python Masterclass (Beginner to Advanced)' : roadmap.title}
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-brand/10 text-brand font-mono text-[11px] font-bold uppercase mb-2">
+                <MapIcon className="w-3.5 h-3.5" />
+                {roadmap.isActive ? 'Active Track' : 'Curriculum Track'}
+                {courseInfo && (
+                  <span className="text-[color:var(--text-secondary)] font-normal ml-1">
+                    • {courseInfo.category}
+                  </span>
+                )}
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-[color:var(--text-primary)]">
+                {displayTitle}
               </h1>
-              {isPythonCourse && (
-                <p className="text-sm text-[color:var(--text-secondary)] mt-1">
-                  Comprehensive 3-Level Structured Curriculum with Project Verifications and Formal Assessments
-                </p>
-              )}
+              <p className="text-sm text-[color:var(--text-secondary)] mt-1.5 leading-relaxed">
+                {displayDescription}
+              </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/onboarding')}
-              className="self-start sm:self-auto cursor-pointer shrink-0"
-            >
-              <SparklesIcon className="w-4 h-4 mr-1.5" /> + New Roadmap
-            </Button>
           </div>
 
-          {/* Dual Track Switcher if user has both a custom roadmap and python */}
-          {roadmap && !roadmap.title?.toLowerCase().includes('python') && (
-            <div className="flex items-center gap-2 p-1.5 mb-6 rounded-xl bg-[color:var(--color-bg-card)] border border-border w-full sm:w-fit">
-              <button
-                type="button"
-                onClick={() => setActiveTrack('python')}
-                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-heading font-semibold transition-all cursor-pointer ${
-                  activeTrack === 'python'
-                    ? 'bg-brand text-white shadow-sm'
-                    : 'text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]'
-                }`}
-              >
-                <AcademicCapIcon className="w-4 h-4" /> Python Masterclass
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTrack('personalized')}
-                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-heading font-semibold transition-all cursor-pointer ${
-                  activeTrack === 'personalized'
-                    ? 'bg-brand text-white shadow-sm'
-                    : 'text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]'
-                }`}
-              >
-                <SparklesIcon className="w-4 h-4" /> My Personalized Track
-              </button>
-            </div>
-          )}
-
-          {/* Banner to open dedicated Python Course if on a personalized roadmap */}
-          {!isPythonCourse && (
+          {/* Banner linking to full dedicated Masterclass if mapped */}
+          {courseInfo && (
             <div className="mb-6 p-4 rounded-xl border border-brand/30 bg-gradient-to-r from-brand/10 via-[color:var(--color-bg-card)] to-transparent flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
               <div className="flex items-center gap-2.5">
                 <AcademicCapIcon className="w-5 h-5 text-brand shrink-0" />
                 <div className="text-xs sm:text-sm">
-                  <span className="font-bold text-[color:var(--text-primary)]">Looking for structured language masterclasses? </span>
-                  <span className="text-[color:var(--text-secondary)]">Explore the complete Python Masterclass (Beginner to Advanced).</span>
+                  <span className="font-bold text-[color:var(--text-primary)]">{courseInfo.shortTitle} Masterclass available! </span>
+                  <span className="text-[color:var(--text-secondary)]">Access interactive assessments, formal quizzes, and certifications.</span>
                 </div>
               </div>
               <button
-                onClick={() => navigate('/courses/python')}
-                className="text-xs font-mono font-bold text-brand hover:underline shrink-0 cursor-pointer self-start sm:self-auto"
+                onClick={() => navigate(courseInfo.route)}
+                className="inline-flex items-center gap-1 text-xs font-mono font-bold text-brand hover:underline shrink-0 cursor-pointer self-start sm:self-auto"
               >
-                Open Python Course →
+                <span>Launch Full Masterclass</span>
+                <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
 
-          {/* Level Switcher for Python Course */}
-          {isPythonCourse && pythonCourseState && (
+          {/* Level Switcher for 3-Level Masterclass Courses */}
+          {courseInfo && courseProgressState && (
             <CourseLevelSwitcher
-              courseState={pythonCourseState}
+              courseState={courseProgressState}
               activeLevel={activeLevel}
               onSelectLevel={handleLevelSelect}
               onLockedLevelClick={handleLockedLevelClick}
@@ -350,7 +507,7 @@ export const RoadmapScreen: React.FC = () => {
             <div className="flex-1">
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium text-[color:var(--text-secondary)]">
-                  {isPythonCourse ? `${activeLevel.toUpperCase()} Level Progress` : 'Overall Roadmap Progress'}
+                  {courseInfo ? `${activeLevel.toUpperCase()} Level Progress` : 'Overall Roadmap Progress'}
                 </span>
                 <span className="text-sm font-mono text-brand font-bold">
                   {displayProgress}%

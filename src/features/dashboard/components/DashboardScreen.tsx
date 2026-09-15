@@ -7,6 +7,7 @@ import { Input } from '@/components/forms/Input';
 import { Badge } from '@/components/elements/Badge';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { DashboardService, DashboardData } from '../services/dashboard.service';
+import { COURSE_REGISTRY } from '@/features/roadmap/services/courseRegistry';
 import { WeeklyLearningActivity } from './WeeklyLearningActivity';
 import { 
   FireIcon, 
@@ -195,13 +196,31 @@ export const DashboardScreen: React.FC = () => {
                       <ProgressBar progress={data.roadmap.progress} />
                     </div>
 
-                    <Button 
-                      variant="primary" 
-                      className="w-full sm:w-auto self-start group-hover:shadow-ai-glow transition-shadow cursor-pointer"
-                      onClick={() => navigate('/roadmap')}
-                    >
-                      Resume Learning <ArrowRightIcon className="w-4 h-4 ml-2" />
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Button 
+                        variant="primary" 
+                        className="w-full sm:w-auto group-hover:shadow-ai-glow transition-shadow cursor-pointer"
+                        onClick={() => navigate(data.roadmap.id ? `/roadmap?id=${data.roadmap.id}` : '/roadmap')}
+                      >
+                        Resume Learning <ArrowRightIcon className="w-4 h-4 ml-2" />
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        className="w-full sm:w-auto cursor-pointer"
+                        onClick={() => navigate('/roadmaps')}
+                      >
+                        <MapIcon className="w-4 h-4 mr-1.5 text-brand" /> Switch Roadmap
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        className="w-full sm:w-auto cursor-pointer text-xs font-mono text-[color:var(--text-secondary)] hover:text-brand"
+                        onClick={() => navigate('/onboarding')}
+                      >
+                        <SparklesIcon className="w-3.5 h-3.5 mr-1" /> + New Roadmap
+                      </Button>
+                    </div>
                   </div>
                 </Card>
 
@@ -221,7 +240,7 @@ export const DashboardScreen: React.FC = () => {
                     {data.tasks.map((task) => (
                       <div 
                         key={task.id} 
-                        onClick={() => navigate('/roadmap')}
+                        onClick={() => navigate(data.roadmap.id ? `/roadmap?id=${data.roadmap.id}` : '/roadmap')}
                         className={`flex items-center justify-between gap-3 p-4 rounded-lg border backdrop-blur-sm transition-all cursor-pointer ${
                           task.completed 
                             ? 'bg-[color:var(--color-bg-base)] border-transparent opacity-60' 
@@ -261,7 +280,7 @@ export const DashboardScreen: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <AcademicCapIcon className="w-5 h-5 text-brand" />
                       <h3 className="text-base font-heading font-bold text-[color:var(--text-primary)]">
-                        Structured Skill Masterclasses
+                        {data.roadmap.courseId ? 'Associated Masterclass Curriculum' : 'Structured Skill Masterclasses'}
                       </h3>
                     </div>
                     <button
@@ -272,40 +291,52 @@ export const DashboardScreen: React.FC = () => {
                     </button>
                   </div>
 
-                  <div
-                    onClick={() => navigate('/courses/python')}
-                    className="p-4 rounded-xl border border-border bg-[color:var(--color-bg-base)] hover:border-brand/60 hover:shadow-sm transition-all cursor-pointer group"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-brand/10 text-brand font-mono text-[10px] font-bold uppercase">
-                            Approved Course
-                          </span>
-                          <span className="text-xs font-mono text-[color:var(--text-secondary)]">3 Levels • 43 Modules</span>
-                        </div>
-                        <h4 className="text-base font-heading font-bold text-[color:var(--text-primary)] group-hover:text-brand transition-colors">
-                          Python Masterclass (Beginner to Advanced)
-                        </h4>
-                        <p className="text-xs text-[color:var(--text-secondary)]">
-                          Full 3-level progression with syntax, OOP, concurrency, FastAPI, databases, Docker, and Master Certification.
-                        </p>
-                      </div>
+                  {(() => {
+                    const matchedCourse = data.roadmap.courseId
+                      ? COURSE_REGISTRY[data.roadmap.courseId]
+                      : null;
+                    const courseToDisplay = matchedCourse || COURSE_REGISTRY['python'];
+                    const targetRoute = data.roadmap.courseRoute || courseToDisplay.route;
 
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="self-start sm:self-auto shrink-0 flex items-center gap-1.5 cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate('/courses/python');
-                        }}
+                    return (
+                      <div
+                        onClick={() => navigate(targetRoute)}
+                        className="p-4 rounded-xl border border-border bg-[color:var(--color-bg-base)] hover:border-brand/60 hover:shadow-sm transition-all cursor-pointer group"
                       >
-                        <span>Open Course</span>
-                        <ArrowRightIcon className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
-                  </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-brand/10 text-brand font-mono text-[10px] font-bold uppercase">
+                                {matchedCourse ? 'Active Track Masterclass' : 'Recommended Masterclass'}
+                              </span>
+                              <span className="text-xs font-mono text-[color:var(--text-secondary)]">
+                                {courseToDisplay.category} • 3 Levels
+                              </span>
+                            </div>
+                            <h4 className="text-base font-heading font-bold text-[color:var(--text-primary)] group-hover:text-brand transition-colors">
+                              {courseToDisplay.title}
+                            </h4>
+                            <p className="text-xs text-[color:var(--text-secondary)]">
+                              {courseToDisplay.description}
+                            </p>
+                          </div>
+
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="self-start sm:self-auto shrink-0 flex items-center gap-1.5 cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(targetRoute);
+                            }}
+                          >
+                            <span>Open Course</span>
+                            <ArrowRightIcon className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </Card>
 
                 {/* 4. Weekly Learning Activity & Progress Analytics */}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserProfile } from '../types/profile.types';
-import { CertificateService, Certificate } from '@/features/certificate/certificate.service';
+import { CertificateService, Certificate, buildVerificationUrl } from '@/features/certificate/certificate.service';
 import CertificateView from '@/features/certificate/CertificateView';
 import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/elements/Button';
@@ -46,7 +46,7 @@ export const CertificatesTab: React.FC<CertificatesTabProps> = ({ profile, certi
             issuer: c.issuer || 'Skillora AI',
             date: c.date || new Date().toISOString().slice(0, 10),
             badge_type: c.badgeType || c.badge_type || '3d-gold',
-            certificate_url: c.certificateUrl || c.certificate_url || `https://skillora.ai/verify/${c.id}`,
+            certificate_url: c.certificateUrl || c.certificate_url || buildVerificationUrl(c.id),
             created_at: new Date().toISOString(),
           }))
         );
@@ -113,14 +113,25 @@ export const CertificatesTab: React.FC<CertificatesTabProps> = ({ profile, certi
                   Issued: {cert.date}
                 </span>
 
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => setSelectedCert(cert)}
-                  className="mt-6 w-full flex items-center justify-center gap-2"
-                >
-                  <EyeIcon className="w-4 h-4" /> View &amp; Download PDF
-                </Button>
+                <div className="mt-6 w-full space-y-2">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setSelectedCert(cert)}
+                    className="w-full flex items-center justify-center gap-2"
+                  >
+                    <EyeIcon className="w-4 h-4" /> View &amp; Download PDF
+                  </Button>
+                  <a
+                    href={`/verify-certificate/${cert.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[color:var(--color-bg-base)] border border-border text-xs font-mono text-[color:var(--text-secondary)] hover:text-brand hover:border-brand transition-colors"
+                  >
+                    <CheckBadgeIcon className="w-3.5 h-3.5 text-emerald-400" />
+                    Verify Public Link
+                  </a>
+                </div>
               </Card>
             ))}
           </div>
@@ -135,10 +146,10 @@ export const CertificatesTab: React.FC<CertificatesTabProps> = ({ profile, certi
             >
               <div className="flex flex-col items-center py-4 overflow-x-auto">
                 <CertificateView
-                  recipientName={recipientName}
+                  recipientName={selectedCert.student_name || selectedCert.recipient_name || recipientName}
                   courseTitle={selectedCert.title}
                   issuedDate={selectedCert.date}
-                  verifyUrl={selectedCert.certificate_url || `https://skillora.ai/verify/${selectedCert.id}`}
+                  verifyUrl={selectedCert.certificate_url || buildVerificationUrl(selectedCert.id)}
                 />
               </div>
             </Modal>

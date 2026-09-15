@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 export interface Certificate {
   id: string;
   user_id: string;
+  student_name?: string | null;
+  recipient_name?: string | null;
   title: string;
   issuer: string;
   date: string;
@@ -11,17 +13,44 @@ export interface Certificate {
   created_at: string;
 }
 
-const VERIFY_BASE_URL = `${window.location.origin}/verify`;
+/**
+ * Strict production verification URL:
+ * Under no circumstances should localhost or dev URLs be embedded into certificates.
+ */
+export const PRODUCTION_VERIFY_BASE_URL = 'https://skillora-ai-eta.vercel.app/verify-certificate';
+
+/**
+ * Builds the canonical public verification URL for a given certificate ID.
+ */
+export function buildVerificationUrl(certificateId: string): string {
+  const cleanId = (certificateId || '').trim();
+  return `${PRODUCTION_VERIFY_BASE_URL}/${encodeURIComponent(cleanId)}`;
+}
+
+/**
+ * Generates a high-entropy, human-readable unique Certificate ID.
+ * Format: SKL-{YEAR}-{6 RANDOM UPPERCASE ALPHANUMERICS} e.g. SKL-2026-X8K9M2
+ */
+export function generateCertificateId(): string {
+  const year = new Date().getFullYear();
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // omits confusing I, 1, O, 0
+  let rand = '';
+  for (let i = 0; i < 6; i++) {
+    rand += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `SKL-${year}-${rand}`;
+}
+
 export const CertificateService = {
   /**
-   * Call this after a roadmap hits 100% progress.
-   * Creates a certificate row if one doesn't already exist for this
-   * user + roadmap title, and returns the certificate record either way.
+   * Generates or retrieves a certificate for a user upon completing a roadmap or masterclass.
+   * Ensures student_name is frozen into the record and canonical production verification URL is stored.
    */
   getOrCreateCertificate: async (
     userId: string,
     roadmapTitle: string,
-    badgeType: Certificate['badge_type'] = 'standard'
+    badgeType: Certificate['badge_type'] = 'standard',
+    studentName?: string
   ): Promise<Certificate> => {
     // 1. Check if a certificate already exists for this user + title
     const { data: existing, error: fetchError } = await supabase
@@ -37,50 +66,132 @@ export const CertificateService = {
     }
 
     if (existing) {
-      return existing as Certificate;
+      const canonicalUrl = buildVerificationUrl(existing.id);
+      const existingName = existing.student_name || existing.recipient_name;
+      
+      // If the certificate is missing student_name or has an outdated/localhost URL, update it
+      if (!existingName || existing.certificate_url !== canonicalUrl) {
+        let nameToPersist = existingName;
+        if (!nameToPersist) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', userId)
+            .maybeSingle();
+          nameToPersist = profile?.full_name || studentName || 'Skillora Learner';
+        }
+
+        try {
+          const { data: updated } = await supabase
+            .from('certificates')
+            .update({
+              certificate_url: canonicalUrl,
+              student_name: nameToPersist,
+              recipient_name: nameToPersist,
+            })
+            .eq('id', existing.id)
+            .select('*')
+            .single();
+
+          if (updated) {
+            return updated as Certificate;
+          }
+        } catch {
+          // If column doesn't exist yet or update fails, return patched existing record
+        }
+      }
+
+      return {
+        ...existing,
+        student_name: existingName || studentName || 'Skillora Learner',
+        recipient_name: existingName || studentName || 'Skillora Learner',
+        certificate_url: canonicalUrl,
+      } as Certificate;
     }
 
-    // 2. Create a new certificate row
-    const { data: created, error: insertError } = await supabase
+    // 2. Resolve student name from profile if not explicitly provided
+    let resolvedName = studentName;
+    if (!resolvedName) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', userId)
+        .maybeSingle();
+      resolvedName = profile?.full_name || 'Skillora Learner';
+    }
+
+    // 3. Generate unique certificate ID and canonical URL
+    const newCertId = generateCertificateId();
+    const canonicalUrl = buildVerificationUrl(newCertId);
+    const currentDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    // 4. Create new certificate row with student name and canonical URL
+    const payload: any = {
+      id: newCertId,
+      user_id: userId,
+      student_name: resolvedName,
+      recipient_name: resolvedName,
+      title: roadmapTitle,
+      issuer: 'Skillora AI',
+      date: currentDate,
+      badge_type: badgeType,
+      certificate_url: canonicalUrl,
+    };
+
+    let created: any = null;
+    const { data: initialData, error: insertError } = await supabase
       .from('certificates')
-      .insert({
+      .insert(payload)
+      .select('*')
+      .single();
+    created = initialData;
+
+    // Fallback if schema doesn't have student_name/recipient_name columns yet
+    if (insertError) {
+      console.warn('[CertificateService] Retrying insert with standard columns:', insertError);
+      const standardPayload = {
+        id: newCertId,
         user_id: userId,
         title: roadmapTitle,
         issuer: 'Skillora AI',
-        date: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
+        date: currentDate,
         badge_type: badgeType,
-      })
-      .select('*')
-      .single();
+        certificate_url: canonicalUrl,
+      };
 
-    if (insertError || !created) {
-      console.error('[CertificateService] Error creating certificate:', insertError);
-      throw insertError;
+      const fallbackResult = await supabase
+        .from('certificates')
+        .insert(standardPayload)
+        .select('*')
+        .single();
+
+      if (fallbackResult.error || !fallbackResult.data) {
+        console.error('[CertificateService] Error creating certificate:', fallbackResult.error);
+        throw fallbackResult.error || insertError;
+      }
+      created = fallbackResult.data;
     }
 
-    // 3. Build and store the verification URL using the certificate's own id
-    const verifyUrl = `${VERIFY_BASE_URL}/${created.id}`;
-    const { data: updated, error: updateError } = await supabase
-      .from('certificates')
-      .update({ certificate_url: verifyUrl })
-      .eq('id', created.id)
-      .select('*')
-      .single();
-
-    if (updateError || !updated) {
-      console.error('[CertificateService] Error setting certificate_url:', updateError);
-      return created as Certificate; // still usable even if this step failed
-    }
-
-    return updated as Certificate;
+    return {
+      ...created,
+      student_name: created.student_name || resolvedName,
+      recipient_name: created.recipient_name || resolvedName,
+      certificate_url: canonicalUrl,
+    } as Certificate;
   },
 
-  /** Fetch a single certificate by its id (used by the public /verify/:id page) */
+  /**
+   * Fetch a single certificate by its unique ID for public unauthenticated verification.
+   * Normalizes the verification URL to production domain.
+   */
   getCertificateById: async (certificateId: string): Promise<Certificate | null> => {
+    if (!certificateId) return null;
+    const cleanId = certificateId.trim();
+
     const { data, error } = await supabase
       .from('certificates')
       .select('*')
-      .eq('id', certificateId)
+      .eq('id', cleanId)
       .maybeSingle();
 
     if (error) {
@@ -88,10 +199,19 @@ export const CertificateService = {
       throw error;
     }
 
-    return data as Certificate | null;
+    if (!data) return null;
+
+    return {
+      ...data,
+      student_name: data.student_name || data.recipient_name || null,
+      recipient_name: data.recipient_name || data.student_name || null,
+      certificate_url: buildVerificationUrl(data.id),
+    } as Certificate;
   },
 
-  /** Fetch all certificates earned by a user (for a "My certificates" list) */
+  /**
+   * Fetch all certificates earned by a user, with canonical production verification URLs.
+   */
   getCertificatesForUser: async (userId: string): Promise<Certificate[]> => {
     const { data, error } = await supabase
       .from('certificates')
@@ -104,6 +224,11 @@ export const CertificateService = {
       throw error;
     }
 
-    return (data as Certificate[]) || [];
+    return ((data as Certificate[]) || []).map((c) => ({
+      ...c,
+      student_name: c.student_name || c.recipient_name || null,
+      recipient_name: c.recipient_name || c.student_name || null,
+      certificate_url: buildVerificationUrl(c.id),
+    }));
   },
 };

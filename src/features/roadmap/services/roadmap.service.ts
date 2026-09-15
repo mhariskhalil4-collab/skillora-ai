@@ -2,18 +2,65 @@ import { supabase } from '@/lib/supabase';
 import { Roadmap, Task, Resource } from '../types/roadmap.types';
 import { OnboardingData } from '@/features/onboarding/schemas/onboarding.schemas';
 import { useAuthStore } from '@/features/auth/store/auth.store';
-import { PYTHON_BEGINNER_TASKS } from '../data/python';
 import { CertificateService } from '@/features/certificate/certificate.service';
+import {
+  resolveCourseFromRoadmap,
+  setActiveCourseId,
+  LOCAL_STORAGE_ACTIVE_ROADMAP_ID_KEY,
+  LOCAL_STORAGE_ROADMAPS_KEY,
+} from './courseRegistry';
 
-const LOCAL_STORAGE_ROADMAP_KEY = 'skillora_active_roadmap';
+const LOCAL_STORAGE_LEGACY_ROADMAP_KEY = 'skillora_active_roadmap';
+const LOCAL_STORAGE_ACTIVE_ID_KEY = LOCAL_STORAGE_ACTIVE_ROADMAP_ID_KEY;
+
+/**
+ * Helper to get all local roadmaps from localStorage, auto-migrating legacy single-roadmap key if needed.
+ */
+function getLocalRoadmaps(): Roadmap[] {
+  try {
+    const rawList = localStorage.getItem(LOCAL_STORAGE_ROADMAPS_KEY);
+    if (rawList) {
+      const parsed = JSON.parse(rawList);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    }
+
+    // Auto-migrate legacy single roadmap key
+    const rawLegacy = localStorage.getItem(LOCAL_STORAGE_LEGACY_ROADMAP_KEY);
+    if (rawLegacy) {
+      const parsedLegacy = JSON.parse(rawLegacy) as Roadmap;
+      if (parsedLegacy && parsedLegacy.title && Array.isArray(parsedLegacy.tasks)) {
+        const migratedList = [parsedLegacy];
+        localStorage.setItem(LOCAL_STORAGE_ROADMAPS_KEY, JSON.stringify(migratedList));
+        if (!localStorage.getItem(LOCAL_STORAGE_ACTIVE_ID_KEY)) {
+          localStorage.setItem(LOCAL_STORAGE_ACTIVE_ID_KEY, parsedLegacy.id);
+        }
+        return migratedList;
+      }
+    }
+  } catch (err) {
+    console.warn('[RoadmapService] Error reading local roadmaps:', err);
+  }
+  return [];
+}
+
+/**
+ * Helper to save roadmaps array to localStorage.
+ */
+function saveLocalRoadmaps(roadmaps: Roadmap[]): void {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_ROADMAPS_KEY, JSON.stringify(roadmaps));
+  } catch (err) {
+    console.warn('[RoadmapService] Error saving local roadmaps:', err);
+  }
+}
 
 export const RoadmapService = {
   /**
-   * Fetches the user's latest active roadmap, with tasks and nested resources.
-   * If a logged-in user has 0 roadmaps in Supabase but has a guest roadmap in localStorage,
-   * it automatically migrates it to Supabase and generates credentials if completed.
+   * Fetches all roadmaps belonging to the user (multi-roadmap support).
    */
-  fetchActiveRoadmap: async (userId?: string): Promise<Roadmap | null> => {
+  fetchAllRoadmaps: async (userId?: string): Promise<Roadmap[]> => {
     let effectiveUserId = userId;
 
     if (!effectiveUserId) {
@@ -21,19 +68,22 @@ export const RoadmapService = {
       effectiveUserId = authData.user?.id || useAuthStore.getState().user?.id;
     }
 
-    console.log('[RoadmapService] fetchActiveRoadmap: Resolving user ID ->', effectiveUserId || 'No Supabase Auth User (Guest/Demo)');
+    console.log('[RoadmapService] fetchAllRoadmaps: Resolving user ID ->', effectiveUserId || 'Guest/Offline');
 
-    // If authenticated user exists, query Supabase
+    const activeRoadmapId = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_ACTIVE_ID_KEY) : null;
+
+    // 1. Authenticated User flow: Query Supabase
     if (effectiveUserId) {
-      console.log('[RoadmapService] Querying Supabase for active roadmap for user:', effectiveUserId);
       const { data: roadmaps, error } = await supabase
         .from('roadmaps')
         .select(`
           id,
           title,
+          description,
           progress_percentage,
           status,
           created_at,
+          updated_at,
           tasks (
             id,
             order_index,
@@ -55,9 +105,9 @@ export const RoadmapService = {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('[RoadmapService] Supabase query error:', error.code, error.message, error.details);
+        console.error('[RoadmapService] fetchAllRoadmaps error:', error.code, error.message);
       } else if (roadmaps && roadmaps.length > 0) {
-        // 1. Ensure certificates exist in Supabase for all completed roadmaps
+        // Auto-check completed roadmaps for certificates
         for (const r of roadmaps) {
           if ((r.status === 'completed' || (r.progress_percentage ?? 0) >= 100) && effectiveUserId) {
             try {
@@ -68,13 +118,8 @@ export const RoadmapService = {
           }
         }
 
-        // 2. Select the most recently created roadmap that is NOT completed
-        const activeRoadmapRow = roadmaps.find(
-          (r) => r.status !== 'completed' && (r.progress_percentage ?? 0) < 100
-        );
-
-        if (activeRoadmapRow) {
-          const rawTasks = (activeRoadmapRow.tasks as any[]) || [];
+        const formattedRoadmaps: Roadmap[] = roadmaps.map((r) => {
+          const rawTasks = (r.tasks as any[]) || [];
           rawTasks.sort((a, b) => a.order_index - b.order_index);
 
           const formattedTasks: Task[] = rawTasks.map((t) => ({
@@ -85,127 +130,443 @@ export const RoadmapService = {
             status: t.status as Task['status'],
             requiresQuiz: Boolean(t.requires_quiz),
             xpReward: t.xp_reward || 50,
-            resources: ((t.resources as any[]) || []).map((r) => ({
-              id: r.id,
-              title: r.title,
-              type: r.type as Resource['type'],
-              url: r.url,
-              duration: r.duration || undefined,
+            resources: ((t.resources as any[]) || []).map((res) => ({
+              id: res.id,
+              title: res.title,
+              type: res.type as Resource['type'],
+              url: res.url,
+              duration: res.duration || undefined,
             })),
           }));
 
-          // SELF-HEALING: If no task is 'in_progress' and not all tasks are completed,
-          // unlock the first uncompleted task!
+          // Self-heal: ensure at least one task is in_progress if not completed
+          const isCompleted = r.status === 'completed' || (r.progress_percentage ?? 0) >= 100;
+          if (!isCompleted && formattedTasks.length > 0) {
+            const hasInProgress = formattedTasks.some((t) => t.status === 'in_progress');
+            const firstUncompleted = formattedTasks.find((t) => t.status !== 'completed');
+            if (!hasInProgress && firstUncompleted) {
+              firstUncompleted.status = 'in_progress';
+              if (effectiveUserId && !firstUncompleted.id.startsWith('tsk_guest_')) {
+                supabase
+                  .from('tasks')
+                  .update({ status: 'in_progress' })
+                  .eq('id', firstUncompleted.id)
+                  .then(() => {});
+              }
+            }
+          }
+
+          const completedCount = formattedTasks.filter((t) => t.status === 'completed').length;
+          const calculatedProgress = formattedTasks.length > 0
+            ? Math.round((completedCount / formattedTasks.length) * 100)
+            : (r.progress_percentage || 0);
+
+          const resolvedCourse = resolveCourseFromRoadmap({
+            id: r.id,
+            title: r.title,
+            description: r.description || undefined,
+          });
+
+          const isActive = activeRoadmapId ? r.id === activeRoadmapId : false;
+
+          return {
+            id: r.id,
+            userId: effectiveUserId,
+            title: r.title,
+            description: r.description || undefined,
+            courseId: resolvedCourse?.id,
+            courseRoute: resolvedCourse?.route,
+            progressPercentage: calculatedProgress,
+            status: (r.status as any) || (calculatedProgress >= 100 ? 'completed' : 'in_progress'),
+            isActive,
+            createdAt: r.created_at,
+            updatedAt: r.updated_at,
+            tasks: formattedTasks,
+            totalTasksCount: formattedTasks.length,
+            completedTasksCount: completedCount,
+          };
+        });
+
+        // If no roadmap has active flag matching activeRoadmapId, designate the first in-progress or first item
+        const hasActive = formattedRoadmaps.some((rm) => rm.isActive);
+        if (!hasActive && formattedRoadmaps.length > 0) {
+          const defaultActive = formattedRoadmaps.find((rm) => rm.status !== 'completed' && rm.progressPercentage < 100) || formattedRoadmaps[0];
+          defaultActive.isActive = true;
+          try {
+            localStorage.setItem(LOCAL_STORAGE_ACTIVE_ID_KEY, defaultActive.id);
+            localStorage.setItem(LOCAL_STORAGE_LEGACY_ROADMAP_KEY, JSON.stringify(defaultActive));
+            const resolved = resolveCourseFromRoadmap(defaultActive);
+            if (resolved) {
+              setActiveCourseId(resolved.id);
+            }
+          } catch (_) {}
+        }
+
+        return formattedRoadmaps;
+      } else if (!error && (!roadmaps || roadmaps.length === 0)) {
+        // No roadmaps in Supabase. Check if there are unmigrated guest roadmaps
+        const localList = getLocalRoadmaps();
+        if (localList.length > 0) {
+          console.log('[RoadmapService] Found local guest roadmaps. Migrating first roadmap to Supabase...');
+          try {
+            const migrated = await RoadmapService.migrateGuestRoadmap(effectiveUserId, localList[0]);
+            return [migrated];
+          } catch (migErr) {
+            console.error('[RoadmapService] Migration error:', migErr);
+          }
+        }
+      }
+    }
+
+    // 2. Guest/Offline Fallback flow
+    const localRoadmaps = getLocalRoadmaps();
+    if (localRoadmaps.length > 0) {
+      const activeId = activeRoadmapId || localRoadmaps[0].id;
+      const formatted = localRoadmaps.map((r) => {
+        const tasks = r.tasks || [];
+        tasks.sort((a, b) => a.orderIndex - b.orderIndex);
+        const completedCount = tasks.filter((t) => t.status === 'completed').length;
+        const progressPercentage = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : (r.progressPercentage || 0);
+        const resolvedCourse = resolveCourseFromRoadmap(r);
+
+        return {
+          ...r,
+          courseId: resolvedCourse?.id,
+          courseRoute: resolvedCourse?.route,
+          progressPercentage,
+          status: (r.status as any) || (progressPercentage >= 100 ? 'completed' : 'in_progress'),
+          isActive: r.id === activeId,
+          totalTasksCount: tasks.length,
+          completedTasksCount: completedCount,
+        };
+      });
+
+      // Ensure at least one is active
+      if (!formatted.some((r) => r.isActive) && formatted.length > 0) {
+        formatted[0].isActive = true;
+      }
+      return formatted;
+    }
+
+    return [];
+  },
+
+  /**
+   * Fetches a specific roadmap by its ID.
+   */
+  fetchRoadmapById: async (roadmapId: string, userId?: string): Promise<Roadmap | null> => {
+    let effectiveUserId = userId;
+
+    if (!effectiveUserId) {
+      const { data: authData } = await supabase.auth.getUser();
+      effectiveUserId = authData.user?.id || useAuthStore.getState().user?.id;
+    }
+
+    // 1. If authenticated and not a guest ID, query Supabase
+    if (effectiveUserId && !roadmapId.startsWith('rmp_guest_')) {
+      const { data: r, error } = await supabase
+        .from('roadmaps')
+        .select(`
+          id,
+          title,
+          description,
+          progress_percentage,
+          status,
+          created_at,
+          updated_at,
+          tasks (
+            id,
+            order_index,
+            title,
+            description,
+            status,
+            requires_quiz,
+            xp_reward,
+            resources (
+              id,
+              title,
+              type,
+              url,
+              duration
+            )
+          )
+        `)
+        .eq('id', roadmapId)
+        .eq('user_id', effectiveUserId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('[RoadmapService] fetchRoadmapById error:', error);
+      } else if (r) {
+        const rawTasks = (r.tasks as any[]) || [];
+        rawTasks.sort((a, b) => a.order_index - b.order_index);
+
+        const formattedTasks: Task[] = rawTasks.map((t) => ({
+          id: t.id,
+          orderIndex: t.order_index,
+          title: t.title,
+          description: t.description || '',
+          status: t.status as Task['status'],
+          requiresQuiz: Boolean(t.requires_quiz),
+          xpReward: t.xp_reward || 50,
+          resources: ((t.resources as any[]) || []).map((res) => ({
+            id: res.id,
+            title: res.title,
+            type: res.type as Resource['type'],
+            url: res.url,
+            duration: res.duration || undefined,
+          })),
+        }));
+
+        const isCompleted = r.status === 'completed' || (r.progress_percentage ?? 0) >= 100;
+        if (!isCompleted && formattedTasks.length > 0) {
           const hasInProgress = formattedTasks.some((t) => t.status === 'in_progress');
           const firstUncompleted = formattedTasks.find((t) => t.status !== 'completed');
           if (!hasInProgress && firstUncompleted) {
             firstUncompleted.status = 'in_progress';
-            if (effectiveUserId && !firstUncompleted.id.startsWith('tsk_guest_')) {
-              supabase
-                .from('tasks')
-                .update({ status: 'in_progress' })
-                .eq('id', firstUncompleted.id)
-                .then(({ error: patchErr }) => {
-                  if (patchErr) {
-                    console.warn('[RoadmapService] Self-healing task unlock warning:', patchErr);
-                  } else {
-                    console.log('[RoadmapService] Self-healed locked task to in_progress:', firstUncompleted.id, firstUncompleted.title);
-                  }
-                });
-            }
-          }
-
-          // Calculate correct progress_percentage based on completed tasks count
-          const completedCount = formattedTasks.filter((t) => t.status === 'completed').length;
-          const calculatedProgress = formattedTasks.length > 0 
-            ? Math.round((completedCount / formattedTasks.length) * 100)
-            : 0;
-
-          const activeRoadmap: Roadmap = {
-            id: activeRoadmapRow.id,
-            title: activeRoadmapRow.title,
-            progressPercentage: calculatedProgress,
-            tasks: formattedTasks,
-          };
-
-          console.log('[RoadmapService] Successfully loaded active roadmap from Supabase:', activeRoadmap.title, `(${activeRoadmap.tasks.length} tasks, ${activeRoadmap.progressPercentage}% progress)`);
-
-          // Cache latest active roadmap into localStorage
-          try {
-            localStorage.setItem(LOCAL_STORAGE_ROADMAP_KEY, JSON.stringify(activeRoadmap));
-          } catch (_) {}
-
-          return activeRoadmap;
-        }
-
-        // If all roadmaps in Supabase are completed:
-        console.log('[RoadmapService] All user roadmaps in Supabase are completed (100%). Returning null for active roadmap.');
-        try {
-          localStorage.removeItem(LOCAL_STORAGE_ROADMAP_KEY);
-        } catch (_) {}
-        return null;
-      } else if (!error && (!roadmaps || roadmaps.length === 0)) {
-        // Supabase returned 0 roadmaps for this logged-in user.
-        // Check if there is a guest roadmap in localStorage that can be migrated to Supabase.
-        try {
-          const stored = localStorage.getItem(LOCAL_STORAGE_ROADMAP_KEY);
-          if (stored) {
-            const guestRoadmap = JSON.parse(stored) as Roadmap;
-            if (guestRoadmap && guestRoadmap.title && Array.isArray(guestRoadmap.tasks) && guestRoadmap.tasks.length > 0) {
-              console.log('[RoadmapService] Found un-migrated guest roadmap in localStorage for logged-in user. Migrating to Supabase:', guestRoadmap.title);
-              const migratedRoadmap = await RoadmapService.migrateGuestRoadmap(effectiveUserId, guestRoadmap);
-              if (guestRoadmap.progressPercentage >= 100) {
-                try {
-                  localStorage.removeItem(LOCAL_STORAGE_ROADMAP_KEY);
-                } catch (_) {}
-                return null;
-              }
-              return migratedRoadmap || guestRoadmap;
-            }
-          }
-        } catch (migrationErr) {
-          console.error('[RoadmapService] Error migrating guest roadmap to Supabase:', migrationErr);
-          const stored = localStorage.getItem(LOCAL_STORAGE_ROADMAP_KEY);
-          if (stored) {
-            try {
-              return JSON.parse(stored);
-            } catch (_) {}
           }
         }
+
+        const completedCount = formattedTasks.filter((t) => t.status === 'completed').length;
+        const calculatedProgress = formattedTasks.length > 0
+          ? Math.round((completedCount / formattedTasks.length) * 100)
+          : (r.progress_percentage || 0);
+
+        const activeRoadmapId = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_ACTIVE_ID_KEY) : null;
+        const resolvedCourse = resolveCourseFromRoadmap({
+          id: r.id,
+          title: r.title,
+          description: r.description || undefined,
+        });
+
+        return {
+          id: r.id,
+          userId: effectiveUserId,
+          title: r.title,
+          description: r.description || undefined,
+          courseId: resolvedCourse?.id,
+          courseRoute: resolvedCourse?.route,
+          progressPercentage: calculatedProgress,
+          status: (r.status as any) || (calculatedProgress >= 100 ? 'completed' : 'in_progress'),
+          isActive: r.id === activeRoadmapId,
+          createdAt: r.created_at,
+          updatedAt: r.updated_at,
+          tasks: formattedTasks,
+          totalTasksCount: formattedTasks.length,
+          completedTasksCount: completedCount,
+        };
       }
     }
 
-    // Fallback: Check local storage for guest/offline roadmap (truly unauthenticated visitor)
-    try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_ROADMAP_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored) as Roadmap;
-        if ((parsed.progressPercentage ?? 0) >= 100) {
-          console.log('[RoadmapService] Guest roadmap in localStorage is 100% complete. Returning null for active roadmap.');
-          return null;
-        }
-
-        if (Array.isArray(parsed.tasks) && parsed.tasks.length > 0) {
-          parsed.tasks.sort((a, b) => a.orderIndex - b.orderIndex);
-          const hasInProgress = parsed.tasks.some((t) => t.status === 'in_progress');
-          const firstUncompleted = parsed.tasks.find((t) => t.status !== 'completed');
-          if (!hasInProgress && firstUncompleted) {
-            firstUncompleted.status = 'in_progress';
-            localStorage.setItem(LOCAL_STORAGE_ROADMAP_KEY, JSON.stringify(parsed));
-          }
-          const completedCount = parsed.tasks.filter((t) => t.status === 'completed').length;
-          parsed.progressPercentage = Math.round((completedCount / parsed.tasks.length) * 100);
-        }
-
-        console.log('[RoadmapService] Loaded active roadmap from local storage:', parsed.title);
-        return parsed;
-      }
-    } catch (e) {
-      console.warn('[RoadmapService] Failed to read fallback roadmap from localStorage:', e);
+    // 2. Local storage search
+    const localRoadmaps = getLocalRoadmaps();
+    const matched = localRoadmaps.find((rm) => rm.id === roadmapId);
+    if (matched) {
+      const activeRoadmapId = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_ACTIVE_ID_KEY) : null;
+      const resolvedCourse = resolveCourseFromRoadmap(matched);
+      return {
+        ...matched,
+        courseId: resolvedCourse?.id,
+        courseRoute: resolvedCourse?.route,
+        isActive: matched.id === activeRoadmapId,
+      };
     }
 
-    console.log('[RoadmapService] No active roadmap found.');
     return null;
+  },
+
+  /**
+   * Fetches the user's currently active roadmap.
+   * Prioritizes the user-selected active roadmap ID, or falls back to the most recent in-progress roadmap.
+   */
+  fetchActiveRoadmap: async (userId?: string): Promise<Roadmap | null> => {
+    let effectiveUserId = userId;
+
+    if (!effectiveUserId) {
+      const { data: authData } = await supabase.auth.getUser();
+      effectiveUserId = authData.user?.id || useAuthStore.getState().user?.id;
+    }
+
+    const allRoadmaps = await RoadmapService.fetchAllRoadmaps(effectiveUserId);
+    if (allRoadmaps.length === 0) {
+      return null;
+    }
+
+    const activeRoadmapId = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_ACTIVE_ID_KEY) : null;
+    let activeRoadmap = activeRoadmapId ? allRoadmaps.find((r) => r.id === activeRoadmapId) : null;
+
+    if (!activeRoadmap) {
+      // Pick first in-progress or first item
+      activeRoadmap = allRoadmaps.find((r) => r.status !== 'completed' && r.progressPercentage < 100) || allRoadmaps[0];
+      if (activeRoadmap && typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(LOCAL_STORAGE_ACTIVE_ID_KEY, activeRoadmap.id);
+        } catch (_) {}
+      }
+    }
+
+    if (activeRoadmap) {
+      const resolved = resolveCourseFromRoadmap(activeRoadmap);
+      if (resolved) {
+        setActiveCourseId(resolved.id);
+      }
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(LOCAL_STORAGE_LEGACY_ROADMAP_KEY, JSON.stringify(activeRoadmap));
+        } catch (_) {}
+      }
+    }
+
+    return activeRoadmap || null;
+  },
+
+  /**
+   * Sets a specific roadmap as the active roadmap for the user.
+   */
+  setActiveRoadmap: async (roadmapId: string, userId?: string): Promise<Roadmap | null> => {
+    console.log('[RoadmapService] Setting active roadmap:', roadmapId);
+    try {
+      localStorage.setItem(LOCAL_STORAGE_ACTIVE_ID_KEY, roadmapId);
+    } catch (_) {}
+
+    const roadmap = await RoadmapService.fetchRoadmapById(roadmapId, userId);
+    if (roadmap) {
+      const resolved = resolveCourseFromRoadmap(roadmap);
+      if (resolved) {
+        setActiveCourseId(resolved.id);
+      } else {
+        setActiveCourseId('custom');
+      }
+
+      try {
+        localStorage.setItem(LOCAL_STORAGE_LEGACY_ROADMAP_KEY, JSON.stringify(roadmap));
+      } catch (_) {}
+
+      // Update active flag in local roadmaps cache
+      try {
+        const localList = getLocalRoadmaps();
+        if (localList.length > 0) {
+          const updated = localList.map((r) => ({
+            ...r,
+            isActive: r.id === roadmapId,
+          }));
+          saveLocalRoadmaps(updated);
+        }
+      } catch (_) {}
+    }
+    return roadmap;
+  },
+
+  /**
+   * Renames a roadmap record in Supabase and/or localStorage.
+   */
+  renameRoadmap: async (roadmapId: string, newTitle: string, userId?: string): Promise<boolean> => {
+    const trimmedTitle = newTitle.trim();
+    if (!trimmedTitle) return false;
+
+    let effectiveUserId = userId;
+    if (!effectiveUserId) {
+      const { data: authData } = await supabase.auth.getUser();
+      effectiveUserId = authData.user?.id || useAuthStore.getState().user?.id;
+    }
+
+    console.log('[RoadmapService] Renaming roadmap:', roadmapId, 'to:', trimmedTitle);
+
+    // 1. If authenticated and not guest ID, update in Supabase
+    if (effectiveUserId && !roadmapId.startsWith('rmp_guest_')) {
+      const { error } = await supabase
+        .from('roadmaps')
+        .update({ title: trimmedTitle, updated_at: new Date().toISOString() })
+        .eq('id', roadmapId)
+        .eq('user_id', effectiveUserId);
+
+      if (error) {
+        console.error('[RoadmapService] renameRoadmap error in Supabase:', error);
+        return false;
+      }
+    }
+
+    // 2. Always update local storage
+    const localRoadmaps = getLocalRoadmaps();
+    const updatedLocal = localRoadmaps.map((r) => {
+      if (r.id === roadmapId) {
+        return { ...r, title: trimmedTitle, updatedAt: new Date().toISOString() };
+      }
+      return r;
+    });
+    saveLocalRoadmaps(updatedLocal);
+
+    // Update active cache if active
+    const activeId = localStorage.getItem(LOCAL_STORAGE_ACTIVE_ID_KEY);
+    if (activeId === roadmapId) {
+      const cachedActive = localStorage.getItem(LOCAL_STORAGE_LEGACY_ROADMAP_KEY);
+      if (cachedActive) {
+        try {
+          const parsed = JSON.parse(cachedActive);
+          parsed.title = trimmedTitle;
+          localStorage.setItem(LOCAL_STORAGE_LEGACY_ROADMAP_KEY, JSON.stringify(parsed));
+        } catch (_) {}
+      }
+    }
+
+    return true;
+  },
+
+  /**
+   * Deletes a roadmap safely. Cascades to tasks and resources in Supabase.
+   * If the active roadmap was deleted, switches to the next available roadmap.
+   * Never deletes or touches other roadmaps or course progress.
+   */
+  deleteRoadmap: async (
+    roadmapId: string,
+    userId?: string
+  ): Promise<{ success: boolean; nextActiveRoadmap: Roadmap | null }> => {
+    let effectiveUserId = userId;
+    if (!effectiveUserId) {
+      const { data: authData } = await supabase.auth.getUser();
+      effectiveUserId = authData.user?.id || useAuthStore.getState().user?.id;
+    }
+
+    console.log('[RoadmapService] Deleting roadmap:', roadmapId, 'User:', effectiveUserId || 'Guest');
+
+    // 1. Delete in Supabase if authenticated
+    if (effectiveUserId && !roadmapId.startsWith('rmp_guest_')) {
+      const { error } = await supabase
+        .from('roadmaps')
+        .delete()
+        .eq('id', roadmapId)
+        .eq('user_id', effectiveUserId);
+
+      if (error) {
+        console.error('[RoadmapService] deleteRoadmap Supabase error:', error);
+        throw new Error(`Failed to delete roadmap: ${error.message}`);
+      }
+    }
+
+    // 2. Delete from local storage
+    const localRoadmaps = getLocalRoadmaps();
+    const filteredLocal = localRoadmaps.filter((r) => r.id !== roadmapId);
+    saveLocalRoadmaps(filteredLocal);
+
+    // 3. Fallback active roadmap if deleted roadmap was active
+    const activeId = localStorage.getItem(LOCAL_STORAGE_ACTIVE_ID_KEY);
+    let nextActiveRoadmap: Roadmap | null = null;
+
+    if (activeId === roadmapId) {
+      const remainingRoadmaps = await RoadmapService.fetchAllRoadmaps(effectiveUserId);
+      if (remainingRoadmaps.length > 0) {
+        nextActiveRoadmap = remainingRoadmaps[0];
+        localStorage.setItem(LOCAL_STORAGE_ACTIVE_ID_KEY, nextActiveRoadmap.id);
+        localStorage.setItem(LOCAL_STORAGE_LEGACY_ROADMAP_KEY, JSON.stringify(nextActiveRoadmap));
+      } else {
+        localStorage.removeItem(LOCAL_STORAGE_ACTIVE_ID_KEY);
+        localStorage.removeItem(LOCAL_STORAGE_LEGACY_ROADMAP_KEY);
+      }
+    } else {
+      nextActiveRoadmap = await RoadmapService.fetchActiveRoadmap(effectiveUserId);
+    }
+
+    return { success: true, nextActiveRoadmap };
   },
 
   /**
@@ -215,7 +576,7 @@ export const RoadmapService = {
   migrateGuestRoadmap: async (userId: string, guestRoadmap: Roadmap): Promise<Roadmap> => {
     console.log('[RoadmapService] migrateGuestRoadmap initiating for user:', userId, 'Title:', guestRoadmap.title);
 
-    // 1. Ensure Profile record exists (profiles: id)
+    // 1. Ensure Profile record exists
     const { data: existingProfile } = await supabase
       .from('profiles')
       .select('id')
@@ -226,7 +587,7 @@ export const RoadmapService = {
       await supabase.from('profiles').insert({ id: userId });
     }
 
-    // 2. Create Goal record (goals: user_id, target_role, is_active, current_skills)
+    // 2. Create Goal record
     const { data: goalData, error: goalError } = await supabase
       .from('goals')
       .insert({
@@ -242,7 +603,7 @@ export const RoadmapService = {
       console.warn('[RoadmapService] Goal migration warning:', goalError);
     }
 
-    // 3. Create Roadmap record (roadmaps: user_id, goal_id, title, progress_percentage, status)
+    // 3. Create Roadmap record
     const progressPercentage = guestRoadmap.progressPercentage || 0;
     const isFullyCompleted = progressPercentage >= 100;
 
@@ -255,7 +616,7 @@ export const RoadmapService = {
         progress_percentage: progressPercentage,
         status: isFullyCompleted ? 'completed' : 'in_progress',
       })
-      .select('id, title, progress_percentage')
+      .select('id, title, progress_percentage, created_at, updated_at')
       .single();
 
     if (roadmapError || !roadmapData) {
@@ -265,9 +626,8 @@ export const RoadmapService = {
 
     console.log('[RoadmapService] Migration: Roadmap record created ID:', roadmapData.id);
 
-    // 4. Insert Tasks (tasks: roadmap_id, order_index, title, description, status, requires_quiz, xp_reward - NO user_id)
-    console.log('[RoadmapService] Migration: Seeding Tasks...');
-    const tasksPayload = guestRoadmap.tasks.map((task, idx) => ({
+    // 4. Insert Tasks
+    const tasksPayload = (guestRoadmap.tasks || []).map((task, idx) => ({
       roadmap_id: roadmapData.id,
       order_index: task.orderIndex || (idx + 1),
       title: task.title,
@@ -277,7 +637,6 @@ export const RoadmapService = {
       xp_reward: task.xpReward || 50,
     }));
 
-    // Ensure at least one task is in_progress if roadmap is not fully completed
     const hasAnyInProgress = tasksPayload.some((t) => t.status === 'in_progress');
     const firstPending = tasksPayload.find((t) => t.status !== 'completed');
     if (!hasAnyInProgress && firstPending) {
@@ -294,11 +653,9 @@ export const RoadmapService = {
       throw new Error(`Failed to migrate roadmap tasks: ${tasksError?.message || 'Unknown tasks error'}`);
     }
 
-    console.log('[RoadmapService] Migration: Inserted tasks count:', insertedTasks.length);
-
-    // 5. Insert Resources (resources: task_id, title, type, url, duration - NO user_id)
+    // 5. Insert Resources
     const resourcesPayload: any[] = [];
-    guestRoadmap.tasks.forEach((task) => {
+    (guestRoadmap.tasks || []).forEach((task) => {
       const matchedInsertedTask = insertedTasks.find((t) => t.order_index === task.orderIndex);
       if (matchedInsertedTask && Array.isArray(task.resources) && task.resources.length > 0) {
         task.resources.forEach((r) => {
@@ -328,8 +685,13 @@ export const RoadmapService = {
 
     const completeRoadmap: Roadmap = {
       id: roadmapData.id,
+      userId,
       title: roadmapData.title,
       progressPercentage,
+      status: isFullyCompleted ? 'completed' : 'in_progress',
+      isActive: true,
+      createdAt: roadmapData.created_at,
+      updatedAt: roadmapData.updated_at,
       tasks: insertedTasks.map((t) => ({
         id: t.id,
         orderIndex: t.order_index,
@@ -346,19 +708,16 @@ export const RoadmapService = {
           duration: r.duration,
         })),
       })),
+      totalTasksCount: insertedTasks.length,
+      completedTasksCount: insertedTasks.filter((t) => t.status === 'completed').length,
     };
 
-    if (isFullyCompleted) {
-      try {
-        localStorage.removeItem(LOCAL_STORAGE_ROADMAP_KEY);
-      } catch (_) {}
-    } else {
-      try {
-        localStorage.setItem(LOCAL_STORAGE_ROADMAP_KEY, JSON.stringify(completeRoadmap));
-      } catch (_) {}
-    }
+    // Update active cache
+    try {
+      localStorage.setItem(LOCAL_STORAGE_ACTIVE_ID_KEY, completeRoadmap.id);
+      localStorage.setItem(LOCAL_STORAGE_LEGACY_ROADMAP_KEY, JSON.stringify(completeRoadmap));
+    } catch (_) {}
 
-    console.log('[RoadmapService] migrateGuestRoadmap completed successfully!');
     return completeRoadmap;
   },
 
@@ -371,37 +730,47 @@ export const RoadmapService = {
     const skillsList = onboardingData.currentSkills || [];
     const skillsText = skillsList.length > 0 ? skillsList.slice(0, 3).join(', ') : '';
 
-    // Check if the user is studying Python
-    const isPythonSelected = 
-      skillsList.some((s) => s.toLowerCase().includes('python')) ||
-      targetGoal.toLowerCase().includes('python');
+    const resolvedCourse = resolveCourseFromRoadmap({
+      title: targetGoal,
+      goal: targetGoal,
+      description: skillsText,
+    });
 
-    if (isPythonSelected) {
-      return {
-        isPython: true,
-        title: 'Python Masterclass (Beginner to Advanced)',
-        tasks: PYTHON_BEGINNER_TASKS.map((t, idx) => ({
-          orderIndex: t.orderIndex || (idx + 1),
-          title: t.title,
-          description: t.description,
-          status: t.status,
-          requiresQuiz: t.requiresQuiz,
-          xpReward: t.xpReward,
-          resources: (t.resources || []).map((r) => ({
-            title: r.title,
-            type: (r.type as any) || 'documentation',
-            url: r.url || 'https://docs.python.org/3/',
-            duration: r.duration || '20m',
-          })),
-        })),
-      };
+    if (resolvedCourse) {
+      try {
+        const courseState = resolvedCourse.service.getCourseState();
+        const beginnerTasks = courseState.levels?.beginner?.tasks || [];
+        if (beginnerTasks.length > 0) {
+          return {
+            courseId: resolvedCourse.id,
+            courseRoute: resolvedCourse.route,
+            title: resolvedCourse.title,
+            tasks: beginnerTasks.map((t, idx) => ({
+              orderIndex: t.orderIndex || (idx + 1),
+              title: t.title,
+              description: t.description || '',
+              status: (t.status || (idx === 0 ? 'in_progress' : 'locked')) as Task['status'],
+              requiresQuiz: Boolean(t.requiresQuiz),
+              xpReward: t.xpReward || 50,
+              resources: (t.resources || []).map((r, rIdx) => ({
+                id: r.id || `res_${resolvedCourse.id}_${idx + 1}_${rIdx + 1}`,
+                title: r.title,
+                type: (r.type as any) || 'documentation',
+                url: r.url || 'https://skillora.ai',
+                duration: r.duration || '15m',
+              })),
+            })),
+          };
+        }
+      } catch (err) {
+        console.warn('[RoadmapService] Could not extract course beginner tasks:', err);
+      }
     }
 
-    // Resolve clean domain/skill name without personal names
     let cleanSkill = targetGoal;
-    const isPersonalNameOrGeneric = 
-      !cleanSkill || 
-      cleanSkill.length < 3 || 
+    const isPersonalNameOrGeneric =
+      !cleanSkill ||
+      cleanSkill.length < 3 ||
       ['amir', 'john', 'alex', 'user', 'guest', 'me', 'self'].includes(cleanSkill.toLowerCase());
 
     if (isPersonalNameOrGeneric) {
@@ -410,7 +779,8 @@ export const RoadmapService = {
 
     if (userType === 'freelancer') {
       return {
-        isPython: false,
+        courseId: undefined,
+        courseRoute: undefined,
         title: `${cleanSkill} Freelance Acceleration Track`,
         tasks: [
           {
@@ -422,12 +792,14 @@ export const RoadmapService = {
             xpReward: 50,
             resources: [
               {
+                id: `res_fl_1_1`,
                 title: `${cleanSkill} Commercial Blueprint & Client Service Standards`,
                 type: 'video' as const,
                 url: 'https://youtube.com',
                 duration: '15m',
               },
               {
+                id: `res_fl_1_2`,
                 title: 'Client Deliverables & Technical Specification Guide',
                 type: 'documentation' as const,
                 url: 'https://developer.mozilla.org',
@@ -444,13 +816,15 @@ export const RoadmapService = {
             xpReward: 100,
             resources: [
               {
+                id: `res_fl_2_1`,
                 title: `High-Velocity Client Project Execution & Automation in ${cleanSkill}`,
                 type: 'video' as const,
                 url: 'https://youtube.com',
                 duration: '30m',
               },
               {
-                title: 'Standard Operating Procedures & Client Hand-Off Guide',
+                id: `res_fl_2_2`,
+                title: 'Client Milestone Verification & Acceptance Criteria Guide',
                 type: 'documentation' as const,
                 url: 'https://developer.mozilla.org',
                 duration: '15m read',
@@ -459,8 +833,8 @@ export const RoadmapService = {
           },
           {
             orderIndex: 3,
-            title: `High-Ticket Client Portfolio Deliverable for ${cleanSkill}`,
-            description: `Construct a live, verified client-grade deliverable in ${cleanSkill} demonstrating measurable results, performance optimization, and polished commercial delivery.`,
+            title: `Client-Ready Production Capstone for ${cleanSkill}`,
+            description: `Deliver an end-to-end commercial capstone project in ${cleanSkill}, deploy live demo, and verify project delivery.`,
             status: 'locked' as const,
             requiresQuiz: false,
             xpReward: 150,
@@ -472,47 +846,28 @@ export const RoadmapService = {
 
     if (userType === 'career_changer') {
       return {
-        isPython: false,
+        courseId: undefined,
+        courseRoute: undefined,
         title: `${cleanSkill} Career Transition Track`,
         tasks: [
           {
             orderIndex: 1,
-            title: `Transferable Skills Mapping & Core ${cleanSkill} Competencies`,
-            description: `Bridge your previous background${skillsText ? ` and experience in ${skillsText}` : ''} to rapidly acquire the essential foundations of ${cleanSkill}.`,
+            title: `Industry-Aligned Fundamentals & Architecture in ${cleanSkill}`,
+            description: `Master core mental models, modern industry standards, and developer tooling in ${cleanSkill} tailored for rapid career transition.`,
             status: 'in_progress' as const,
             requiresQuiz: true,
             xpReward: 50,
             resources: [
               {
-                title: `Career Transition Roadmap: Fast-Tracking ${cleanSkill}`,
+                id: `res_cc_1_1`,
+                title: `${cleanSkill} Industry Orientation & Core Architecture`,
                 type: 'video' as const,
                 url: 'https://youtube.com',
                 duration: '12m',
               },
               {
-                title: 'Core Competencies & Industry Landscape Overview',
-                type: 'documentation' as const,
-                url: 'https://developer.mozilla.org',
-                duration: '15m read',
-              },
-            ],
-          },
-          {
-            orderIndex: 2,
-            title: `Industry Toolchains & Applied ${cleanSkill} Practice`,
-            description: `Adopt industry-standard development workflows, collaborative tools, and practical problem-solving methodologies in ${cleanSkill}.`,
-            status: 'locked' as const,
-            requiresQuiz: true,
-            xpReward: 100,
-            resources: [
-              {
-                title: `Professional Tooling & Team Workflows in ${cleanSkill}`,
-                type: 'video' as const,
-                url: 'https://youtube.com',
-                duration: '25m',
-              },
-              {
-                title: 'Industry Patterns, Architecture & Coding Standards',
+                id: `res_cc_1_2`,
+                title: 'Professional Patterns & Reference Documentation',
                 type: 'documentation' as const,
                 url: 'https://developer.mozilla.org',
                 duration: '18m read',
@@ -520,9 +875,33 @@ export const RoadmapService = {
             ],
           },
           {
+            orderIndex: 2,
+            title: `Real-World System Implementation in ${cleanSkill}`,
+            description: `Build scalable features and tackle real-world engineering constraints in ${cleanSkill} replicating enterprise engineering workflows.`,
+            status: 'locked' as const,
+            requiresQuiz: true,
+            xpReward: 100,
+            resources: [
+              {
+                id: `res_cc_2_1`,
+                title: `Production System Architecture in ${cleanSkill}`,
+                type: 'video' as const,
+                url: 'https://youtube.com',
+                duration: '25m',
+              },
+              {
+                id: `res_cc_2_2`,
+                title: 'System Design & Code Quality Standards',
+                type: 'documentation' as const,
+                url: 'https://developer.mozilla.org',
+                duration: '20m read',
+              },
+            ],
+          },
+          {
             orderIndex: 3,
-            title: `Industry-Transition Capstone & Verified Portfolio Project for ${cleanSkill}`,
-            description: `Build and launch a comprehensive capstone deliverable in ${cleanSkill} proving production readiness and domain competence to hiring managers.`,
+            title: `Portfolio Capstone & Technical Interview Deliverable in ${cleanSkill}`,
+            description: `Build and deploy a full production capstone in ${cleanSkill} designed to demonstrate senior-level competencies to hiring managers.`,
             status: 'locked' as const,
             requiresQuiz: false,
             xpReward: 150,
@@ -532,26 +911,29 @@ export const RoadmapService = {
       };
     }
 
-    // Default: University Student
+    // Default: University Student / General Learner
     return {
-      isPython: false,
-      title: `${cleanSkill} Academic & Industry Foundation Track`,
+      courseId: undefined,
+      courseRoute: undefined,
+      title: `${cleanSkill} Structured Curriculum`,
       tasks: [
         {
           orderIndex: 1,
-          title: `Core Foundations & Architecture of ${cleanSkill}`,
-          description: `Master the fundamental architectural principles, theoretical models, and core syntax of ${cleanSkill}${skillsText ? ` while building on your foundation in ${skillsText}` : ''}.`,
+          title: `Core Principles & Mental Models in ${cleanSkill}`,
+          description: `Build a rigorous foundation in ${cleanSkill} covering essential terminology, modern conventions, and baseline execution environments.`,
           status: 'in_progress' as const,
           requiresQuiz: true,
           xpReward: 50,
           resources: [
             {
-              title: `${cleanSkill} Core Architecture & Fundamentals`,
+              id: `res_uni_1_1`,
+              title: `${cleanSkill} Fundamental Concepts & Execution Walkthrough`,
               type: 'video' as const,
               url: 'https://youtube.com',
               duration: '10m',
             },
             {
+              id: `res_uni_1_2`,
               title: 'Academic Standards, Specifications & Syntax Guide',
               type: 'documentation' as const,
               url: 'https://developer.mozilla.org',
@@ -568,12 +950,14 @@ export const RoadmapService = {
           xpReward: 100,
           resources: [
             {
+              id: `res_uni_2_1`,
               title: `Lab Project Walkthrough & Implementation Guide in ${cleanSkill}`,
               type: 'video' as const,
               url: 'https://youtube.com',
               duration: '25m',
             },
             {
+              id: `res_uni_2_2`,
               title: 'Best Practices for Code Quality & Modular Design',
               type: 'documentation' as const,
               url: 'https://developer.mozilla.org',
@@ -595,13 +979,13 @@ export const RoadmapService = {
   },
 
   /**
-   * Creates a starter roadmap with goal, modules, and resources based on onboarding data.
+   * Creates a new starter roadmap with goal, modules, and resources based on onboarding data.
+   * Preserves any existing roadmaps (multi-roadmap architecture).
    */
   createStarterRoadmap: async (userId: string, onboardingData: OnboardingData): Promise<Roadmap> => {
-    console.log('[RoadmapService] createStarterRoadmap initiated for user:', userId, 'Goal:', onboardingData.targetGoal, 'UserType:', onboardingData.userType);
+    console.log('[RoadmapService] createStarterRoadmap initiated for user:', userId, 'Goal:', onboardingData.targetGoal);
 
-    // 1. Ensure Profile row exists and update skills (profiles: id, skills)
-    console.log('[RoadmapService] 1/5: Upserting profile record...');
+    // 1. Upsert profile skills
     const { error: profileError } = await supabase
       .from('profiles')
       .upsert({
@@ -613,7 +997,7 @@ export const RoadmapService = {
       console.warn('[RoadmapService] Profile upsert warning:', profileError.message);
     }
 
-    // 1b. Ensure progress_tracking row exists (preserving existing XP and streak)
+    // 1b. Ensure progress_tracking row exists
     const today = new Date().toISOString().slice(0, 10);
     const { data: existingProgress } = await supabase
       .from('progress_tracking')
@@ -633,8 +1017,7 @@ export const RoadmapService = {
         });
     }
 
-    // 2. Create Goal record (goals: user_id, target_role, is_active, current_skills)
-    console.log('[RoadmapService] 2/5: Creating Goal record...');
+    // 2. Create Goal record
     const { data: goalData, error: goalError } = await supabase
       .from('goals')
       .insert({
@@ -647,12 +1030,10 @@ export const RoadmapService = {
       .single();
 
     if (goalError) {
-      console.error('[RoadmapService] Goal insert error:', goalError.code, goalError.message);
-    } else {
-      console.log('[RoadmapService] Goal record created ID:', goalData?.id);
+      console.error('[RoadmapService] Goal insert error:', goalError);
     }
 
-    console.log('[RoadmapService] 3/5: Creating Roadmap record...');
+    // 3. Create Roadmap record (does NOT delete previous roadmaps!)
     const personalizedData = RoadmapService.getPersonalizedStarterData(onboardingData);
     const roadmapTitle = personalizedData.title || onboardingData.targetGoal;
 
@@ -665,19 +1046,15 @@ export const RoadmapService = {
         progress_percentage: 0,
         status: 'in_progress',
       })
-      .select('id, title, progress_percentage')
+      .select('id, title, progress_percentage, created_at, updated_at')
       .single();
 
     if (roadmapError || !roadmapData) {
-      console.error('[RoadmapService] Roadmap insert error:', roadmapError?.code, roadmapError?.message);
+      console.error('[RoadmapService] Roadmap insert error:', roadmapError);
       throw new Error(`Failed to create roadmap: ${roadmapError?.message || 'Unknown database error'}`);
     }
 
-    console.log('[RoadmapService] Roadmap record created ID:', roadmapData.id);
-
-    // 4. Seed personalized sequential tasks (tasks: roadmap_id, order_index, title, description, status, requires_quiz, xp_reward - NO user_id)
-    console.log('[RoadmapService] 4/5: Seeding Personalized Roadmap Tasks for UserType:', onboardingData.userType);
-
+    // 4. Seed personalized sequential tasks
     const starterTasksPayload = personalizedData.tasks.map((t) => ({
       roadmap_id: roadmapData.id,
       order_index: t.orderIndex,
@@ -694,14 +1071,11 @@ export const RoadmapService = {
       .select('id, order_index, title, description, status, requires_quiz, xp_reward');
 
     if (tasksError || !insertedTasks) {
-      console.error('[RoadmapService] Tasks insert error:', tasksError?.code, tasksError?.message);
+      console.error('[RoadmapService] Tasks insert error:', tasksError);
       throw new Error(`Failed to create roadmap tasks: ${tasksError?.message || 'Unknown tasks error'}`);
     }
 
-    console.log('[RoadmapService] Inserted tasks count:', insertedTasks.length);
-
-    // 5. Seed personalized resources for tasks (resources: task_id, title, type, url, duration - NO user_id)
-    console.log('[RoadmapService] 5/5: Seeding Personalized Resources...');
+    // 5. Seed resources
     const resourcesPayload: any[] = [];
     personalizedData.tasks.forEach((taskData) => {
       const matchedInsertedTask = insertedTasks.find((t) => t.order_index === taskData.orderIndex);
@@ -719,59 +1093,88 @@ export const RoadmapService = {
     });
 
     if (resourcesPayload.length > 0) {
-      const { error: resError } = await supabase.from('resources').insert(resourcesPayload);
-      if (resError) {
-        console.warn('[RoadmapService] Resources insert warning:', resError.message);
-      }
+      await supabase.from('resources').insert(resourcesPayload);
     }
 
-    // Retrieve the newly created roadmap from Supabase
-    const completeRoadmap = await RoadmapService.fetchActiveRoadmap(userId);
+    // Set newly created roadmap as the active roadmap
+    try {
+      localStorage.setItem(LOCAL_STORAGE_ACTIVE_ID_KEY, roadmapData.id);
+      if (personalizedData.courseId) {
+        setActiveCourseId(personalizedData.courseId);
+      } else {
+        setActiveCourseId('custom');
+      }
+    } catch (_) {}
+
+    const completeRoadmap = await RoadmapService.fetchRoadmapById(roadmapData.id, userId);
     if (!completeRoadmap) {
       throw new Error('Roadmap was created but could not be fetched.');
     }
 
-    // Save copy in localStorage as instant cache
     try {
-      localStorage.setItem(LOCAL_STORAGE_ROADMAP_KEY, JSON.stringify(completeRoadmap));
+      localStorage.setItem(LOCAL_STORAGE_LEGACY_ROADMAP_KEY, JSON.stringify(completeRoadmap));
     } catch (_) {}
 
-    console.log('[RoadmapService] createStarterRoadmap completed successfully!');
+    console.log('[RoadmapService] createStarterRoadmap completed successfully! ID:', completeRoadmap.id);
     return completeRoadmap;
   },
 
   /**
    * Generates a starter roadmap in local storage for guest/offline sessions.
+   * Appends to multi-roadmap storage list and sets as active.
    */
   createGuestStarterRoadmap: (onboardingData: OnboardingData): Roadmap => {
-    console.log('[RoadmapService] Creating guest starter roadmap for goal:', onboardingData.targetGoal, 'UserType:', onboardingData.userType);
+    console.log('[RoadmapService] Creating guest starter roadmap for goal:', onboardingData.targetGoal);
     const personalizedData = RoadmapService.getPersonalizedStarterData(onboardingData);
     const roadmapTitle = personalizedData.title || onboardingData.targetGoal;
+    const newRoadmapId = `rmp_guest_${Date.now()}`;
 
     const guestRoadmap: Roadmap = {
-      id: `rmp_guest_${Date.now()}`,
+      id: newRoadmapId,
       title: roadmapTitle,
+      courseId: personalizedData.courseId,
+      courseRoute: personalizedData.courseRoute,
       progressPercentage: 0,
+      status: 'in_progress',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       tasks: personalizedData.tasks.map((task) => ({
-        id: `tsk_guest_${task.orderIndex}`,
+        id: `tsk_guest_${newRoadmapId}_${task.orderIndex}`,
         orderIndex: task.orderIndex,
         title: task.title,
         description: task.description,
         status: task.status,
         requiresQuiz: task.requiresQuiz,
         xpReward: task.xpReward,
-        resources: task.resources.map((r, rIdx) => ({
-          id: `res_guest_${task.orderIndex}_${rIdx + 1}`,
+        resources: (task.resources || []).map((r, rIdx) => ({
+          id: (r as any).id || `res_guest_${newRoadmapId}_${task.orderIndex}_${rIdx + 1}`,
           title: r.title,
           type: r.type,
           url: r.url,
           duration: r.duration || undefined,
         })),
       })),
+      totalTasksCount: personalizedData.tasks.length,
+      completedTasksCount: 0,
     };
 
+    // Append to local roadmaps array
+    const existing = getLocalRoadmaps();
+    const updatedList = [
+      guestRoadmap,
+      ...existing.map((r) => ({ ...r, isActive: false })),
+    ];
+    saveLocalRoadmaps(updatedList);
+
     try {
-      localStorage.setItem(LOCAL_STORAGE_ROADMAP_KEY, JSON.stringify(guestRoadmap));
+      localStorage.setItem(LOCAL_STORAGE_ACTIVE_ID_KEY, newRoadmapId);
+      localStorage.setItem(LOCAL_STORAGE_LEGACY_ROADMAP_KEY, JSON.stringify(guestRoadmap));
+      if (personalizedData.courseId) {
+        setActiveCourseId(personalizedData.courseId);
+      } else {
+        setActiveCourseId('custom');
+      }
     } catch (_) {}
 
     return guestRoadmap;
@@ -792,57 +1195,73 @@ export const RoadmapService = {
 
     console.log('[RoadmapService] completeTask initiated for taskId:', taskId, 'User:', effectiveUserId || 'Guest');
 
-    // If unauthenticated guest session, update localStorage
+    // 1. If unauthenticated guest session or guest task ID, update localStorage
     if (!effectiveUserId || taskId.startsWith('tsk_guest_')) {
-      try {
-        const stored = localStorage.getItem(LOCAL_STORAGE_ROADMAP_KEY);
-        if (stored) {
-          const roadmap = JSON.parse(stored) as Roadmap;
-          const sorted = [...(roadmap.tasks || [])].sort((a, b) => a.orderIndex - b.orderIndex);
-          const currentIdx = sorted.findIndex((t) => t.id === taskId);
+      const localRoadmaps = getLocalRoadmaps();
+      let updatedProgress = 0;
+      let matchedRoadmap: Roadmap | null = null;
 
-          const updatedTasks = sorted.map((task) => {
-            if (task.id === taskId) {
-              return { ...task, status: 'completed' as const };
-            }
-            return task;
-          });
+      const updatedList = localRoadmaps.map((roadmap) => {
+        const hasTask = (roadmap.tasks || []).some((t) => t.id === taskId);
+        if (!hasTask) return roadmap;
 
-          // Unlock next locked or pending task
-          const nextTask = updatedTasks.find((t, idx) => idx > currentIdx && t.status !== 'completed') ||
-                           updatedTasks.find((t) => t.status === 'locked');
-          if (nextTask) {
-            nextTask.status = 'in_progress';
+        const sorted = [...(roadmap.tasks || [])].sort((a, b) => a.orderIndex - b.orderIndex);
+        const currentIdx = sorted.findIndex((t) => t.id === taskId);
+
+        const updatedTasks = sorted.map((task) => {
+          if (task.id === taskId) {
+            return { ...task, status: 'completed' as const };
           }
+          return task;
+        });
 
-          const completedCount = updatedTasks.filter((t) => t.status === 'completed').length;
-          const progressPercentage = Math.round((completedCount / updatedTasks.length) * 100);
-
-          const updatedRoadmap: Roadmap = {
-            ...roadmap,
-            progressPercentage,
-            tasks: updatedTasks,
-          };
-
-          localStorage.setItem(LOCAL_STORAGE_ROADMAP_KEY, JSON.stringify(updatedRoadmap));
-
-          // If roadmap reached 100% and we have an authenticated user, generate a certificate
-          if (progressPercentage === 100 && effectiveUserId) {
-            try {
-              await CertificateService.getOrCreateCertificate(effectiveUserId, roadmap.title);
-            } catch (certErr) {
-              console.error('[RoadmapService] Failed to generate certificate for guest/cached roadmap:', certErr);
-            }
-          }
-
-          return { success: true, progressPercentage };
+        // Unlock next task
+        const nextTask = updatedTasks.find((t, idx) => idx > currentIdx && t.status !== 'completed') ||
+                         updatedTasks.find((t) => t.status === 'locked');
+        if (nextTask) {
+          nextTask.status = 'in_progress';
         }
-      } catch (e) {
-        console.warn('[RoadmapService] Failed to update guest task:', e);
+
+        const completedCount = updatedTasks.filter((t) => t.status === 'completed').length;
+        const progressPercentage = Math.round((completedCount / updatedTasks.length) * 100);
+        updatedProgress = progressPercentage;
+
+        matchedRoadmap = {
+          ...roadmap,
+          progressPercentage,
+          status: progressPercentage >= 100 ? 'completed' : 'in_progress',
+          tasks: updatedTasks,
+          completedTasksCount: completedCount,
+          totalTasksCount: updatedTasks.length,
+          updatedAt: new Date().toISOString(),
+        };
+
+        return matchedRoadmap;
+      });
+
+      saveLocalRoadmaps(updatedList);
+
+      if (matchedRoadmap) {
+        try {
+          const activeId = localStorage.getItem(LOCAL_STORAGE_ACTIVE_ID_KEY);
+          if (activeId === (matchedRoadmap as Roadmap).id) {
+            localStorage.setItem(LOCAL_STORAGE_LEGACY_ROADMAP_KEY, JSON.stringify(matchedRoadmap));
+          }
+        } catch (_) {}
+
+        if (updatedProgress === 100 && effectiveUserId) {
+          try {
+            await CertificateService.getOrCreateCertificate(effectiveUserId, (matchedRoadmap as Roadmap).title);
+          } catch (certErr) {
+            console.error('[RoadmapService] Certificate generation error:', certErr);
+          }
+        }
       }
+
+      return { success: true, progressPercentage: updatedProgress };
     }
 
-    // 1. Mark task completed in Supabase (tasks has NO user_id column)
+    // 2. Mark task completed in Supabase
     const { data: completedTask, error: taskError } = await supabase
       .from('tasks')
       .update({ status: 'completed' })
@@ -855,7 +1274,7 @@ export const RoadmapService = {
       throw taskError;
     }
 
-    // 2. Fetch all tasks for this roadmap to calculate progression
+    // 3. Fetch all tasks for this roadmap
     const { data: allTasks, error: allTasksError } = await supabase
       .from('tasks')
       .select('id, order_index, status')
@@ -866,7 +1285,7 @@ export const RoadmapService = {
       throw allTasksError;
     }
 
-    // 3. Find and unlock next locked/pending task (tasks has NO user_id column)
+    // 4. Find and unlock next locked/pending task
     const nextLockedTask = allTasks.find(
       (t) => t.order_index > completedTask.order_index && t.status !== 'completed'
     ) || allTasks.find(
@@ -880,22 +1299,23 @@ export const RoadmapService = {
         .eq('id', nextLockedTask.id);
     }
 
-    // 4. Calculate updated progress percentage
+    // 5. Calculate updated progress percentage
     const completedCount = allTasks.filter(
       (t) => t.id === taskId || t.status === 'completed'
     ).length;
     const progressPercentage = Math.round((completedCount / allTasks.length) * 100);
 
-    // 5. Update roadmap progress
+    // 6. Update roadmap progress
     await supabase
       .from('roadmaps')
       .update({
         progress_percentage: progressPercentage,
         status: progressPercentage === 100 ? 'completed' : 'in_progress',
+        updated_at: new Date().toISOString(),
       })
       .eq('id', completedTask.roadmap_id);
 
-    // 5b. If roadmap just hit 100%, generate a certificate
+    // 7. If roadmap just hit 100%, generate certificate
     if (progressPercentage === 100 && effectiveUserId) {
       const { data: roadmapData } = await supabase
         .from('roadmaps')
@@ -908,7 +1328,7 @@ export const RoadmapService = {
       }
     }
 
-    // 6. Award XP and update streak in progress_tracking (single source of truth for XP & Streak)
+    // 8. Award XP and update streak
     if (effectiveUserId) {
       const today = new Date().toISOString().slice(0, 10);
       const { data: progress } = await supabase
@@ -985,18 +1405,15 @@ export const RoadmapService = {
       isPublic: true,
     };
 
-    // 1. Always cache in local projects storage for instant Portfolio reflection
     try {
       const existingProjectsRaw = localStorage.getItem('skillora_user_projects');
       const existingProjects = existingProjectsRaw ? JSON.parse(existingProjectsRaw) : [];
-      // Deduplicate by URL or title
       const filtered = existingProjects.filter((p: any) =>
         repoUrl ? p.url !== repoUrl : p.title !== title
       );
       filtered.unshift(projectItem);
       localStorage.setItem('skillora_user_projects', JSON.stringify(filtered));
 
-      // Also update cached profile if present
       const cachedProfileRaw = localStorage.getItem('skillora_user_profile');
       if (cachedProfileRaw) {
         const cachedProfile = JSON.parse(cachedProfileRaw);
@@ -1007,11 +1424,9 @@ export const RoadmapService = {
       console.warn('[RoadmapService] LocalStorage portfolio update note:', e);
     }
 
-    // 2. Persist to Supabase if authenticated
     if (effectiveUserId && !taskId.startsWith('tsk_guest_')) {
-      // A. Insert into project_submissions table
       try {
-        const { error: subError } = await supabase.from('project_submissions').insert({
+        await supabase.from('project_submissions').insert({
           user_id: effectiveUserId,
           task_id: taskId,
           title: title,
@@ -1020,16 +1435,12 @@ export const RoadmapService = {
           status: 'submitted',
           created_at: new Date().toISOString(),
         });
-        if (subError) {
-          console.warn('[RoadmapService] project_submissions insert note:', subError.message);
-        }
       } catch (err) {
         console.warn('[RoadmapService] project_submissions exception:', err);
       }
 
-      // B. Publish to Supabase projects table
       try {
-        const { error: projError } = await supabase.from('projects').insert({
+        await supabase.from('projects').insert({
           user_id: effectiveUserId,
           title: title,
           description: projectDescription,
@@ -1038,18 +1449,12 @@ export const RoadmapService = {
           is_public: true,
           created_at: new Date().toISOString(),
         });
-        if (projError) {
-          console.warn('[RoadmapService] projects table insert note:', projError.message);
-        }
       } catch (err) {
         console.warn('[RoadmapService] projects table exception:', err);
       }
     }
 
-    // 3. Mark the task completed, award XP, and unlock next module
     const result = await RoadmapService.completeTask(taskId, effectiveUserId);
     return result;
   },
 };
-
-

@@ -109,7 +109,7 @@ export const PublicPortfolioService = {
           issuer: c.issuer || 'Skillora AI',
           date: c.date || (c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Verified'),
           badgeType: (c.badge_type as any) || '3d-gold',
-          certificateUrl: c.certificate_url || `/verify/${c.id}`,
+          certificateUrl: c.certificate_url || `/verify-certificate/${c.id}`,
         })),
         progress: {
           xpTotal: progressData?.xp_total ?? 0,

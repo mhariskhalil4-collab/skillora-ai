@@ -134,9 +134,37 @@ export interface CourseProgressState {
 
 export interface Roadmap {
   id: string;
+  userId?: string;
   title: string;
+  goal?: string;
+  description?: string;
+  courseId?: string;
+  courseRoute?: string;
   progressPercentage: number;
+  status?: 'draft' | 'in_progress' | 'completed' | 'archived';
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
   tasks: Task[];
+  totalTasksCount?: number;
+  completedTasksCount?: number;
   currentLevel?: CourseLevel;
   levels?: Record<CourseLevel, LevelProgress>;
 }
+
+export interface RoadmapSummary {
+  id: string;
+  userId?: string;
+  title: string;
+  goal?: string;
+  courseId?: string;
+  courseRoute?: string;
+  progressPercentage: number;
+  status: 'draft' | 'in_progress' | 'completed' | 'archived';
+  isActive: boolean;
+  totalTasksCount: number;
+  completedTasksCount: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+

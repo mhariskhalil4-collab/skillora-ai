@@ -5,6 +5,7 @@ import { YouTubeAdsCourseService } from '../services/youtubeAdsCourse.service';
 import { RoadmapTimeline } from './RoadmapTimeline';
 import { TaskDetailDrawer } from './TaskDetailDrawer';
 import { CourseLevelSwitcher } from './CourseLevelSwitcher';
+import { CourseSwitcherNav } from './CourseSwitcherNav';
 import { PrerequisiteModal } from './PrerequisiteModal';
 import { ProgressBar } from '@/components/data-display/ProgressBar';
 import { Button } from '@/components/elements/Button';
@@ -12,10 +13,8 @@ import { useAuthStore } from '@/features/auth/store/auth.store';
 import { CertificateService } from '@/features/certificate/certificate.service';
 import {
   VideoCameraIcon,
-  SparklesIcon,
   TrophyIcon,
   CheckBadgeIcon,
-  ArrowLeftIcon,
   BookOpenIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
@@ -194,24 +193,11 @@ export const YouTubeAdsCourseScreen: React.FC = () => {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         
-        {/* Navigation Breadcrumb */}
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => navigate('/courses')}
-            className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-[color:var(--text-secondary)] hover:text-brand transition-colors cursor-pointer"
-          >
-            <ArrowLeftIcon className="w-3.5 h-3.5" /> Back to All Courses
-          </button>
-          
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/roadmap')}
-              className="text-xs font-mono text-brand hover:underline cursor-pointer flex items-center gap-1"
-            >
-              <SparklesIcon className="w-3.5 h-3.5" /> View My Personalized Roadmap
-            </button>
-          </div>
-        </div>
+        {/* Course Navigation & Switcher Header */}
+        <CourseSwitcherNav
+          currentCourseTitle="YouTube Ads Masterclass"
+          currentCourseId="youtube-ads"
+        />
 
         {/* Master Certificate Unlocked Hero Banner */}
         {certEligibility.isEligible && (

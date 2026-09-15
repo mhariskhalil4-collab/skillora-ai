@@ -9,6 +9,7 @@ import { ResetPasswordForm } from '@/features/auth/components/ResetPasswordForm'
 import { OnboardingWizard } from '@/features/onboarding/components/OnboardingWizard';
 import { DashboardScreen } from '@/features/dashboard/components/DashboardScreen';
 import { RoadmapScreen } from '@/features/roadmap/components/RoadmapScreen';
+import { RoadmapListScreen } from '@/features/roadmap/components/RoadmapListScreen';
 import { PythonCourseScreen } from '@/features/roadmap/components/PythonCourseScreen';
 import { ShopifyCourseScreen } from '@/features/roadmap/components/ShopifyCourseScreen';
 import { MetaAdsCourseScreen } from '@/features/roadmap/components/MetaAdsCourseScreen';
@@ -94,7 +95,9 @@ const App: React.FC = () => {
             <Route path="/update-password" element={<Navigate to="/auth/reset-password" replace />} />
 
 
-            {/* Public Certificate Verification Route */}
+            {/* Public Certificate Verification Routes */}
+            <Route path="/verify-certificate/:certificateId" element={<VerifyCertificateScreen />} />
+            <Route path="/verify-certificate/:id" element={<VerifyCertificateScreen />} />
             <Route path="/verify/:id" element={<VerifyCertificateScreen />} />
 
             {/* Public Portfolio Route */}
@@ -247,6 +250,11 @@ const App: React.FC = () => {
               <Route path="/courses/professional-english-speaking-masterclass/intermediate" element={<Navigate to="/courses/professional-english-speaking?level=intermediate" replace />} />
               <Route path="/courses/professional-english-speaking-masterclass/advanced" element={<Navigate to="/courses/professional-english-speaking?level=advanced" replace />} />
               <Route path="/roadmap" element={<RoadmapScreen />} />
+              <Route path="/roadmap/:roadmapId" element={<RoadmapScreen />} />
+              <Route path="/roadmaps" element={<RoadmapListScreen />} />
+              <Route path="/roadmaps/:roadmapId" element={<RoadmapScreen />} />
+              <Route path="/roadmaps/all" element={<Navigate to="/roadmaps" replace />} />
+              <Route path="/roadmap/new" element={<Navigate to="/onboarding" replace />} />
               <Route path="/study-buddy" element={<StudyBuddyScreen />} />
               <Route path="/career-gps" element={<CareerGPSScreen />} />
               <Route path="/profile" element={<ProfileScreen />} />

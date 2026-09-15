@@ -325,6 +325,15 @@ export const CareerGpsService = {
           tasks: updatedTasks,
         };
         localStorage.setItem('skillora_active_roadmap', JSON.stringify(updatedRoadmap));
+
+        const rawList = localStorage.getItem('skillora_roadmaps');
+        if (rawList) {
+          try {
+            const list: Roadmap[] = JSON.parse(rawList);
+            const updatedList = list.map((rm) => (rm.id === updatedRoadmap.id ? updatedRoadmap : rm));
+            localStorage.setItem('skillora_roadmaps', JSON.stringify(updatedList));
+          } catch (_) {}
+        }
       } catch (_) {}
     } else {
       // Offline/Guest local storage fallback — ONLY for truly unauthenticated visitors
@@ -353,6 +362,12 @@ export const CareerGpsService = {
 
       try {
         localStorage.setItem('skillora_active_roadmap', JSON.stringify(guestRoadmap));
+        const rawList = localStorage.getItem('skillora_roadmaps');
+        if (rawList) {
+          const list: Roadmap[] = JSON.parse(rawList);
+          const updatedList = list.map((rm) => (rm.id === guestRoadmap.id ? guestRoadmap : rm));
+          localStorage.setItem('skillora_roadmaps', JSON.stringify(updatedList));
+        }
       } catch (_) {}
     }
 

@@ -4,9 +4,11 @@ import { cn } from '@/utils/cn';
 import { NAV_ITEMS } from './Sidebar';
 
 export const BottomNav: React.FC = () => {
+  const bottomItems = NAV_ITEMS.filter((item) => item.path !== '/roadmaps');
+
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 flex items-stretch justify-around border-t border-border bg-[color:var(--color-bg-card)]/95 backdrop-blur-md pb-safe">
-      {NAV_ITEMS.map((item) => (
+      {bottomItems.map((item) => (
         <NavLink
           key={item.path}
           to={item.path}

@@ -18,6 +18,8 @@ export interface DashboardData {
   roadmap: {
     id?: string;
     goal: string;
+    courseId?: string;
+    courseRoute?: string;
     currentModule: string;
     currentModuleIndex: number;
     totalModules: number;
@@ -163,6 +165,8 @@ export const DashboardService = {
       roadmap: {
         id: activeRoadmap?.id,
         goal: activeRoadmap?.title || 'Personalized AI Curriculum',
+        courseId: activeRoadmap?.courseId,
+        courseRoute: activeRoadmap?.courseRoute,
         currentModule: currentModuleTitle,
         currentModuleIndex: totalModules > 0 ? currentModuleIndex : 0,
         totalModules,

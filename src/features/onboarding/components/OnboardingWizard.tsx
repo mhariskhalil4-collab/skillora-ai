@@ -49,8 +49,12 @@ export const OnboardingWizard: React.FC = () => {
     setIsGenerating(true);
 
     try {
-      await OnboardingService.generateRoadmap(completeData);
-      navigate('/dashboard');
+      const result = await OnboardingService.generateRoadmap(completeData);
+      if (result && result.id) {
+        navigate(`/roadmap?id=${result.id}`);
+      } else {
+        navigate('/roadmap');
+      }
     } catch (error) {
       console.error('Failed to generate roadmap', error);
       setIsGenerating(false);

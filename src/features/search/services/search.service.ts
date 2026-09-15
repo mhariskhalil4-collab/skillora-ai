@@ -277,7 +277,7 @@ export const SearchService = {
               title: c.title,
               subtitle: `Verified Certificate • Issuer: ${c.issuer || 'Skillora AI'}`,
               category: 'certificate',
-              url: `/verify/${c.id}`,
+              url: `/verify-certificate/${c.id}`,
               badge: 'Verified Credential',
             });
           }
